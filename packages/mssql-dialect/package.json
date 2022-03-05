@@ -1,7 +1,7 @@
 {
   "name": "@sqb/mssql-dialect",
   "description": "SQB serialization extension for MS-SQL database",
-  "version": "4.0.9",
+  "version": "4.0.10",
   "author": "Panates",
   "contributors": [
     "Eray Hanoglu <e.hanoglu@panates.com>"
