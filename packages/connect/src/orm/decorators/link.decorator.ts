@@ -26,6 +26,8 @@ export function Link(options?: AssociationFieldOptions): LinkPropertyDecorator {
         if (typeof propertyKey !== 'string')
             throw new TypeError('Symbol properties are not allowed');
         const reflectType = Reflect.getMetadata("design:type", target, propertyKey);
+      if (!reflectType)
+        throw new TypeError(`Can not access design type info. You must enable "emitDecoratorMetadata" in tsconfig`);
         if (!root) {
             if (reflectType === Array)
                 throw new TypeError(`Can't get type information while it is an array. Please define entity type`);
