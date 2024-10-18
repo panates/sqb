@@ -1,7 +1,7 @@
 {
   "name": "@sqb/migrator",
   "description": "Database migrator for SQB",
-  "version": "4.19.2",
+  "version": "4.19.3",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -28,9 +28,9 @@
     "tslib": "^2.7.0"
   },
   "peerDependencies": {
-    "@sqb/builder": "^4.19.2",
-    "@sqb/connect": "^4.19.2",
-    "@sqb/postgres": "^4.19.2"
+    "@sqb/builder": "^4.19.3",
+    "@sqb/connect": "^4.19.3",
+    "@sqb/postgres": "^4.19.3"
   },
   "devDependencies": {
     "postgrejs": "^2.21.1"
