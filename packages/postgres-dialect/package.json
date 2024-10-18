@@ -1,7 +1,7 @@
 {
   "name": "@sqb/postgres-dialect",
   "description": "SQB serialization extension for PostgreSQL database",
-  "version": "4.19.2",
+  "version": "4.19.3",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -25,7 +25,7 @@
     "tslib": "^2.7.0"
   },
   "peerDependencies": {
-    "@sqb/builder": "^4.19.2"
+    "@sqb/builder": "^4.19.3"
   },
   "type": "module",
   "exports": {
