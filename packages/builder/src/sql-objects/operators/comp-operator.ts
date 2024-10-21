@@ -63,7 +63,7 @@ export abstract class CompOperator extends Operator {
       }
       if (x instanceof ParamExpression) {
         let value = ctx.params ? ctx.params[x._name] : undefined;
-        if (x._isArray && value != null) value = [value];
+        if (x._isArray && value != null && !Array.isArray(value)) value = [value];
         result.value = value;
         result.isArray = x._isArray || Array.isArray(value);
         result.isParam = true;
