@@ -22,7 +22,7 @@
     "clean:cover": "rimraf ../../coverage/sqlite-dialect"
   },
   "dependencies": {
-    "tslib": "^2.8.0"
+    "tslib": "^2.8.1"
   },
   "peerDependencies": {
     "@sqb/builder": "^4.19.4"

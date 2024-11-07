@@ -23,11 +23,11 @@
   },
   "dependencies": {
     "putil-promisify": "^1.10.1",
-    "tslib": "^2.8.0"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@types/sql.js": "^1.4.9",
-    "sql.js": "^1.11.0"
+    "sql.js": "^1.12.0"
   },
   "peerDependencies": {
     "@sqb/builder": "^4.19.4",
