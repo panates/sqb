@@ -104,11 +104,7 @@ export class SqbCoreModule implements OnApplicationShutdown {
     if (rxjs.lastValueFrom) {
       // @ts-ignore
       return await rxjs.lastValueFrom(
-        defer(async () => {
-          const client = new SqbClient(options);
-          await client.test();
-          return client;
-        }).pipe(
+        defer(async () => new SqbClient(options)).pipe(
           handleRetry(
             connectionToken,
             options.retryAttempts,
@@ -121,11 +117,7 @@ export class SqbCoreModule implements OnApplicationShutdown {
     }
     // NestJS 7
     // @ts-ignore
-    return await defer(async () => {
-      const client = new SqbClient(options);
-      await client.test();
-      return client;
-    })
+    return await defer(async () => new SqbClient(options))
       .pipe(
         handleRetry(
           connectionToken,
