@@ -8,18 +8,19 @@
     "compile": "tsc --noEmit",
     "prebuild": "npm run lint && npm run clean",
     "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc -b tsconfig-build-cjs.json && cp ../../support/package.cjs.json ../../build/postgres/cjs/package.json",
-    "build:esm": "tsc -b tsconfig-build-esm.json && cp ../../support/package.esm.json ../../build/postgres/esm/package.json",
-    "postbuild": "cp README.md package.json ../../LICENSE ../../build/postgres && node ../../support/postbuild.cjs",
+    "build:cjs": "tsc -b tsconfig-build-cjs.json && cp ../../support/package.cjs.json ./build/cjs/package.json",
+    "build:esm": "tsc -b tsconfig-build-esm.json && cp ../../support/package.esm.json ./build/esm/package.json",
+    "postbuild": "cp README.md ./build && node ../../support/postbuild.cjs",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier . --write --log-level=warn",
-    "test": "jest",
-    "cover": "jest --collect-coverage",
-    "clean": "npm run clean:src | npm run clean:dist | npm run clean:cover",
+    "check": "madge --circular src/**",
+    "test": "jest --runInBand",
+    "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
     "clean:src": "ts-cleanup -s src --all",
-    "clean:dist": "rimraf ../../build/postgres",
-    "clean:cover": "rimraf ../../coverage/postgres"
+    "clean:test": "ts-cleanup -s test --all",
+    "clean:build": "rimraf build",
+    "clean:cover": "rimraf coverage"
   },
   "dependencies": {
     "putil-promisify": "^1.10.1",
@@ -84,5 +85,8 @@
     "dialect",
     "serializer",
     "database"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

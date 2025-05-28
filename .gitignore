@@ -1,8 +1,14 @@
 # compiled output
-/build
 /node_modules
-packages/*/node_modules
+**/node_modules
+packages/*/dist
+packages/*/build
+/support/docker/data
+/reports
+/debug
 *.cache.json
+*.tsbuildinfo
+junit.xml
 
 # environment variables
 .env
@@ -38,7 +44,3 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
-
-packages/*/_debug.js
-packages/*/_debug2.js

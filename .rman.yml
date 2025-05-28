@@ -4,4 +4,6 @@ command:
   version:
     unified: true
   run:
-    parallel: lint
+    parallel: lint,clean,compile,format
+
+logLevel: info

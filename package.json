@@ -9,7 +9,7 @@
     "url": "https://github.com/sqbjs/sqb.git"
   },
   "workspaces": [
-    "packages/**"
+    "packages/*"
   ],
   "scripts": {
     "preclean": "rimraf build coverage",
