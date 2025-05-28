@@ -25,6 +25,7 @@ export interface JoinInfo {
   sourceEntity: EntityMetadata;
   targetEntity: EntityMetadata;
   joinAlias: string;
+  parentAlias: string;
   join: JoinStatement;
 }
 
@@ -58,7 +59,7 @@ export async function joinAssociation(
   let node = association;
   const result: JoinInfo[] = [];
   while (node) {
-    joinInfo = joinInfos.find(j => j.association === node);
+    joinInfo = joinInfos.find(j => j.association === node && j.parentAlias === parentAlias);
     if (!joinInfo) {
       const targetEntity = await node.resolveTarget();
       const sourceEntity = await node.resolveSource();
@@ -81,6 +82,7 @@ export async function joinAssociation(
         association: node,
         sourceEntity,
         targetEntity,
+        parentAlias,
         joinAlias,
         join,
       };
