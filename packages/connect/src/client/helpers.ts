@@ -13,7 +13,10 @@ import {
   ValueTransformFunction,
 } from './types.js';
 
-export function applyNamingStrategy(value: string, namingStrategy?: FieldNaming): Maybe<string> {
+export function applyNamingStrategy(
+  value: string,
+  namingStrategy?: FieldNaming,
+): Maybe<string> {
   if (typeof namingStrategy === 'string' && namingStrategy !== 'original') {
     switch (namingStrategy.toLowerCase()) {
       case 'lowercase':
@@ -34,7 +37,10 @@ export function applyNamingStrategy(value: string, namingStrategy?: FieldNaming)
   return value;
 }
 
-export function wrapAdapterFields(oldFields: Adapter.Field[], fieldNaming?: FieldNaming): FieldInfoMap {
+export function wrapAdapterFields(
+  oldFields: Adapter.Field[],
+  fieldNaming?: FieldNaming,
+): FieldInfoMap {
   const mapFieldInfo = (f: Adapter.Field, index: number): Maybe<FieldInfo> => {
     const name = applyNamingStrategy(f.fieldName, fieldNaming);
     if (name) return { ...f, name, index } as FieldInfo;
@@ -57,7 +63,10 @@ export function normalizeRowsToObjectRows(
   oldRows: ObjectRowset | ArrayRowset,
   options?: Pick<QueryRequest, 'ignoreNulls' | 'transform'>,
 ): Record<string, any>[] {
-  return normalizeRows(fields, rowType, oldRows, { ...options, objectRows: true }) as Record<string, any>[];
+  return normalizeRows(fields, rowType, oldRows, {
+    ...options,
+    objectRows: true,
+  }) as Record<string, any>[];
 }
 
 export function normalizeRowsToArrayRows(
@@ -66,7 +75,10 @@ export function normalizeRowsToArrayRows(
   oldRows: ObjectRowset | ArrayRowset,
   options?: Pick<QueryRequest, 'ignoreNulls' | 'transform'>,
 ): any[][] {
-  return normalizeRows(fields, rowType, oldRows, { ...options, objectRows: false }) as any[][];
+  return normalizeRows(fields, rowType, oldRows, {
+    ...options,
+    objectRows: false,
+  }) as any[][];
 }
 
 function normalizeRows(
@@ -144,7 +156,10 @@ function normalizeRows(
   }) as ArrayRowset;
 }
 
-export function callFetchHooks(rows: ObjectRowset | ArrayRowset, request: QueryRequest): void {
+export function callFetchHooks(
+  rows: ObjectRowset | ArrayRowset,
+  request: QueryRequest,
+): void {
   const fetchHooks = request.fetchHooks;
   if (!fetchHooks) return;
   for (const row of rows) {

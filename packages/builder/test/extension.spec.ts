@@ -1,4 +1,9 @@
-import { Select, SerializationType, SerializerExtension, SerializerRegistry } from '../src/index.js';
+import {
+  Select,
+  SerializationType,
+  SerializerExtension,
+  SerializerRegistry,
+} from '../src/index.js';
 
 describe('Serializer Extensions', () => {
   it('should register serialization extension', () => {
@@ -22,7 +27,8 @@ describe('Serializer Extensions', () => {
     const ext = {
       dialect: 'any-dialect',
       serialize: (ctx, type, obj) => {
-        if (type === SerializationType.TABLE_NAME) return obj.table.toUpperCase() + ' ' + obj.alias.toUpperCase();
+        if (type === SerializationType.TABLE_NAME)
+          return obj.table.toUpperCase() + ' ' + obj.alias.toUpperCase();
       },
     };
     SerializerRegistry.register(ext);

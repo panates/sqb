@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SqbClient } from '@sqb/connect';
 import { Customer } from '../../_support/customer.entity.js';
 import { initClient } from '../../_support/init-client.js';

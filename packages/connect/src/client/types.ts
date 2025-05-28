@@ -8,7 +8,10 @@ import type { SqbConnection } from './sqb-connection.js';
 
 export { DataType } from '@sqb/builder';
 
-export type ExecuteHookFunction = (connection: SqbConnection, request: QueryRequest) => Promise<void>;
+export type ExecuteHookFunction = (
+  connection: SqbConnection,
+  request: QueryRequest,
+) => Promise<void>;
 export type FetchFunction = (row: any, request: QueryRequest) => void;
 export type ValueTransformFunction = (value: any, fieldInfo?: FieldInfo) => any;
 export type TransactionFunction = (connection: SqbConnection) => Promise<any>;

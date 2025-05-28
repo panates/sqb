@@ -1,7 +1,11 @@
 /**
  * Prints array with line feeding
  */
-export function printArray(arr: string[], sep?: string, lfLen?: number): string {
+export function printArray(
+  arr: string[],
+  sep?: string,
+  lfLen?: number,
+): string {
   let out = '';
   let line = '';
   let k = 0;

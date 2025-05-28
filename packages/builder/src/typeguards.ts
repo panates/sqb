@@ -31,19 +31,27 @@ export function isRawStatement(value: any): value is RawStatement {
 }
 
 export function isSelectQuery(value: any): value is SelectQuery {
-  return isSerializable(value) && value._type === SerializationType.SELECT_QUERY;
+  return (
+    isSerializable(value) && value._type === SerializationType.SELECT_QUERY
+  );
 }
 
 export function isInsertQuery(value: any): value is InsertQuery {
-  return isSerializable(value) && value._type === SerializationType.INSERT_QUERY;
+  return (
+    isSerializable(value) && value._type === SerializationType.INSERT_QUERY
+  );
 }
 
 export function isIUpdateQuery(value: any): value is UpdateQuery {
-  return isSerializable(value) && value._type === SerializationType.UPDATE_QUERY;
+  return (
+    isSerializable(value) && value._type === SerializationType.UPDATE_QUERY
+  );
 }
 
 export function isDeleteQuery(value: any): value is DeleteQuery {
-  return isSerializable(value) && value._type === SerializationType.DELETE_QUERY;
+  return (
+    isSerializable(value) && value._type === SerializationType.DELETE_QUERY
+  );
 }
 
 export function isJoinStatement(value: any): value is JoinStatement {
@@ -51,27 +59,43 @@ export function isJoinStatement(value: any): value is JoinStatement {
 }
 
 export function isCaseStatement(value: any): value is CaseStatement {
-  return isSerializable(value) && value._type === SerializationType.CASE_STATEMENT;
+  return (
+    isSerializable(value) && value._type === SerializationType.CASE_STATEMENT
+  );
 }
 
 export function isCountStatement(value: any): value is CountStatement {
-  return isSerializable(value) && value._type === SerializationType.COUNT_STATEMENT;
+  return (
+    isSerializable(value) && value._type === SerializationType.COUNT_STATEMENT
+  );
 }
 
 export function isParamExpression(value: any): value is ParamExpression {
-  return isSerializable(value) && value._type === SerializationType.EXTERNAL_PARAMETER;
+  return (
+    isSerializable(value) &&
+    value._type === SerializationType.EXTERNAL_PARAMETER
+  );
 }
 
 export function isLogicalOperator(value: any): value is LogicalOperator {
-  return isSerializable(value) && value._type === SerializationType.LOGICAL_EXPRESSION;
+  return (
+    isSerializable(value) &&
+    value._type === SerializationType.LOGICAL_EXPRESSION
+  );
 }
 
 export function isCompOperator(value: any): value is CompOperator {
-  return isSerializable(value) && value._type === SerializationType.COMPARISON_EXPRESSION;
+  return (
+    isSerializable(value) &&
+    value._type === SerializationType.COMPARISON_EXPRESSION
+  );
 }
 
 export function isNotOperator(value: any): value is CompOperator {
-  return isSerializable(value) && value._type === SerializationType.NEGATIVE_EXPRESSION;
+  return (
+    isSerializable(value) &&
+    value._type === SerializationType.NEGATIVE_EXPRESSION
+  );
 }
 
 export function isSelectColumn(value: any): value is FieldExpression {
@@ -79,15 +103,21 @@ export function isSelectColumn(value: any): value is FieldExpression {
 }
 
 export function isOrderColumn(value: any): value is OrderColumn {
-  return isSerializable(value) && value._type === SerializationType.ORDER_COLUMN;
+  return (
+    isSerializable(value) && value._type === SerializationType.ORDER_COLUMN
+  );
 }
 
 export function isGroupColumn(value: any): value is GroupColumn {
-  return isSerializable(value) && value._type === SerializationType.GROUP_COLUMN;
+  return (
+    isSerializable(value) && value._type === SerializationType.GROUP_COLUMN
+  );
 }
 
 export function isReturningColumn(value: any): value is ReturningColumn {
-  return isSerializable(value) && value._type === SerializationType.RETURNING_COLUMN;
+  return (
+    isSerializable(value) && value._type === SerializationType.RETURNING_COLUMN
+  );
 }
 
 export function isTableName(value: any): value is TableName {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Eq, Param } from '@sqb/builder';
 import { Entity, SqbClient } from '@sqb/connect';
 import { Country } from '../../_support/country.entity.js';
@@ -205,7 +204,9 @@ describe('Repository.findMany()', () => {
 
   it('should sort by data columns only ', async () => {
     const repo = client.getRepository(Customer);
-    return expect(() => repo.findMany({ sort: ['country'] })).rejects.toThrow('Can not sort by');
+    return expect(() => repo.findMany({ sort: ['country'] })).rejects.toThrow(
+      'Can not sort by',
+    );
   });
 
   it('should sort by embedded sub element', async () => {

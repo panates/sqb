@@ -2,20 +2,33 @@
 import { MutableKeys, Type } from 'ts-gems';
 import { Entity } from './decorators/entity.decorator.js';
 
-export function getInsertColumnNames<T, K extends MutableKeys<T>>(ctor: Type<T>): K[] {
+export function getInsertColumnNames<T, K extends MutableKeys<T>>(
+  ctor: Type<T>,
+): K[] {
   return Entity.getInsertColumnNames(ctor) as K[];
 }
 
-export function getUpdateColumnNames<T, K extends MutableKeys<T>>(ctor: Type<T>): K[] {
+export function getUpdateColumnNames<T, K extends MutableKeys<T>>(
+  ctor: Type<T>,
+): K[] {
   return Entity.getUpdateColumnNames(ctor) as K[];
 }
 
-export function getNonAssociationElementNames<T, K extends MutableKeys<T>>(ctor: Type<T>): K[] {
+export function getNonAssociationElementNames<T, K extends MutableKeys<T>>(
+  ctor: Type<T>,
+): K[] {
   return Entity.getNonAssociationFieldNames(ctor) as K[];
 }
 
-export function mixinEntities<A, B>(derivedCtor: Type<A>, baseB: Type<B>): Type<A & B>;
-export function mixinEntities<A, B, C>(derivedCtor: Type<A>, baseB: Type<B>, baseC: Type<C>): Type<A & B & C>;
+export function mixinEntities<A, B>(
+  derivedCtor: Type<A>,
+  baseB: Type<B>,
+): Type<A & B>;
+export function mixinEntities<A, B, C>(
+  derivedCtor: Type<A>,
+  baseB: Type<B>,
+  baseC: Type<C>,
+): Type<A & B & C>;
 export function mixinEntities<A, B, C, D>(
   derivedCtor: Type<A>,
   baseB: Type<B>,

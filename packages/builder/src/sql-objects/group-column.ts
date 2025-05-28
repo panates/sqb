@@ -8,7 +8,8 @@ export class GroupColumn extends BaseField {
   constructor(value: string) {
     super();
     const m = value.match(GROUP_COLUMN_PATTERN);
-    if (!m) throw new TypeError(`"${value}" does not match group column format`);
+    if (!m)
+      throw new TypeError(`"${value}" does not match group column format`);
     this._field = m[2];
     if (m[1]) {
       const a = m[1].split(/\./g);

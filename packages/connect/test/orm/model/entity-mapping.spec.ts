@@ -1,5 +1,10 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Column, Entity, EntityMetadata, ForeignKey, Index } from '@sqb/connect';
+import {
+  Column,
+  Entity,
+  EntityMetadata,
+  ForeignKey,
+  Index,
+} from '@sqb/connect';
 
 describe('Model / Entity mapping', () => {
   describe('UnionEntity()', () => {

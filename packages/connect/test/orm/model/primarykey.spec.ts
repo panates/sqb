@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Entity, PrimaryKey } from '@sqb/connect';
 
 describe('Model / PrimaryKey', () => {

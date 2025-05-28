@@ -1,4 +1,8 @@
-export function applyMixins(derivedCtor: any, baseCtor: any, filter?: (k: string) => boolean) {
+export function applyMixins(
+  derivedCtor: any,
+  baseCtor: any,
+  filter?: (k: string) => boolean,
+) {
   for (const name of Object.getOwnPropertyNames(baseCtor.prototype)) {
     if (
       name === 'constructor' ||
@@ -12,7 +16,8 @@ export function applyMixins(derivedCtor: any, baseCtor: any, filter?: (k: string
     Object.defineProperty(
       derivedCtor.prototype,
       name,
-      Object.getOwnPropertyDescriptor(baseCtor.prototype, name) || Object.create(null),
+      Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+        Object.create(null),
     );
   }
 }

@@ -19,17 +19,24 @@ describe('DbMigrator', () => {
   beforeAll(async () => {
     connection = new Connection({ database: 'postgres' });
     await connection.connect();
-    const r = await connection.query('SELECT oid FROM pg_database WHERE datname = $1', {
-      params: [connectionConfig.database],
-    });
+    const r = await connection.query(
+      'SELECT oid FROM pg_database WHERE datname = $1',
+      {
+        params: [connectionConfig.database],
+      },
+    );
     if (!(r.rows && r.rows.length)) {
-      await connection.execute('CREATE DATABASE ' + connectionConfig.database, { autoCommit: true });
+      await connection.execute('CREATE DATABASE ' + connectionConfig.database, {
+        autoCommit: true,
+      });
     }
     await connection.close(0);
     connection = new Connection({ database: connectionConfig.database });
     await connection.connect();
     await connection.execute(`drop schema if exists __migration cascade;`);
-    await connection.execute(`drop schema if exists ${connectionConfig.schema} cascade;`);
+    await connection.execute(
+      `drop schema if exists ${connectionConfig.schema} cascade;`,
+    );
   });
 
   afterAll(async () => {
@@ -44,15 +51,21 @@ describe('DbMigrator', () => {
       targetVersion: 10,
     });
 
-    let r = await connection.query('SELECT oid FROM pg_database WHERE datname = $1', {
-      params: [connectionConfig.database],
-    });
+    let r = await connection.query(
+      'SELECT oid FROM pg_database WHERE datname = $1',
+      {
+        params: [connectionConfig.database],
+      },
+    );
     assert.ok(r.rows);
     assert.strictEqual(r.rows?.length, 1);
 
-    r = await connection.query('SELECT schema_name FROM information_schema.schemata WHERE schema_name = $1', {
-      params: [connectionConfig.schema],
-    });
+    r = await connection.query(
+      'SELECT schema_name FROM information_schema.schemata WHERE schema_name = $1',
+      {
+        params: [connectionConfig.schema],
+      },
+    );
     assert.ok(r.rows);
     assert.strictEqual(r.rows?.length, 1);
     // @ts-ignore
@@ -83,15 +96,21 @@ describe('DbMigrator', () => {
       targetVersion: 11,
     });
 
-    let r = await connection.query('SELECT oid FROM pg_database WHERE datname = $1', {
-      params: [connectionConfig.database],
-    });
+    let r = await connection.query(
+      'SELECT oid FROM pg_database WHERE datname = $1',
+      {
+        params: [connectionConfig.database],
+      },
+    );
     assert.ok(r.rows);
     assert.strictEqual(r.rows?.length, 1);
 
-    r = await connection.query('SELECT schema_name FROM information_schema.schemata WHERE schema_name = $1', {
-      params: [connectionConfig.schema],
-    });
+    r = await connection.query(
+      'SELECT schema_name FROM information_schema.schemata WHERE schema_name = $1',
+      {
+        params: [connectionConfig.schema],
+      },
+    );
     assert.ok(r.rows);
     assert.strictEqual(r.rows?.length, 1);
     // @ts-ignore
@@ -124,7 +143,9 @@ describe('DbMigrator', () => {
       targetVersion: 12,
     });
 
-    const r = await connection.query(`SELECT id, name FROM ${connectionConfig.schema}.table1`);
+    const r = await connection.query(
+      `SELECT id, name FROM ${connectionConfig.schema}.table1`,
+    );
     assert.ok(r.rows);
     assert.strictEqual(r.rows?.length, 2);
     assert.strictEqual(r.rows[0][0], 1);
@@ -156,7 +177,9 @@ describe('DbMigrator', () => {
     // @ts-ignore
     assert.strictEqual(r.rows[0][0], 'table4');
 
-    r = await connection.query(`SELECT id, name FROM ${connectionConfig.schema}.table3`);
+    r = await connection.query(
+      `SELECT id, name FROM ${connectionConfig.schema}.table3`,
+    );
     assert.ok(r.rows);
     assert.strictEqual(r.rows.length, 4);
   });

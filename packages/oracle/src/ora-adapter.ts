@@ -20,7 +20,11 @@ export class OraAdapter implements Adapter {
     try {
       /* Retrieve sessionId */
       let sessionId;
-      const r = await connection.execute<any>('select sid from v$mystat where rownum <= 1', [], {});
+      const r = await connection.execute<any>(
+        'select sid from v$mystat where rownum <= 1',
+        [],
+        {},
+      );
       if (r && r.rows) sessionId = r.rows[0][0];
 
       const oracon = new OraConnection(connection, sessionId);

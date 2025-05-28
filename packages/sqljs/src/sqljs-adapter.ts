@@ -19,7 +19,10 @@ export class SqljsAdapter implements Adapter {
   };
 
   async connect(config: ClientConfiguration): Promise<Adapter.Connection> {
-    if (!config.database) throw new Error('You must provide sqlite database file for sql.js driver');
+    if (!config.database)
+      throw new Error(
+        'You must provide sqlite database file for sql.js driver',
+      );
 
     let dbName = '';
     let isMemory = false;

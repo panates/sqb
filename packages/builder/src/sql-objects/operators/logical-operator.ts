@@ -3,7 +3,12 @@ import { SerializationType } from '../../enums.js';
 import { printArray } from '../../helpers.js';
 import { Serializable } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
-import { isCompOperator, isLogicalOperator, isNotOperator, isRawStatement } from '../../typeguards.js';
+import {
+  isCompOperator,
+  isLogicalOperator,
+  isNotOperator,
+  isRawStatement,
+} from '../../typeguards.js';
 import { Operator } from '../operator.js';
 
 export const WrapOps = {};
@@ -30,7 +35,11 @@ export abstract class LogicalOperator extends Operator {
       if (!item) continue;
       if (isLogicalOperator(item)) {
         this._items.push(item);
-      } else if (isRawStatement(item) || isCompOperator(item) || isNotOperator(item)) {
+      } else if (
+        isRawStatement(item) ||
+        isCompOperator(item) ||
+        isNotOperator(item)
+      ) {
         this._items.push(item);
       } else if (isPlainObject(item)) {
         this.add(...this._wrapObject(item));
@@ -67,7 +76,8 @@ export abstract class LogicalOperator extends Operator {
       if (['exists', '!exists'].includes(n)) result.push(WrapOps[n](obj[n]));
       else {
         const m = n.match(COMPARE_LEFT_PATTERN);
-        if (!m) throw new TypeError(`"${n}" is not a valid expression definition`);
+        if (!m)
+          throw new TypeError(`"${n}" is not a valid expression definition`);
         op = WrapOps[m[2] || 'eq'];
         if (!op) throw new Error(`Unknown operator "${m[2]}"`);
         result.push(op(m[1], obj[n]));

@@ -20,7 +20,9 @@ describe('Sqb-Nestjs (async-class)', () => {
   });
 
   it(`should return created entity`, () =>
-    request(server).post('/photo').expect(201, { name: 'Nest', description: 'Is great!', views: 6000 }));
+    request(server)
+      .post('/photo')
+      .expect(201, { name: 'Nest', description: 'Is great!', views: 6000 }));
 
   afterEach(async () => {
     await app.close();

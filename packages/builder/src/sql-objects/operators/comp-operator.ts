@@ -18,7 +18,8 @@ export abstract class CompOperator extends Operator {
     super();
     if (typeof left === 'string') {
       const m = left.match(EXPRESSION_PATTERN);
-      if (!m) throw new TypeError(`"${left}" is not a valid expression definition`);
+      if (!m)
+        throw new TypeError(`"${left}" is not a valid expression definition`);
       this._left = m[1];
       this._isArray = !!m[2];
     } else this._left = left;
@@ -42,7 +43,11 @@ export abstract class CompOperator extends Operator {
     return this.__serialize(ctx, o);
   }
 
-  protected __serializeItem(ctx: SerializeContext, x: string | Serializable, left?: any): any {
+  protected __serializeItem(
+    ctx: SerializeContext,
+    x: string | Serializable,
+    left?: any,
+  ): any {
     const isRight = !!left;
     if (ctx.strictParams && !(x instanceof Serializable) && isRight) {
       ctx.strictParamGenId = ctx.strictParamGenId || 0;
@@ -63,7 +68,8 @@ export abstract class CompOperator extends Operator {
       }
       if (x instanceof ParamExpression) {
         let value = ctx.params ? ctx.params[x._name] : undefined;
-        if (x._isArray && value != null && !Array.isArray(value)) value = [value];
+        if (x._isArray && value != null && !Array.isArray(value))
+          value = [value];
         result.value = value;
         result.isArray = x._isArray || Array.isArray(value);
         result.isParam = true;
@@ -80,7 +86,9 @@ export abstract class CompOperator extends Operator {
   }
 
   protected __serialize(ctx: SerializeContext, o: any): string {
-    return ctx.serialize(this._type, o, (_ctx: SerializeContext, _o) => this.__defaultSerialize(_ctx, _o));
+    return ctx.serialize(this._type, o, (_ctx: SerializeContext, _o) =>
+      this.__defaultSerialize(_ctx, _o),
+    );
   }
 
   protected __defaultSerialize(ctx: SerializeContext, o: any): string {

@@ -89,7 +89,8 @@ describe('CursorStream', () => {
       .acquire(async (session: SqbConnection) => {
         const result = await session.execute(Select().from('customers'));
         cursor = result && result.cursor;
-        (cursor as any)._intlcur.close = () => Promise.reject(new Error('Any error'));
+        (cursor as any)._intlcur.close = () =>
+          Promise.reject(new Error('Any error'));
         const stream = cursor.toStream();
         stream.once('error', () => {
           delete result.cursor._intlcur.close;

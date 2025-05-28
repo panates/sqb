@@ -2,7 +2,9 @@ import { ClientConfiguration } from '@sqb/connect';
 import { ConnectionAttributes } from 'oracledb';
 import url from 'url';
 
-export function clientConfigurationToDriver(config: ClientConfiguration): ConnectionAttributes {
+export function clientConfigurationToDriver(
+  config: ClientConfiguration,
+): ConnectionAttributes {
   const cfg: ConnectionAttributes = {
     user: config.user,
     password: config.password,
@@ -15,8 +17,11 @@ export function clientConfigurationToDriver(config: ClientConfiguration): Connec
 
     const parsed = url.parse(hostUrl, true);
     const host = decodeURI(parsed.hostname || '');
-    const port = config.port || (parsed.port && parseInt(parsed.port, 10)) || 1521;
-    const database = config.database || (parsed.pathname && decodeURI(parsed.pathname.substring(1)));
+    const port =
+      config.port || (parsed.port && parseInt(parsed.port, 10)) || 1521;
+    const database =
+      config.database ||
+      (parsed.pathname && decodeURI(parsed.pathname.substring(1)));
     cfg.connectString = `${host}:${port}${database ? '/' + database : ''}`;
     if (!cfg.externalAuth) {
       if (parsed.auth) {

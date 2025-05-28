@@ -21,7 +21,8 @@ describe('Hooking serialization', () => {
       .from('table1')
       .where(Eq('id', 1))
       .on('serialize', (ctx, type, o) => {
-        if (type === SerializationType.COMPARISON_EXPRESSION) o.left.expression = 'new_id';
+        if (type === SerializationType.COMPARISON_EXPRESSION)
+          o.left.expression = 'new_id';
       });
     const result = query.generate(options);
     expect(result.sql).toStrictEqual('select * from table1 where new_id = 1');

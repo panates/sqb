@@ -1,4 +1,8 @@
-import { isInsertDataMigrationTask, isSqlScriptMigrationTask, MigrationPackage } from '../src/migration-package.js';
+import {
+  isInsertDataMigrationTask,
+  isSqlScriptMigrationTask,
+  MigrationPackage,
+} from '../src/migration-package.js';
 
 describe('MigrationPackage', () => {
   it('should load sync', async () => {

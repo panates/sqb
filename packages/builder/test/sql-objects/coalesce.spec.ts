@@ -7,13 +7,17 @@ describe('serialize "Coalesce"', () => {
   };
 
   it('should initialize Coalesce', () => {
-    expect(Coalesce()._type).toStrictEqual(SerializationType.COALESCE_STATEMENT);
+    expect(Coalesce()._type).toStrictEqual(
+      SerializationType.COALESCE_STATEMENT,
+    );
   });
 
   it('should serialize values', () => {
     const query = Select(Coalesce(null, 'a', 1)).from('table1');
     const result = query.generate(options);
-    expect(result.sql).toStrictEqual(`select coalesce(null, 'a', 1) from table1`);
+    expect(result.sql).toStrictEqual(
+      `select coalesce(null, 'a', 1) from table1`,
+    );
   });
 
   it('should serialize Field names', () => {
@@ -25,7 +29,9 @@ describe('serialize "Coalesce"', () => {
   it('should serialize sub query', () => {
     const query = Select(Coalesce(Select().from('table2'))).from('table1');
     const result = query.generate(options);
-    expect(result.sql).toStrictEqual(`select coalesce((select * from table2)) from table1`);
+    expect(result.sql).toStrictEqual(
+      `select coalesce((select * from table2)) from table1`,
+    );
   });
 
   it('should serialize alias', () => {

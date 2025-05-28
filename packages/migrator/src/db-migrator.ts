@@ -2,7 +2,11 @@ import { ClientConfiguration } from '@sqb/connect';
 import { AsyncEventEmitter } from 'strict-typed-events';
 import { PgMigrationAdapter } from './adapters/pg-migration-adapter.js';
 import { MigrationAdapter } from './migration-adapter.js';
-import { MigrationPackage, MigrationPackageConfig, MigrationTask } from './migration-package.js';
+import {
+  MigrationPackage,
+  MigrationPackageConfig,
+  MigrationTask,
+} from './migration-package.js';
 import { MigrationStatus } from './types.js';
 
 export interface DbMigratorOptions {
@@ -14,18 +18,30 @@ export interface DbMigratorOptions {
 }
 
 export class DbMigrator extends AsyncEventEmitter {
-  protected declare adapter: MigrationAdapter;
+  declare protected adapter: MigrationAdapter;
 
   async execute(options: DbMigratorOptions): Promise<boolean> {
-    if (!options.connection.dialect) throw new TypeError(`You must provide connection.dialect`);
+    if (!options.connection.dialect)
+      throw new TypeError(`You must provide connection.dialect`);
 
-    const migrationPackage = await MigrationPackage.load(options.migrationPackage);
+    const migrationPackage = await MigrationPackage.load(
+      options.migrationPackage,
+    );
 
-    let minVersion = migrationPackage.migrations.reduce((a, m) => Math.min(a, m.version), Number.MAX_SAFE_INTEGER);
+    let minVersion = migrationPackage.migrations.reduce(
+      (a, m) => Math.min(a, m.version),
+      Number.MAX_SAFE_INTEGER,
+    );
     if (minVersion === Number.MAX_SAFE_INTEGER) minVersion = 0;
-    const maxVersion = migrationPackage.migrations.reduce((a, m) => Math.max(a, m.version), 0);
+    const maxVersion = migrationPackage.migrations.reduce(
+      (a, m) => Math.max(a, m.version),
+      0,
+    );
 
-    const targetVersion: number = Math.min(options?.targetVersion || Number.MAX_SAFE_INTEGER, maxVersion);
+    const targetVersion: number = Math.min(
+      options?.targetVersion || Number.MAX_SAFE_INTEGER,
+      maxVersion,
+    );
 
     if (targetVersion && targetVersion < minVersion) {
       // noinspection ExceptionCaughtLocallyJS
@@ -38,15 +54,23 @@ export class DbMigrator extends AsyncEventEmitter {
     let migrationAdapter: MigrationAdapter;
     switch (options.connection.dialect) {
       case 'postgres': {
-        migrationAdapter = await PgMigrationAdapter.create({ ...options, migrationPackage });
+        migrationAdapter = await PgMigrationAdapter.create({
+          ...options,
+          migrationPackage,
+        });
         break;
       }
       default:
-        throw new TypeError(`Migration adapter for "${options.connection.dialect}" dialect is not implemented yet`);
+        throw new TypeError(
+          `Migration adapter for "${options.connection.dialect}" dialect is not implemented yet`,
+        );
     }
     let needBackup = false;
     try {
-      if (migrationAdapter.version && migrationAdapter.version < minVersion - 1) {
+      if (
+        migrationAdapter.version &&
+        migrationAdapter.version < minVersion - 1
+      ) {
         // noinspection ExceptionCaughtLocallyJS
         throw new Error(
           `This package can migrate starting from ${minVersion - 1} but current version is ${migrationAdapter.version}`,
@@ -71,7 +95,11 @@ export class DbMigrator extends AsyncEventEmitter {
       let migrationIndex = -1;
       for (const migration of migrations) {
         migrationIndex++;
-        if (migration.version > targetVersion || migrationAdapter.version >= migration.version) continue;
+        if (
+          migration.version > targetVersion ||
+          migrationAdapter.version >= migration.version
+        )
+          continue;
         await this.emitAsync('migration-start', {
           migration,
           total: migrations.length,
@@ -89,10 +117,15 @@ export class DbMigrator extends AsyncEventEmitter {
             message: `Task "${task.title}" started`,
           });
           try {
-            await migrationAdapter.executeTask(migrationPackage, migration, task, {
-              schema: options.connection.schema,
-              ...options.scriptVariables,
-            });
+            await migrationAdapter.executeTask(
+              migrationPackage,
+              migration,
+              task,
+              {
+                schema: options.connection.schema,
+                ...options.scriptVariables,
+              },
+            );
             await migrationAdapter.writeEvent({
               event: MigrationAdapter.EventKind.success,
               version: migration.version,
@@ -118,9 +151,17 @@ export class DbMigrator extends AsyncEventEmitter {
             // noinspection ExceptionCaughtLocallyJS
             throw e;
           }
-          await this.emitAsync('task-finish', { migration, task, total, index });
+          await this.emitAsync('task-finish', {
+            migration,
+            task,
+            total,
+            index,
+          });
         }
-        await migrationAdapter.update({ version: migration.version, status: MigrationStatus.idle });
+        await migrationAdapter.update({
+          version: migration.version,
+          status: MigrationStatus.idle,
+        });
         await this.emitAsync('migration-finish', {
           migration,
           total: migrations.length,

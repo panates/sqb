@@ -9,8 +9,11 @@ export class TableName extends Serializable {
 
   constructor(tableName: string) {
     super();
-    const m = tableName.match(/^(?:([a-zA-Z][\w$]*)\.)? *([a-zA-Z][\w$]*) *(?:as)? *(\w+)?$/);
-    if (!m) throw new TypeError(`(${tableName}) does not match table name format`);
+    const m = tableName.match(
+      /^(?:([a-zA-Z][\w$]*)\.)? *([a-zA-Z][\w$]*) *(?:as)? *(\w+)?$/,
+    );
+    if (!m)
+      throw new TypeError(`(${tableName}) does not match table name format`);
     if (m[1]) this.schema = m[1];
     if (m[2]) this.table = m[2];
     if (m[3]) this.alias = m[3];
@@ -28,7 +31,10 @@ export class TableName extends Serializable {
         table: this.table,
         alias: this.alias,
       },
-      () => (this.schema ? this.schema + '.' : '') + this.table + (this.alias ? ' ' + this.alias : ''),
+      () =>
+        (this.schema ? this.schema + '.' : '') +
+        this.table +
+        (this.alias ? ' ' + this.alias : ''),
     );
   }
 }

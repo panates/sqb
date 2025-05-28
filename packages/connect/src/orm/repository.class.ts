@@ -23,7 +23,11 @@ interface Filtering {
 }
 
 export namespace Repository {
-  export type TransformRowFunction = (fields: FieldInfoMap, row: object, obj: object) => void;
+  export type TransformRowFunction = (
+    fields: FieldInfoMap,
+    row: object,
+    obj: object,
+  ) => void;
 
   export interface CommandOptions {
     connection?: SqbConnection;
@@ -55,7 +59,10 @@ export namespace Repository {
     onTransformRow?: TransformRowFunction;
   }
 
-  export interface UpdateOptions extends CommandOptions, Projection, Filtering {}
+  export interface UpdateOptions
+    extends CommandOptions,
+      Projection,
+      Filtering {}
 
   export interface UpdateOnlyOptions extends CommandOptions, Filtering {}
 
@@ -72,12 +79,18 @@ interface RepositoryEvents {
  * @class Repository
  * @template T - The data type class type of the record
  */
-export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(AsyncEventEmitter) {
+export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
+  AsyncEventEmitter,
+) {
   private readonly _executor: SqbClient | SqbConnection;
   private readonly _entity: EntityMetadata;
   private readonly _schema?: string;
 
-  constructor(entityDef: EntityMetadata, executor: SqbClient | SqbConnection, schema?: string) {
+  constructor(
+    entityDef: EntityMetadata,
+    executor: SqbClient | SqbConnection,
+    schema?: string,
+  ) {
     super();
     this._executor = executor;
     this._entity = entityDef;
@@ -100,12 +113,23 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @returns {Promise<PartialDTO<T>>} A promise that resolves to the created resource
    * @throws {Error} if an unknown error occurs while creating the resource
    */
-  create(input: PartialDTO<T>, options: RequiredSome<Repository.CreateOptions, 'projection'>): Promise<PartialDTO<T>>;
+  create(
+    input: PartialDTO<T>,
+    options: RequiredSome<Repository.CreateOptions, 'projection'>,
+  ): Promise<PartialDTO<T>>;
   create(input: PartialDTO<T>, options?: Repository.CreateOptions): Promise<T>;
-  create(input: PartialDTO<T>, options?: Repository.CreateOptions): Promise<PartialDTO<T> | T> {
+  create(
+    input: PartialDTO<T>,
+    options?: Repository.CreateOptions,
+  ): Promise<PartialDTO<T> | T> {
     return this._execute(async connection => {
-      const keyValue = await this._create(input, { ...options, connection, returning: true });
-      const result = keyValue && (await this._find(keyValue, { ...options, connection }));
+      const keyValue = await this._create(input, {
+        ...options,
+        connection,
+        returning: true,
+      });
+      const result =
+        keyValue && (await this._find(keyValue, { ...options, connection }));
       if (!result) throw new Error('Unable to insert new row');
       return result;
     }, options);
@@ -119,9 +143,16 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @returns {Promise<any>} A promise that resolves key value(s) of the created record
    * @throws {Error} if an unknown error occurs while creating the resource
    */
-  createOnly(input: PartialDTO<T>, options?: StrictOmit<Repository.CreateOptions, keyof Projection>): Promise<any> {
+  createOnly(
+    input: PartialDTO<T>,
+    options?: StrictOmit<Repository.CreateOptions, keyof Projection>,
+  ): Promise<any> {
     return this._execute(async connection => {
-      const r = await this._create(input, { ...options, connection, returning: true });
+      const r = await this._create(input, {
+        ...options,
+        connection,
+        returning: true,
+      });
       const primaryIndex = EntityMetadata.getPrimaryIndex(this.entity);
       if (!primaryIndex || primaryIndex.columns.length > 1) return r;
       return r[primaryIndex.columns[0]];
@@ -135,7 +166,10 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @return {Promise<number>} - A promise that resolves to the count of records
    */
   count(options?: Repository.CountOptions): Promise<number> {
-    return this._execute(async connection => this._count({ ...options, connection }), options);
+    return this._execute(
+      async connection => this._count({ ...options, connection }),
+      options,
+    );
   }
 
   /**
@@ -145,8 +179,14 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @param {Repository.DeleteOptions} [options] - Optional delete options.
    * @return {Promise<boolean>} - A Promise that resolves true or false. True when resource deleted.
    */
-  delete(keyValue: any | Record<string, any>, options?: Repository.DeleteOptions): Promise<boolean> {
-    return this._execute(async connection => this._delete(keyValue, { ...options, connection }), options);
+  delete(
+    keyValue: any | Record<string, any>,
+    options?: Repository.DeleteOptions,
+  ): Promise<boolean> {
+    return this._execute(
+      async connection => this._delete(keyValue, { ...options, connection }),
+      options,
+    );
   }
 
   /**
@@ -156,7 +196,10 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @return {Promise<number>} - A promise that resolves to the number of resources deleted.
    */
   deleteMany(options?: Repository.DeleteManyOptions): Promise<number> {
-    return this._execute(async connection => this._deleteMany({ ...options, connection }), options);
+    return this._execute(
+      async connection => this._deleteMany({ ...options, connection }),
+      options,
+    );
   }
 
   /**
@@ -166,8 +209,14 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @param {Repository.ExistsOptions} [options] - The options for the query (optional).
    * @return {Promise<boolean>} - A Promise that resolves to a boolean indicating whether the record exists or not.
    */
-  exists(keyValue: any | Record<string, any>, options?: Repository.ExistsOptions): Promise<boolean> {
-    return this._execute(async connection => this._exists(keyValue, { ...options, connection }), options);
+  exists(
+    keyValue: any | Record<string, any>,
+    options?: Repository.ExistsOptions,
+  ): Promise<boolean> {
+    return this._execute(
+      async connection => this._exists(keyValue, { ...options, connection }),
+      options,
+    );
   }
 
   /**
@@ -177,7 +226,10 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @return {Promise<boolean>} - A Promise that resolves to a boolean indicating whether the record exists or not.
    */
   existsOne(options?: Repository.ExistsOptions): Promise<boolean> {
-    return this._execute(async connection => this._existsOne({ ...options, connection }), options);
+    return this._execute(
+      async connection => this._existsOne({ ...options, connection }),
+      options,
+    );
   }
 
   /**
@@ -191,12 +243,18 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
     keyValue: any | Record<string, any>,
     options: RequiredSome<Repository.FindOptions, 'projection'>,
   ): Promise<PartialDTO<T> | undefined>;
-  findById(keyValue: any | Record<string, any>, options?: Repository.FindOptions): Promise<T | undefined>;
+  findById(
+    keyValue: any | Record<string, any>,
+    options?: Repository.FindOptions,
+  ): Promise<T | undefined>;
   findById(
     keyValue: any | Record<string, any>,
     options?: Repository.FindOptions,
   ): Promise<PartialDTO<T> | T | undefined> {
-    return this._execute(async connection => this._find(keyValue, { ...options, connection }), options);
+    return this._execute(
+      async connection => this._find(keyValue, { ...options, connection }),
+      options,
+    );
   }
 
   /**
@@ -205,9 +263,13 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @param {Repository.FindOneOptions} options - The options for the query.
    * @return {Promise<PartialDTO<T> | undefined>} A promise that resolves with the found document or undefined if no document is found.
    */
-  findOne(options: RequiredSome<Repository.FindOneOptions, 'projection'>): Promise<PartialDTO<T> | undefined>;
+  findOne(
+    options: RequiredSome<Repository.FindOneOptions, 'projection'>,
+  ): Promise<PartialDTO<T> | undefined>;
   findOne(options?: Repository.FindOneOptions): Promise<T | undefined>;
-  findOne(options?: Repository.FindOneOptions): Promise<PartialDTO<T> | T | undefined> {
+  findOne(
+    options?: Repository.FindOneOptions,
+  ): Promise<PartialDTO<T> | T | undefined> {
     return this._execute(
       async connection =>
         await this._findOne({
@@ -224,10 +286,17 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @param {Repository.FindManyOptions} options - The options for the find operation.
    * @return A Promise that resolves to an array of partial outputs of type T.
    */
-  findMany(options: RequiredSome<Repository.FindManyOptions, 'projection'>): Promise<PartialDTO<T>[]>;
+  findMany(
+    options: RequiredSome<Repository.FindManyOptions, 'projection'>,
+  ): Promise<PartialDTO<T>[]>;
   findMany(options?: Repository.FindManyOptions): Promise<T[]>;
-  findMany(options?: Repository.FindManyOptions): Promise<(PartialDTO<T> | T)[]> {
-    return this._execute(async connection => this._findMany({ ...options, connection }), options);
+  findMany(
+    options?: Repository.FindManyOptions,
+  ): Promise<(PartialDTO<T> | T)[]> {
+    return this._execute(
+      async connection => this._findMany({ ...options, connection }),
+      options,
+    );
   }
 
   /**
@@ -275,7 +344,8 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
     options?: Repository.UpdateOnlyOptions,
   ): Promise<boolean> {
     return this._execute(
-      async connection => !!(await this._update(keyValue, input, { ...options, connection })),
+      async connection =>
+        !!(await this._update(keyValue, input, { ...options, connection })),
       options,
     );
   }
@@ -287,13 +357,22 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
    * @param {Repository.UpdateManyOptions} options - The options for updating the documents.
    * @return {Promise<number>} - A promise that resolves to the number of documents matched and modified.
    */
-  updateMany(input: PartialDTO<T>, options?: Repository.UpdateManyOptions): Promise<number> {
-    return this._execute(async connection => this._updateMany(input, { ...options, connection }));
+  updateMany(
+    input: PartialDTO<T>,
+    options?: Repository.UpdateManyOptions,
+  ): Promise<number> {
+    return this._execute(async connection =>
+      this._updateMany(input, { ...options, connection }),
+    );
   }
 
-  protected async _execute(fn: TransactionFunction, opts?: Repository.CommandOptions): Promise<any> {
+  protected async _execute(
+    fn: TransactionFunction,
+    opts?: Repository.CommandOptions,
+  ): Promise<any> {
     let connection = opts?.connection;
-    if (!connection && this._executor instanceof SqbConnection) connection = this._executor;
+    if (!connection && this._executor instanceof SqbConnection)
+      connection = this._executor;
     if (connection) {
       if (this._schema) await connection.setSchema(this._schema);
       return fn(connection);
@@ -318,7 +397,8 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
       entity: this._entity,
       values,
     });
-    if (options.returning && !keyValues) throw new Error('Unable to insert new row');
+    if (options.returning && !keyValues)
+      throw new Error('Unable to insert new row');
     return keyValues;
   }
 
@@ -357,7 +437,9 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(Asyn
     return resp.length > 0;
   }
 
-  protected async _count(options: Repository.CountOptions & { connection: SqbConnection }): Promise<number> {
+  protected async _count(
+    options: Repository.CountOptions & { connection: SqbConnection },
+  ): Promise<number> {
     return CountCommand.execute({
       ...options,
       entity: this._entity,

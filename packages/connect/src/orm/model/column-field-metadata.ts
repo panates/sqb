@@ -10,7 +10,9 @@ import type {
 import type { EntityMetadata } from './entity-metadata.js';
 import { FieldMetadata } from './field-metadata.js';
 
-export type ColumnFieldOptions = Partial<Omit<ColumnFieldMetadata, 'entity' | 'name' | 'kind'>>;
+export type ColumnFieldOptions = Partial<
+  Omit<ColumnFieldMetadata, 'entity' | 'name' | 'kind'>
+>;
 
 export interface ColumnFieldMetadata extends FieldMetadata {
   readonly kind: 'column';
@@ -95,7 +97,11 @@ export interface ColumnFieldMetadata extends FieldMetadata {
 }
 
 export namespace ColumnFieldMetadata {
-  export function create(entity: EntityMetadata, name: string, options: ColumnFieldOptions = {}): ColumnFieldMetadata {
+  export function create(
+    entity: EntityMetadata,
+    name: string,
+    options: ColumnFieldOptions = {},
+  ): ColumnFieldMetadata {
     const result: ColumnFieldMetadata = {
       kind: 'column',
       entity,
@@ -106,13 +112,19 @@ export namespace ColumnFieldMetadata {
     return result;
   }
 
-  export function assign(target: ColumnFieldMetadata, options: ColumnFieldOptions) {
+  export function assign(
+    target: ColumnFieldMetadata,
+    options: ColumnFieldOptions,
+  ) {
     Object.assign(target, _.omit(options, ['entity', 'name', 'kind']));
   }
 
   export function checkEnumValue(col: ColumnFieldMetadata, v: FieldValue) {
     if (v === undefined || !col.enum || (v == null && !col.notNull)) return;
     const enumKeys = Array.isArray(col.enum) ? col.enum : Object.keys(col.enum);
-    if (!enumKeys.includes(v)) throw new Error(`${col.entity.name}.${col.name} value must be one of (${enumKeys})`);
+    if (!enumKeys.includes(v))
+      throw new Error(
+        `${col.entity.name}.${col.name} value must be one of (${enumKeys})`,
+      );
   }
 }

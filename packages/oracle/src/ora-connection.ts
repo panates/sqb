@@ -83,12 +83,18 @@ export class OraConnection implements Adapter.Connection {
   }
 
   async startTransaction(): Promise<void> {
-    assert.ok(this.intlcon, 'Can not start transaction for a closed db session');
+    assert.ok(
+      this.intlcon,
+      'Can not start transaction for a closed db session',
+    );
     this._inTransaction = true;
   }
 
   async commit(): Promise<void> {
-    assert.ok(this.intlcon, 'Can not commit transaction for a closed db session');
+    assert.ok(
+      this.intlcon,
+      'Can not commit transaction for a closed db session',
+    );
     await this.intlcon.commit();
     this._inTransaction = false;
   }
@@ -106,16 +112,24 @@ export class OraConnection implements Adapter.Connection {
 
   async getSchema(): Promise<string> {
     assert.ok(this.intlcon, 'DB session is closed');
-    const r = await this.intlcon.execute("select sys_context( 'userenv', 'current_schema' ) from dual", [], {
-      autoCommit: true,
-    });
+    const r = await this.intlcon.execute(
+      "select sys_context( 'userenv', 'current_schema' ) from dual",
+      [],
+      {
+        autoCommit: true,
+      },
+    );
     if (r && r.rows && r.rows[0]) return (r.rows as any)[0][0] as string;
     return '';
   }
 
   async setSchema(schema: string): Promise<void> {
     assert.ok(this.intlcon, 'Can not set schema of a closed db session');
-    await this.intlcon.execute('alter SESSION set CURRENT_SCHEMA = ' + schema, [], { autoCommit: true });
+    await this.intlcon.execute(
+      'alter SESSION set CURRENT_SCHEMA = ' + schema,
+      [],
+      { autoCommit: true },
+    );
   }
 
   onGenerateQuery(prepared: QueryRequest): void {
@@ -129,7 +143,9 @@ export class OraConnection implements Adapter.Connection {
     const oraOptions: oracledb.ExecuteOptions = {
       autoCommit: request.autoCommit,
       resultSet: request.cursor,
-      outFormat: request.objectRows ? oracledb.OUT_FORMAT_OBJECT : oracledb.OUT_FORMAT_ARRAY,
+      outFormat: request.objectRows
+        ? oracledb.OUT_FORMAT_OBJECT
+        : oracledb.OUT_FORMAT_ARRAY,
     };
     if (request.cursor) oraOptions.fetchArraySize = request.fetchRows;
     else oraOptions.maxRows = request.fetchRows;
@@ -137,14 +153,20 @@ export class OraConnection implements Adapter.Connection {
     const out: Adapter.Response = {};
 
     this.intlcon.action = request.action || '';
-    let response = await this.intlcon.execute<any>(request.sql, request.params || [], oraOptions);
+    let response = await this.intlcon.execute<any>(
+      request.sql,
+      request.params || [],
+      oraOptions,
+    );
 
     if (response.rowsAffected) out.rowsAffected = response.rowsAffected;
 
     if (out.rowsAffected === 1 && request.returningFields) {
       const m = request.sql.match(/\b(insert into|update)\b ("?\w+\.?\w+"?)/i);
       if (m) {
-        const selectFields = request.returningFields.map(x => x.field + (x.alias ? ' as ' + x.alias : ''));
+        const selectFields = request.returningFields.map(
+          x => x.field + (x.alias ? ' as ' + x.alias : ''),
+        );
         let sql = `select ${selectFields.join(',')} from ${m[2]}\n`;
         if (m[1].toLowerCase() === 'insert into') {
           sql += "where rowid='" + response.lastRowid + "'";
@@ -154,7 +176,11 @@ export class OraConnection implements Adapter.Connection {
         else if (m[1].toLowerCase() === 'update') {
           const m2 = request.sql.match(/where (.+)/);
           sql += m2 ? ' where ' + m2[1] : '';
-          response = await this.intlcon.execute(sql, request.params || [], oraOptions);
+          response = await this.intlcon.execute(
+            sql,
+            request.params || [],
+            oraOptions,
+          );
         }
       }
     }
@@ -170,7 +196,8 @@ export class OraConnection implements Adapter.Connection {
           rowNumberName = v.name;
           continue;
         }
-        const fetchType = typeof v.fetchType === 'object' ? v.fetchType.num : v.fetchType;
+        const fetchType =
+          typeof v.fetchType === 'object' ? v.fetchType.num : v.fetchType;
         const fieldInfo: Adapter.Field = {
           _inf: v,
           fieldName: v.name,

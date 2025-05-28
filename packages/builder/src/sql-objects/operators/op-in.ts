@@ -8,7 +8,10 @@ export class OpIn extends CompOperator {
   _symbol = 'in';
 
   constructor(left, right) {
-    super(left, Array.isArray(right) || isSerializable(right) ? right : [right]);
+    super(
+      left,
+      Array.isArray(right) || isSerializable(right) ? right : [right],
+    );
   }
 
   _serialize(ctx: SerializeContext): string {

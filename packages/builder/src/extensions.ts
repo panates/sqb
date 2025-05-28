@@ -9,12 +9,18 @@ export class SerializerRegistry {
 
   static register(...extension: SerializerExtension[]): void {
     for (const ext of extension) {
-      if (!ext.dialect) throw new TypeError('A SerializerExtension must contain "dialect" property');
+      if (!ext.dialect)
+        throw new TypeError(
+          'A SerializerExtension must contain "dialect" property',
+        );
       this.serializers.push(ext);
     }
   }
 
-  static forEach(callback: (value: SerializerExtension, index: number) => void, thisArg?: any) {
+  static forEach(
+    callback: (value: SerializerExtension, index: number) => void,
+    thisArg?: any,
+  ) {
     return this.serializers.forEach(callback, thisArg);
   }
 

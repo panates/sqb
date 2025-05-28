@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion,camelcase */
 import { DataType, Insert, Param, Select } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
 import { initClient } from '../_support/init-client.js';
@@ -24,7 +23,9 @@ describe('Client', () => {
   });
 
   it('should throw if adapter for driver is not registered', () => {
-    expect(() => new SqbClient({ driver: 'unknown' })).toThrow('No database adapter registered for');
+    expect(() => new SqbClient({ driver: 'unknown' })).toThrow(
+      'No database adapter registered for',
+    );
   });
 
   it('should initialize client with driver name', () => {
@@ -78,7 +79,10 @@ describe('Client', () => {
   });
 
   it('should select() and return array rows', async () => {
-    const result = await client.execute(Select().from('customers'), { objectRows: false, fetchRows: 2 });
+    const result = await client.execute(Select().from('customers'), {
+      objectRows: false,
+      fetchRows: 2,
+    });
     expect(result).toBeDefined();
     expect(result.rows).toBeDefined();
     expect(Array.isArray(result.rows![0])).toBeTruthy();
@@ -86,7 +90,9 @@ describe('Client', () => {
   });
 
   it('should select() and return object rows', async () => {
-    const result = await client.execute(Select().from('customers'), { fetchRows: 2 });
+    const result = await client.execute(Select().from('customers'), {
+      fetchRows: 2,
+    });
     expect(result).toBeDefined();
     expect(result.rows).toBeDefined();
     expect(result.rows!.length).toStrictEqual(2);
@@ -132,11 +138,15 @@ describe('Client', () => {
 
   it('should insert record', async () => {
     const given = 'X' + Math.floor(Math.random() * 10000);
-    const c = (await client.execute('select count(*) from customers')).rows[0].count;
-    const result = await client.execute(Insert('customers', { given_name: given }));
+    const c = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
+    const result = await client.execute(
+      Insert('customers', { given_name: given }),
+    );
     expect(result).toBeDefined();
     expect(result.rowsAffected).toStrictEqual(1);
-    const c2 = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c2 = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     expect(c2).toStrictEqual(c + 1);
   });
 
@@ -169,68 +179,91 @@ describe('Client', () => {
   });
 
   it('should acquire(callback) rollback transaction on error', async () => {
-    const c = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     try {
       await client.acquire(async connection => {
         await connection.startTransaction();
-        await connection.execute('insert into customers (given_name) values (:given)', {
-          params: {
-            given: 'John',
+        await connection.execute(
+          'insert into customers (given_name) values (:given)',
+          {
+            params: {
+              given: 'John',
+            },
           },
-        });
-        const c2 = (await connection.execute('select count(*) from customers')).rows[0].count;
+        );
+        const c2 = (await connection.execute('select count(*) from customers'))
+          .rows[0].count;
         expect(c2).toStrictEqual(c);
         throw new Error('any error');
       });
-    } catch (ignored) {
+    } catch {
       //
     }
-    const c3 = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c3 = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     expect(c3).toStrictEqual(c);
   });
 
   it('should acquire(callback) rollback transaction if not committed', async () => {
-    const c = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     try {
       await client.acquire(async connection => {
         await connection.startTransaction();
-        await connection.execute('insert into customers (given_name) values (:given)', {
-          params: {
-            given: 'John',
+        await connection.execute(
+          'insert into customers (given_name) values (:given)',
+          {
+            params: {
+              given: 'John',
+            },
           },
-        });
-        const c2 = (await connection.execute('select count(*) from customers')).rows[0].count;
+        );
+        const c2 = (await connection.execute('select count(*) from customers'))
+          .rows[0].count;
         expect(c2).toStrictEqual(c);
       });
-    } catch (ignored) {
+    } catch {
       //
     }
-    const c3 = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c3 = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     expect(c3).toStrictEqual(c);
   });
 
   it('should commit can be called in execute(callback)', async () => {
-    const c = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     const given = 'X' + Math.floor(Math.random() * 10000);
     await client.acquire(async connection => {
-      await connection.execute(Insert('customers', { given_name: Param('given') }), { params: { given } });
-      const c2 = (await connection.execute('select count(*) from customers')).rows[0].count;
+      await connection.execute(
+        Insert('customers', { given_name: Param('given') }),
+        { params: { given } },
+      );
+      const c2 = (await connection.execute('select count(*) from customers'))
+        .rows[0].count;
       expect(c2).toStrictEqual(c + 1);
       await connection.commit();
     });
-    const c3 = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c3 = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     expect(c3).toStrictEqual(c + 1);
   });
 
   it('should rollback can be called in execute(callback)', async () => {
-    const c = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     await client.acquire(async connection => {
       await connection.startTransaction();
       const given = 'X' + Math.floor(Math.random() * 10000);
-      await connection.execute(Insert('customers', { given_name: Param('given') }), { params: { given } });
+      await connection.execute(
+        Insert('customers', { given_name: Param('given') }),
+        { params: { given } },
+      );
       await connection.rollback();
     });
-    const c2 = (await client.execute('select count(*) from customers')).rows[0].count;
+    const c2 = (await client.execute('select count(*) from customers')).rows[0]
+      .count;
     expect(c2).toStrictEqual(c);
   });
 
@@ -302,10 +335,14 @@ describe('Client', () => {
 
   it('should set defaults.ignoreNulls option', async () => {
     client.defaults.ignoreNulls = true;
-    let result = await client.execute(Select().from('customers').where({ id: insertedIds[0] }));
+    let result = await client.execute(
+      Select().from('customers').where({ id: insertedIds[0] }),
+    );
     expect(result.rows[0].city).toStrictEqual(undefined);
     client.defaults.ignoreNulls = undefined;
-    result = await client.execute(Select().from('customers').where({ id: insertedIds[0] }));
+    result = await client.execute(
+      Select().from('customers').where({ id: insertedIds[0] }),
+    );
     expect(result.rows[0].city).toStrictEqual(null);
   });
 

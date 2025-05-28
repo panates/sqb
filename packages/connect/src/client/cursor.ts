@@ -6,7 +6,11 @@ import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
 import { Adapter } from './adapter.js';
 import { CursorStream, CursorStreamOptions } from './cursor-stream.js';
 import { FieldInfoMap } from './field-info-map.js';
-import { callFetchHooks, normalizeRowsToArrayRows, normalizeRowsToObjectRows } from './helpers.js';
+import {
+  callFetchHooks,
+  normalizeRowsToArrayRows,
+  normalizeRowsToObjectRows,
+} from './helpers.js';
 import { SqbConnection } from './sqb-connection.js';
 import { ObjectRow, QueryRequest } from './types.js';
 
@@ -21,7 +25,9 @@ interface CursorEvents {
   fetch: (row: any, rowNum: number) => void;
 }
 
-export class Cursor extends TypedEventEmitterClass<CursorEvents>(AsyncEventEmitter) {
+export class Cursor extends TypedEventEmitterClass<CursorEvents>(
+  AsyncEventEmitter,
+) {
   private readonly _connection: SqbConnection;
   private readonly _fields: FieldInfoMap;
   private readonly _prefetchRows: number;
@@ -36,7 +42,12 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(AsyncEventEmitt
   private _row: any;
   private _cache?: DoublyLinked;
 
-  constructor(connection: SqbConnection, fields: FieldInfoMap, adapterCursor: Adapter.Cursor, request: QueryRequest) {
+  constructor(
+    connection: SqbConnection,
+    fields: FieldInfoMap,
+    adapterCursor: Adapter.Cursor,
+    request: QueryRequest,
+  ) {
     super();
     this._connection = connection;
     this._intlcur = adapterCursor;
@@ -105,7 +116,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(AsyncEventEmitt
    * Enables cache
    */
   cached(): void {
-    if (this.fetchedRows) throw new Error('Cache can be enabled before fetching rows');
+    if (this.fetchedRows)
+      throw new Error('Cache can be enabled before fetching rows');
     if (!this._cache) this._cache = new DoublyLinked();
   }
 
@@ -133,7 +145,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(AsyncEventEmitt
    * Returns number of fetched rows
    */
   async fetchAll(): Promise<number> {
-    if (!this._cache) throw new Error('fetchAll() method needs cache to be enabled');
+    if (!this._cache)
+      throw new Error('fetchAll() method needs cache to be enabled');
     const n = this.rowNum;
     const v = await this._seek(Number.MAX_SAFE_INTEGER, true);
     await this._seek(n - this.rowNum, true);
@@ -173,7 +186,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(AsyncEventEmitt
    * Moves cursor before first row. (Required cache enabled)
    */
   reset() {
-    if (!this._cache) throw new Error('reset() method needs cache to be enabled');
+    if (!this._cache)
+      throw new Error('reset() method needs cache to be enabled');
     this._cache.reset();
     this._rowNum = 0;
     this.emit('reset');
@@ -210,7 +224,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(AsyncEventEmitt
     step = coerceToInt(step, 0);
     if (!step || (step > 0 && this.isClosed)) return this.rowNum;
 
-    if (step < 0 && !this._cache) throw new Error('To move cursor back, it needs cache to be enabled');
+    if (step < 0 && !this._cache)
+      throw new Error('To move cursor back, it needs cache to be enabled');
 
     const _this = this;
     await this._taskQueue
@@ -229,7 +244,11 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(AsyncEventEmitt
         while (step > 0) {
           if (_this.isEof) return;
           /* Seek cache */
-          while (step > 0 && _this._cache && (_this._row = _this._cache.next())) {
+          while (
+            step > 0 &&
+            _this._cache &&
+            (_this._row = _this._cache.next())
+          ) {
             _this._rowNum++;
             step--;
           }
@@ -265,8 +284,18 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(AsyncEventEmitt
       debug('Fetched %d rows from database', rows.length);
       // Normalize rows
       rows = this._request.objectRows
-        ? normalizeRowsToObjectRows(this._fields, this._intlcur.rowType, rows, this._request)
-        : normalizeRowsToArrayRows(this._fields, this._intlcur.rowType, rows, this._request);
+        ? normalizeRowsToObjectRows(
+            this._fields,
+            this._intlcur.rowType,
+            rows,
+            this._request,
+          )
+        : normalizeRowsToArrayRows(
+            this._fields,
+            this._intlcur.rowType,
+            rows,
+            this._request,
+          );
       callFetchHooks(rows, this._request);
       for (const [idx, row] of rows.entries()) {
         this.emit('fetch', row, this._rowNum + idx + 1);

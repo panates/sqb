@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SqbClient } from '@sqb/connect';
 import { Customer } from '../../_support/customer.entity.js';
 import { initClient } from '../../_support/init-client.js';
@@ -68,7 +67,9 @@ describe('Repository.create()', () => {
     const repo = client.getRepository<Customer>(Customer);
     const customer = await repo.create(values);
     expect(customer).toBeDefined();
-    const x = await repo.findById(customer.id, { projection: ['id', 'gender'] });
+    const x = await repo.findById(customer.id, {
+      projection: ['id', 'gender'],
+    });
     expect(x).toBeDefined();
     expect(x!.id).toStrictEqual(customer.id);
     expect(x!.gender).toStrictEqual('Male');
@@ -117,12 +118,16 @@ describe('Repository.create()', () => {
 
   it('should check enum value', async () => {
     const repo = client.getRepository(Tag);
-    await expect(() => repo.create({ name: 'small', color: 'pink' })).rejects.toThrow('value must be one of');
+    await expect(() =>
+      repo.create({ name: 'small', color: 'pink' }),
+    ).rejects.toThrow('value must be one of');
   });
 
   it('should check column is required', async () => {
     const repo = client.getRepository(Customer);
-    await expect(() => repo.create({ givenName: 'aa', familyName: 'bb' })).rejects.toThrow('is required');
+    await expect(() =>
+      repo.create({ givenName: 'aa', familyName: 'bb' }),
+    ).rejects.toThrow('is required');
   });
 
   it('should execute in transaction', async () => {

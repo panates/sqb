@@ -171,7 +171,8 @@ export async function createTestSchema(schema: string) {
       schema,
       stringifyValueForSQL,
     });
-    for (const table of dataFiles) await connection.execute(table.scripts.join(';\n'));
+    for (const table of dataFiles)
+      await connection.execute(table.scripts.join(';\n'));
   } finally {
     await connection.close(0);
   }

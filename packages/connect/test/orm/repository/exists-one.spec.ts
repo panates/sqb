@@ -35,7 +35,9 @@ describe('Repository.existsOne()', () => {
 
   it('should filter by one-2-many relation element', async () => {
     const repo = client.getRepository<Country>(Country);
-    const c2 = await repo.existsOne({ filter: { 'customers.countryCode': 'DE' } });
+    const c2 = await repo.existsOne({
+      filter: { 'customers.countryCode': 'DE' },
+    });
     expect(c2).toStrictEqual(true);
   });
 });

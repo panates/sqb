@@ -25,7 +25,9 @@ describe('serialize "Min"', () => {
   it('should serialize sub query', () => {
     const query = Select(Min(Select().from('table2'))).from('table1');
     const result = query.generate(options);
-    expect(result.sql).toStrictEqual(`select min((select * from table2)) from table1`);
+    expect(result.sql).toStrictEqual(
+      `select min((select * from table2)) from table1`,
+    );
   });
 
   it('should serialize alias', () => {

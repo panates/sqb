@@ -70,7 +70,10 @@ export class CaseStatement extends Serializable {
     if (!this._expressions.length) return '';
     const q = {
       expressions: [] as any,
-      elseValue: this._elseValue !== undefined ? ctx.anyToSQL(this._elseValue) : undefined,
+      elseValue:
+        this._elseValue !== undefined
+          ? ctx.anyToSQL(this._elseValue)
+          : undefined,
     };
     for (const x of this._expressions) {
       const o = {

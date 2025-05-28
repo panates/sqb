@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BaseEntity, Column, Entity, Link, PrimaryKey } from '@sqb/connect';
 
 describe('Model / Entity', () => {
@@ -82,7 +81,12 @@ describe('Model / Entity', () => {
       declare code: string;
     }
 
-    expect(Entity.getFieldNames(Customer)).toStrictEqual(['id', 'name', 'country', 'code']);
+    expect(Entity.getFieldNames(Customer)).toStrictEqual([
+      'id',
+      'name',
+      'country',
+      'code',
+    ]);
   });
 
   it(`should EntityDefinition.getDataColumnNames() return only data column names`, () => {
@@ -110,7 +114,11 @@ describe('Model / Entity', () => {
       declare code: string;
     }
 
-    expect(Entity.getColumnFieldNames(Customer)).toStrictEqual(['id', 'name', 'code']);
+    expect(Entity.getColumnFieldNames(Customer)).toStrictEqual([
+      'id',
+      'name',
+      'code',
+    ]);
   });
 
   it(`should getInsertColumnNames() return only data column names to insert`, () => {
@@ -138,7 +146,10 @@ describe('Model / Entity', () => {
       declare code: string;
     }
 
-    expect(Entity.getInsertColumnNames(Customer)).toStrictEqual(['name', 'code']);
+    expect(Entity.getInsertColumnNames(Customer)).toStrictEqual([
+      'name',
+      'code',
+    ]);
   });
 
   it(`should EntityDefinition.getInsertColumnNames() return only data column names to insert`, () => {

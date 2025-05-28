@@ -25,7 +25,9 @@ describe('serialize "Lower"', () => {
   it('should serialize sub query', () => {
     const query = Select(Lower(Select().from('table2'))).from('table1');
     const result = query.generate(options);
-    expect(result.sql).toStrictEqual(`select lower((select * from table2)) from table1`);
+    expect(result.sql).toStrictEqual(
+      `select lower((select * from table2)) from table1`,
+    );
   });
 
   it('should serialize alias', () => {

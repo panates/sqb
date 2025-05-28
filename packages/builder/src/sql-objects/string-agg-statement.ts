@@ -13,7 +13,8 @@ export class StringAGGStatement extends Serializable {
 
   constructor(field: string | Serializable, delimiter?: string) {
     super();
-    this._field = typeof field === 'string' ? new FieldExpression(field) : field;
+    this._field =
+      typeof field === 'string' ? new FieldExpression(field) : field;
     this._delimiter = delimiter || ',';
   }
 

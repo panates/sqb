@@ -1,5 +1,12 @@
 import { Adapter, DataType, QueryRequest } from '@sqb/connect';
-import { BindParam, Connection, DataTypeOIDs, FieldInfo, OID, QueryOptions } from 'postgrejs';
+import {
+  BindParam,
+  Connection,
+  DataTypeOIDs,
+  FieldInfo,
+  OID,
+  QueryOptions,
+} from 'postgrejs';
 
 const SqbDataTypToOIDMap = {
   [DataType.BOOL]: [DataTypeOIDs.bool, DataTypeOIDs._bool],
@@ -42,12 +49,14 @@ export class PgConnection implements Adapter.Connection {
   }
 
   async startTransaction(): Promise<void> {
-    if (!this.intlcon) throw new Error('Can not start transaction for a closed db session');
+    if (!this.intlcon)
+      throw new Error('Can not start transaction for a closed db session');
     await this.intlcon.startTransaction();
   }
 
   async commit(): Promise<void> {
-    if (!this.intlcon) throw new Error('Can not commit transaction for a closed db session');
+    if (!this.intlcon)
+      throw new Error('Can not commit transaction for a closed db session');
     await this.intlcon.commit();
   }
 
@@ -57,17 +66,22 @@ export class PgConnection implements Adapter.Connection {
   }
 
   async setSavepoint(savepoint: string): Promise<void> {
-    if (!this.intlcon) throw new Error('Can not set savepoint for a closed db session');
+    if (!this.intlcon)
+      throw new Error('Can not set savepoint for a closed db session');
     return this.intlcon.savepoint(savepoint);
   }
 
   async releaseSavepoint(savepoint: string): Promise<void> {
-    if (!this.intlcon) throw new Error('Can not release savepoint for a closed db session');
+    if (!this.intlcon)
+      throw new Error('Can not release savepoint for a closed db session');
     return this.intlcon.releaseSavepoint(savepoint);
   }
 
   async rollbackSavepoint(savepoint: string): Promise<void> {
-    if (!this.intlcon) throw new Error('Can not rollback to a savepoint for a closed db session');
+    if (!this.intlcon)
+      throw new Error(
+        'Can not rollback to a savepoint for a closed db session',
+      );
     return this.intlcon.rollbackToSavepoint(savepoint);
   }
 
@@ -88,24 +102,28 @@ export class PgConnection implements Adapter.Connection {
   }
 
   async setSchema(schema: string): Promise<void> {
-    if (!this.intlcon) throw new Error('Can not set schema of a closed db session');
+    if (!this.intlcon)
+      throw new Error('Can not set schema of a closed db session');
     await this.intlcon.execute('SET search_path TO ' + schema);
   }
 
   onGenerateQuery(request: QueryRequest): void {
     if (this.intlcon) {
-      // eslint-disable-next-line dot-notation
       request.dialectVersion = this.intlcon.sessionParameters['server_version'];
     }
   }
 
   async execute(query: QueryRequest): Promise<Adapter.Response> {
-    if (!this.intlcon) throw new Error('Can not execute query with a closed db session');
+    if (!this.intlcon)
+      throw new Error('Can not execute query with a closed db session');
 
     const params = query.params?.map((v, i) => {
-      const paramOpts = Array.isArray(query.paramOptions) ? query.paramOptions[i] : undefined;
+      const paramOpts = Array.isArray(query.paramOptions)
+        ? query.paramOptions[i]
+        : undefined;
       if (v != null && paramOpts && paramOpts.dataType) {
-        const oid = SqbDataTypToOIDMap[paramOpts.dataType]?.[paramOpts.isArray ? 1 : 0];
+        const oid =
+          SqbDataTypToOIDMap[paramOpts.dataType]?.[paramOpts.isArray ? 1 : 0];
         if (oid) return new BindParam(oid, v);
       }
       return v;

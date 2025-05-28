@@ -1,4 +1,9 @@
-import { Select, SequenceCurr, SequenceNext, SerializationType } from '../../src/index.js';
+import {
+  Select,
+  SequenceCurr,
+  SequenceNext,
+  SerializationType,
+} from '../../src/index.js';
 
 describe('serialize "Sequence Getter"', () => {
   const options = {
@@ -7,7 +12,9 @@ describe('serialize "Sequence Getter"', () => {
   };
 
   it('should initialize genID', () => {
-    expect(SequenceNext('A')._type).toStrictEqual(SerializationType.SEQUENCE_GETTER_STATEMENT);
+    expect(SequenceNext('A')._type).toStrictEqual(
+      SerializationType.SEQUENCE_GETTER_STATEMENT,
+    );
   });
 
   it('should serialize nextval', () => {

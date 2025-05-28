@@ -18,12 +18,12 @@ SQB is an extensible, multi-dialect SQL query builder and Database connection wr
 
 ## Main goals
 
--   Single code base for any sql based database
--   Powerful and simplified query coding scheme
--   Fast applications with low memory requirements
--   Let applications work with large data tables efficiently
--   Support latest JavaScript language standards
--   Lightweight and extensible framework.
+- Single code base for any sql based database
+- Powerful and simplified query coding scheme
+- Fast applications with low memory requirements
+- Let applications work with large data tables efficiently
+- Support latest JavaScript language standards
+- Lightweight and extensible framework.
 
 You can report bugs and discuss features on the [GitHub issues](https://github.com/sqbjs/sqb/issues) page
 
@@ -39,7 +39,7 @@ $ npm install @sqb/sqljs --save
 
 ## Node Compatibility
 
--   node >= 16.x
+- node >= 16.x
 
 ### License
 

@@ -31,14 +31,20 @@ describe('serialize "TableName"', () => {
   });
 
   it('should validate schema name', () => {
-    expect(() => Select().from('1sch.table1')).toThrow('does not match table name format');
+    expect(() => Select().from('1sch.table1')).toThrow(
+      'does not match table name format',
+    );
   });
 
   it('should validate table name', () => {
-    expect(() => Select().from('sch.1table1')).toThrow('does not match table name format');
+    expect(() => Select().from('sch.1table1')).toThrow(
+      'does not match table name format',
+    );
   });
 
   it('should validate alias', () => {
-    expect(() => Select().from('sch.table1 c+')).toThrow('does not match table name format');
+    expect(() => Select().from('sch.table1 c+')).toThrow(
+      'does not match table name format',
+    );
   });
 });

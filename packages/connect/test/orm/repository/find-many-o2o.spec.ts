@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Eq, op } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
 import { Customer } from '../../_support/customer.entity.js';
@@ -111,7 +110,9 @@ describe('Repository.findMany() (OneToOne)', () => {
         filter: Eq('country.continent.code', 'AM'),
       });
       for (const row of rows) {
-        expect(row.countryCode === 'CA' || row.countryCode === 'US').toBeTruthy();
+        expect(
+          row.countryCode === 'CA' || row.countryCode === 'US',
+        ).toBeTruthy();
       }
     });
 
@@ -121,7 +122,12 @@ describe('Repository.findMany() (OneToOne)', () => {
       client.once('execute', req => (request = req));
       await repo.findMany({
         projection: ['id'],
-        filter: [op.or(op.eq('country.continent.name', 'America'), op.eq('country.continent.name', 'Europe'))],
+        filter: [
+          op.or(
+            op.eq('country.continent.name', 'America'),
+            op.eq('country.continent.name', 'Europe'),
+          ),
+        ],
         prettyPrint: true,
       });
       expect(request.sql).toEqual(`select T.ID as T_ID from customers T
@@ -260,7 +266,9 @@ where (exists (select 1 from countries K
         filter: Eq('country.continent.code', 'AM'),
       });
       for (const row of rows) {
-        expect(row.countryCode === 'CA' || row.countryCode === 'US').toBeTruthy();
+        expect(
+          row.countryCode === 'CA' || row.countryCode === 'US',
+        ).toBeTruthy();
       }
     });
 
@@ -329,7 +337,8 @@ where (exists (select 1 from countries K
       const a = rows.filter(x => x.vvipDetails);
       expect(a.length).toBeGreaterThan(0);
       for (const customer of rows) {
-        if (customer.vvipDetails) expect(customer.vvipDetails.rank).toBeGreaterThanOrEqual(5);
+        if (customer.vvipDetails)
+          expect(customer.vvipDetails.rank).toBeGreaterThanOrEqual(5);
       }
     });
   });

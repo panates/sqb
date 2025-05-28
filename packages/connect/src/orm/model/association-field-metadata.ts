@@ -29,7 +29,13 @@ export namespace AssociationFieldMetadata {
     return result;
   }
 
-  export function assign(target: AssociationFieldMetadata, options: AssociationFieldOptions) {
-    Object.assign(target, _.omit(options, ['entity', 'name', 'kind', 'association']));
+  export function assign(
+    target: AssociationFieldMetadata,
+    options: AssociationFieldOptions,
+  ) {
+    Object.assign(
+      target,
+      _.omit(options, ['entity', 'name', 'kind', 'association']),
+    );
   }
 }

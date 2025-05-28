@@ -15,7 +15,10 @@ export class OpBetween extends CompOperator {
   _serialize(ctx: SerializeContext): string {
     if (!(this._right && this._right.length > 0)) return '';
     const left = this.__serializeItem(ctx, this._left);
-    const right = [this.__serializeItem(ctx, this._right[0], true), this.__serializeItem(ctx, this._right[1], true)];
+    const right = [
+      this.__serializeItem(ctx, this._right[0], true),
+      this.__serializeItem(ctx, this._right[1], true),
+    ];
     const o: any = {
       operatorType: this._operatorType,
       symbol: this._symbol,
@@ -26,6 +29,14 @@ export class OpBetween extends CompOperator {
   }
 
   __defaultSerialize(ctx, o) {
-    return o.left.expression + ' ' + o.symbol + ' ' + o.right[0].expression + ' and ' + o.right[1].expression;
+    return (
+      o.left.expression +
+      ' ' +
+      o.symbol +
+      ' ' +
+      o.right[0].expression +
+      ' and ' +
+      o.right[1].expression
+    );
   }
 }

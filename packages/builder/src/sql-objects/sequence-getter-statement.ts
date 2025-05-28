@@ -49,6 +49,12 @@ export class SequenceGetterStatement extends Serializable {
   }
 
   protected __defaultSerialize(ctx: SerializeContext, o: any): string {
-    return (o.next ? 'nextval' : 'currval') + "('" + o.genName + "')" + (o.alias ? ' ' + o.alias : '');
+    return (
+      (o.next ? 'nextval' : 'currval') +
+      "('" +
+      o.genName +
+      "')" +
+      (o.alias ? ' ' + o.alias : '')
+    );
   }
 }

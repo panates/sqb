@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Select } from '@sqb/builder';
 import { Cursor, SqbClient } from '@sqb/connect';
 import { SqbConnection } from '../../src/client/sqb-connection.js';
@@ -118,7 +117,9 @@ describe('Cursor', () => {
 
   it('should cache rows', async () => {
     await client.acquire(async (connection: SqbConnection) => {
-      const result = await connection.execute(Select().from('customers'), { fetchRows: 100 });
+      const result = await connection.execute(Select().from('customers'), {
+        fetchRows: 100,
+      });
       cursor = result && result.cursor;
       expect(cursor).toBeDefined();
       cursor!.cached();
@@ -144,7 +145,9 @@ describe('Cursor', () => {
 
   it('should move cursor back if cached', async () => {
     await client.acquire(async (connection: SqbConnection) => {
-      const result = await connection.execute(Select().from('customers'), { objectRows: true });
+      const result = await connection.execute(Select().from('customers'), {
+        objectRows: true,
+      });
       cursor = result && result.cursor;
       expect(cursor).toBeDefined();
       cursor!.cached();
@@ -256,7 +259,9 @@ describe('Cursor', () => {
       cursor = result && result.cursor;
       expect(cursor).toBeDefined();
       await cursor!.next();
-      expect(() => cursor!.cached()).toThrow('Cache can be enabled before fetching rows');
+      expect(() => cursor!.cached()).toThrow(
+        'Cache can be enabled before fetching rows',
+      );
     });
   });
 
@@ -265,7 +270,8 @@ describe('Cursor', () => {
       const result = await connection.execute(Select().from('customers'));
       cursor = result && result.cursor;
       expect(cursor).toBeDefined();
-      (cursor as any)._intlcur.close = () => Promise.reject(new Error('Any error'));
+      (cursor as any)._intlcur.close = () =>
+        Promise.reject(new Error('Any error'));
       await expect(() => cursor!.close()).rejects.toThrow('Any error');
     });
   });
@@ -275,7 +281,8 @@ describe('Cursor', () => {
       const result = await connection.execute(Select().from('customers'));
       cursor = result && result.cursor;
       expect(cursor).toBeDefined();
-      (cursor as any)._intlcur.fetch = () => Promise.reject(new Error('Any error'));
+      (cursor as any)._intlcur.fetch = () =>
+        Promise.reject(new Error('Any error'));
       await expect(() => cursor!.next()).rejects.toThrow('Any error');
     });
   });

@@ -65,8 +65,16 @@ function Between(expression: string | Serializable, value1: any, value2?: any) {
 }
 
 function NotBetween(expression: string | Serializable, values: any[]);
-function NotBetween(expression: string | Serializable, value1: any, value2: any);
-function NotBetween(expression: string | Serializable, value1: any, value2?: any) {
+function NotBetween(
+  expression: string | Serializable,
+  value1: any,
+  value2: any,
+);
+function NotBetween(
+  expression: string | Serializable,
+  value1: any,
+  value2?: any,
+) {
   const values = Array.isArray(value1) ? value1 : [value1, value2];
   return new OpNotBetween(expression, values);
 }

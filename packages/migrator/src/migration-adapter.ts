@@ -1,4 +1,8 @@
-import type { Migration, MigrationPackage, MigrationTask } from './migration-package.js';
+import type {
+  Migration,
+  MigrationPackage,
+  MigrationTask,
+} from './migration-package.js';
 import type { MigrationStatus } from './types.js';
 
 export abstract class MigrationAdapter {
@@ -10,7 +14,10 @@ export abstract class MigrationAdapter {
 
   abstract refresh(): Promise<void>;
 
-  abstract update(info: { status?: MigrationStatus; version?: number }): Promise<void>;
+  abstract update(info: {
+    status?: MigrationStatus;
+    version?: number;
+  }): Promise<void>;
 
   abstract writeEvent(event: MigrationAdapter.Event): Promise<void>;
 
@@ -29,8 +36,14 @@ export abstract class MigrationAdapter {
 
   abstract restoreDatabase(): Promise<void>;
 
-  protected replaceVariables(text: string, variables: Record<string, string>): string {
-    return text.replace(/(\$\((\w+)\))/g, (s, ...args: string[]) => variables[args[1]] || s);
+  protected replaceVariables(
+    text: string,
+    variables: Record<string, string>,
+  ): string {
+    return text.replace(
+      /(\$\((\w+)\))/g,
+      (s, ...args: string[]) => variables[args[1]] || s,
+    );
   }
 }
 

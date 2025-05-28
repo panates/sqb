@@ -27,11 +27,14 @@ export interface NestedProperty {
   paramValues: any[];
 }
 
-const isValueProperty = (prop: any): prop is ValueProperty => prop.fieldAlias && !prop.converter;
+const isValueProperty = (prop: any): prop is ValueProperty =>
+  prop.fieldAlias && !prop.converter;
 
-const isObjectProperty = (prop: any): prop is ObjectProperty => prop.converter && !prop.findCommand;
+const isObjectProperty = (prop: any): prop is ObjectProperty =>
+  prop.converter && !prop.findCommand;
 
-const isNestedProperty = (prop: any): prop is NestedProperty => prop.converter && prop.findCommand;
+const isNestedProperty = (prop: any): prop is NestedProperty =>
+  prop.converter && prop.findCommand;
 
 export class RowConverter {
   private _properties: Record<string, ValueProperty | ObjectProperty> = {};
@@ -120,7 +123,11 @@ export class RowConverter {
     return result.filter(x => !!x);
   }
 
-  private _rowToObject(executor: SqbConnection, fields: FieldInfoMap, row: any[]): any {
+  private _rowToObject(
+    executor: SqbConnection,
+    fields: FieldInfoMap,
+    row: any[],
+  ): any {
     // Cache keys for better performance
     const fieldKeys = this.keys;
     const fieldsLen = fieldKeys.length;
@@ -135,7 +142,8 @@ export class RowConverter {
           if (typeof prop.parse === 'function') v = prop.parse(v, elKey);
           if (v != null) {
             result = result || {};
-            if (prop.dataType === DataType.JSON && typeof v === 'string') v = JSON.parse(v);
+            if (prop.dataType === DataType.JSON && typeof v === 'string')
+              v = JSON.parse(v);
             result[elKey] = v;
           }
         }
@@ -188,7 +196,9 @@ export class RowConverter {
               fld = fld || _fields.get('' + p.keyField);
               const keyValue = fld && row[fld.index];
               if (keyValue != null) {
-                const keyValues = Array.isArray(keyValue) ? keyValue : [keyValue];
+                const keyValues = Array.isArray(keyValue)
+                  ? keyValue
+                  : [keyValue];
                 keyValues.forEach(k => {
                   let arr = map.get(k);
                   if (!arr) {
@@ -201,7 +211,9 @@ export class RowConverter {
             },
           });
           if (r.length > findCommand.maxEagerFetch) {
-            throw new Error(`Number of returning rows for "${propKey}" exceeds maxEagerFetch limit`);
+            throw new Error(
+              `Number of returning rows for "${propKey}" exceeds maxEagerFetch limit`,
+            );
           }
 
           for (let i = 0; i < result.length; i++) {
@@ -223,7 +235,15 @@ export class RowConverter {
         })(prop);
         promises.push(promise);
       } else if (isObjectProperty(prop)) {
-        promises.push(this._iterateForNested(prop.converter, connection, fields, rows, result));
+        promises.push(
+          this._iterateForNested(
+            prop.converter,
+            connection,
+            fields,
+            rows,
+            result,
+          ),
+        );
       }
     }
     await Promise.all(promises);

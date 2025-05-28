@@ -212,7 +212,9 @@ ALTER TABLE ${schema}.customer_tags ADD CONSTRAINT FK_cust_tags_tag_id
 
 export async function createTestSchema() {
   if (schemaCreated) return;
-  const connection = await oracledb.getConnection(clientConfigurationToDriver(dbConfig));
+  const connection = await oracledb.getConnection(
+    clientConfigurationToDriver(dbConfig),
+  );
   try {
     for (const s of sqls) {
       try {

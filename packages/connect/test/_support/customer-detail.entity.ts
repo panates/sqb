@@ -13,6 +13,8 @@ export class CustomerDetail extends BaseEntity {
   @Column()
   declare alerts?: string;
 
-  @(Link({ exclusive: true }).toOne(async () => (await import('./customer.entity.js')).Customer))
+  @(Link({ exclusive: true }).toOne(
+    async () => (await import('./customer.entity.js')).Customer,
+  ))
   declare readonly customer?: Customer;
 }

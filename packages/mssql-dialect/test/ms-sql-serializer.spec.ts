@@ -9,13 +9,17 @@ describe('MSSqlSerializer', () => {
   it('should serialize "limit"', () => {
     const query = Select().from('table1').as('t1').limit(10);
     const result = query.generate({ dialect: 'mssql' });
-    expect(result.sql).toStrictEqual('select * from table1 FETCH NEXT 10 ROWS ONLY');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 FETCH NEXT 10 ROWS ONLY',
+    );
   });
 
   it('should serialize "limit" pretty print', () => {
     const query = Select().from('table1').as('t1').limit(10);
     const result = query.generate({ dialect: 'mssql', prettyPrint: true });
-    expect(result.sql).toStrictEqual('select * from table1\nFETCH NEXT 10 ROWS ONLY');
+    expect(result.sql).toStrictEqual(
+      'select * from table1\nFETCH NEXT 10 ROWS ONLY',
+    );
   });
 
   it('should serialize "limit/offset"', () => {
@@ -24,7 +28,9 @@ describe('MSSqlSerializer', () => {
       dialect: 'mssql',
       prettyPrint: true,
     });
-    expect(result.sql).toStrictEqual('select * from table1\nOFFSET 4 ROWS FETCH NEXT 10 ROWS ONLY');
+    expect(result.sql).toStrictEqual(
+      'select * from table1\nOFFSET 4 ROWS FETCH NEXT 10 ROWS ONLY',
+    );
   });
 
   it('should serialize "limit/offset" pretty print', () => {
@@ -33,7 +39,9 @@ describe('MSSqlSerializer', () => {
       dialect: 'mssql',
       prettyPrint: true,
     });
-    expect(result.sql).toStrictEqual('select * from table1\nOFFSET 4 ROWS FETCH NEXT 10 ROWS ONLY');
+    expect(result.sql).toStrictEqual(
+      'select * from table1\nOFFSET 4 ROWS FETCH NEXT 10 ROWS ONLY',
+    );
   });
 
   it('Should serialize params', () => {

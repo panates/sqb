@@ -3,7 +3,11 @@ import { printArray } from '../helpers.js';
 import { SerializeContext } from '../serialize-context.js';
 import type { RawStatement } from '../sql-objects/raw-statement.js';
 import { TableName } from '../sql-objects/table-name.js';
-import { isRawStatement, isSelectQuery, isSerializable } from '../typeguards.js';
+import {
+  isRawStatement,
+  isSelectQuery,
+  isSerializable,
+} from '../typeguards.js';
 import { ReturningQuery } from './returning-query.js';
 
 export class InsertQuery extends ReturningQuery {
@@ -12,13 +16,24 @@ export class InsertQuery extends ReturningQuery {
 
   constructor(tableName: string | RawStatement, input) {
     super();
-    if (!tableName || !(typeof tableName === 'string' || isRawStatement(tableName))) {
-      throw new TypeError('String or Raw instance required as first argument (tableName) for InsertQuery');
+    if (
+      !tableName ||
+      !(typeof tableName === 'string' || isRawStatement(tableName))
+    ) {
+      throw new TypeError(
+        'String or Raw instance required as first argument (tableName) for InsertQuery',
+      );
     }
-    if (!input || !((typeof input === 'object' && !Array.isArray(input)) || input.isSelect)) {
-      throw new TypeError('Object or SelectQuery instance required as second argument (input) for InsertQuery');
+    if (
+      !input ||
+      !((typeof input === 'object' && !Array.isArray(input)) || input.isSelect)
+    ) {
+      throw new TypeError(
+        'Object or SelectQuery instance required as second argument (input) for InsertQuery',
+      );
     }
-    this._table = typeof tableName === 'string' ? new TableName(tableName) : tableName;
+    this._table =
+      typeof tableName === 'string' ? new TableName(tableName) : tableName;
     this._input = input;
   }
 
@@ -37,7 +52,14 @@ export class InsertQuery extends ReturningQuery {
       returning: this.__serializeReturning(ctx),
     };
 
-    let out = 'insert into ' + o.table + '\n\t(' + o.columns + ')\n\bvalues\n\t(' + o.values + ')\b';
+    let out =
+      'insert into ' +
+      o.table +
+      '\n\t(' +
+      o.columns +
+      ')\n\bvalues\n\t(' +
+      o.values +
+      ')\b';
     if (o.returning) out += '\n' + o.returning;
     return out;
   }
@@ -57,7 +79,9 @@ export class InsertQuery extends ReturningQuery {
         }
       }
     } else arr = Object.keys(this._input);
-    return ctx.serialize(SerializationType.INSERT_QUERY_COLUMNS, arr, () => printArray(arr));
+    return ctx.serialize(SerializationType.INSERT_QUERY_COLUMNS, arr, () =>
+      printArray(arr),
+    );
   }
 
   /**
@@ -72,6 +96,8 @@ export class InsertQuery extends ReturningQuery {
       const s = ctx.anyToSQL(allValues[n]) || 'null';
       arr.push(s);
     }
-    return ctx.serialize(SerializationType.INSERT_QUERY_VALUES, arr, () => printArray(arr));
+    return ctx.serialize(SerializationType.INSERT_QUERY_VALUES, arr, () =>
+      printArray(arr),
+    );
   }
 }

@@ -11,7 +11,8 @@ export class OrderColumn extends BaseField {
   constructor(value: string) {
     super();
     const m = value.match(ORDER_COLUMN_PATTERN);
-    if (!m) throw new TypeError(`"${value}" does not match order column format`);
+    if (!m)
+      throw new TypeError(`"${value}" does not match order column format`);
     this._field = m[3];
     if (m[2]) {
       const a = m[2].split(/\./g);
@@ -21,7 +22,9 @@ export class OrderColumn extends BaseField {
     }
     this._descending = !!(
       m[1] === '-' ||
-      (!m[1] && m[4] && ['dsc', 'desc', 'descending'].includes(m[4].toLowerCase()))
+      (!m[1] &&
+        m[4] &&
+        ['dsc', 'desc', 'descending'].includes(m[4].toLowerCase()))
     );
   }
 

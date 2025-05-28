@@ -18,7 +18,11 @@ import {
 import { AssociationNode } from '../model/association-node.js';
 import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { isAssociationField, isColumnField, isEmbeddedField } from '../util/orm.helper.js';
+import {
+  isAssociationField,
+  isColumnField,
+  isEmbeddedField,
+} from '../util/orm.helper.js';
 
 export interface JoinInfo {
   association: AssociationNode;
@@ -35,7 +39,12 @@ export async function joinAssociationGetFirst(
   parentAlias: string,
   innerJoin?: boolean,
 ): Promise<JoinInfo> {
-  const joins = await joinAssociation(joinInfos, association, parentAlias, innerJoin);
+  const joins = await joinAssociation(
+    joinInfos,
+    association,
+    parentAlias,
+    innerJoin,
+  );
   return joins[0];
 }
 
@@ -45,7 +54,12 @@ export async function joinAssociationGetLast(
   parentAlias: string,
   innerJoin?: boolean,
 ): Promise<JoinInfo> {
-  const joins = await joinAssociation(joinInfos, association, parentAlias, innerJoin);
+  const joins = await joinAssociation(
+    joinInfos,
+    association,
+    parentAlias,
+    innerJoin,
+  );
   return joins[joins.length - 1];
 }
 
@@ -59,7 +73,9 @@ export async function joinAssociation(
   let node = association;
   const result: JoinInfo[] = [];
   while (node) {
-    joinInfo = joinInfos.find(j => j.association === node && j.parentAlias === parentAlias);
+    joinInfo = joinInfos.find(
+      j => j.association === node && j.parentAlias === parentAlias,
+    );
     if (!joinInfo) {
       const targetEntity = await node.resolveTarget();
       const sourceEntity = await node.resolveSource();
@@ -72,11 +88,25 @@ export async function joinAssociation(
         : LeftOuterJoin(targetEntity.tableName + ' as ' + joinAlias);
       join.on(
         Eq(
-          Field(joinAlias + '.' + targetCol.fieldName, targetCol.dataType, targetCol.isArray),
-          Field(parentAlias + '.' + keyCol.fieldName, keyCol.dataType, keyCol.isArray),
+          Field(
+            joinAlias + '.' + targetCol.fieldName,
+            targetCol.dataType,
+            targetCol.isArray,
+          ),
+          Field(
+            parentAlias + '.' + keyCol.fieldName,
+            keyCol.dataType,
+            keyCol.isArray,
+          ),
         ),
       );
-      if (node.conditions) await prepareFilter(targetEntity, node.conditions, join._conditions, joinAlias);
+      if (node.conditions)
+        await prepareFilter(
+          targetEntity,
+          node.conditions,
+          join._conditions,
+          joinAlias,
+        );
 
       joinInfo = {
         association: node,
@@ -103,7 +133,8 @@ export async function prepareFilter(
   tableAlias = 'T',
 ): Promise<void> {
   let srcOp: LogicalOperator;
-  if (isLogicalOperator(filter) && filter._operatorType === trgOp._operatorType) srcOp = filter;
+  if (isLogicalOperator(filter) && filter._operatorType === trgOp._operatorType)
+    srcOp = filter;
   else {
     srcOp = And();
     if (Array.isArray(filter)) srcOp.add(...filter);
@@ -149,27 +180,43 @@ export async function prepareFilter(
         for (i; i < l; i++) {
           pt = itemPath[i];
           const col = EntityMetadata.getField(_curEntity, pt);
-          if (!col) throw new Error(`Unknown property (${item._left}) defined in filter`);
+          if (!col)
+            throw new Error(
+              `Unknown property (${item._left}) defined in filter`,
+            );
           /** if last item on path */
           if (i === l - 1) {
-            if (!isColumnField(col)) throw new Error(`Invalid column expression (${item._left}) defined in filter`);
+            if (!isColumnField(col))
+              throw new Error(
+                `Invalid column expression (${item._left}) defined in filter`,
+              );
             const ctor = Object.getPrototypeOf(item).constructor;
             currentOp.add(
               new ctor(
-                Field(_curAlias + '.' + _curPrefix + col.fieldName + _curSuffix, col.dataType, col.isArray),
+                Field(
+                  _curAlias + '.' + _curPrefix + col.fieldName + _curSuffix,
+                  col.dataType,
+                  col.isArray,
+                ),
                 item._right,
               ),
             );
           } else {
             /** if not last item on path */
-            if (isColumnField(col)) throw new Error(`Invalid column (${item._left}) defined in filter`);
+            if (isColumnField(col))
+              throw new Error(
+                `Invalid column (${item._left}) defined in filter`,
+              );
             if (isEmbeddedField(col)) {
               _curEntity = await EmbeddedFieldMetadata.resolveType(col);
               _curPrefix = _curPrefix + (col.fieldNamePrefix || '');
               _curSuffix = (col.fieldNameSuffix || '') + _curSuffix;
               continue;
             }
-            if (!isAssociationField(col)) throw new Error(`Invalid column (${item._left}) defined in filter`);
+            if (!isAssociationField(col))
+              throw new Error(
+                `Invalid column (${item._left}) defined in filter`,
+              );
 
             let node: AssociationNode | undefined;
             _curEntity = await col.association.resolveTarget();
@@ -180,8 +227,16 @@ export async function prepareFilter(
 
               subSelect.where(
                 Eq(
-                  Field('K.' + targetCol.fieldName, targetCol.dataType, targetCol.isArray),
-                  Field(tableAlias + '.' + keyCol.fieldName, keyCol.dataType, keyCol.isArray),
+                  Field(
+                    'K.' + targetCol.fieldName,
+                    targetCol.dataType,
+                    targetCol.isArray,
+                  ),
+                  Field(
+                    tableAlias + '.' + keyCol.fieldName,
+                    keyCol.dataType,
+                    keyCol.isArray,
+                  ),
                 ),
               );
               currentOp.add(Exists(subSelect));
@@ -190,7 +245,12 @@ export async function prepareFilter(
                 subSelect.where(currentOp);
               } else currentOp = subSelect._where as LogicalOperator;
               if (col.association.conditions) {
-                await prepareFilter(_curEntity, col.association.conditions, trgOp, 'K');
+                await prepareFilter(
+                  _curEntity,
+                  col.association.conditions,
+                  trgOp,
+                  'K',
+                );
               }
               node = col.association.next;
               _curAlias = 'K';
@@ -204,8 +264,16 @@ export async function prepareFilter(
               subSelect.join(
                 InnerJoin(targetEntity.tableName + ' ' + joinAlias).on(
                   Eq(
-                    Field(joinAlias + '.' + targetColumn.fieldName, targetColumn.dataType, targetColumn.isArray),
-                    Field(_curAlias + '.' + sourceColumn.fieldName, sourceColumn.dataType, sourceColumn.isArray),
+                    Field(
+                      joinAlias + '.' + targetColumn.fieldName,
+                      targetColumn.dataType,
+                      targetColumn.isArray,
+                    ),
+                    Field(
+                      _curAlias + '.' + sourceColumn.fieldName,
+                      sourceColumn.dataType,
+                      sourceColumn.isArray,
+                    ),
                   ),
                 ),
               );

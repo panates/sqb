@@ -2,7 +2,11 @@ import { Maybe, Type } from 'ts-gems';
 import { AssociationFieldMetadata } from '../model/association-field-metadata.js';
 import { ColumnFieldMetadata } from '../model/column-field-metadata.js';
 import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
-import { AnyFieldMetadata, EntityMetadata, EntityOptions } from '../model/entity-metadata.js';
+import {
+  AnyFieldMetadata,
+  EntityMetadata,
+  EntityOptions,
+} from '../model/entity-metadata.js';
 import { IndexMetadata } from '../model/index-metadata.js';
 import { applyMixins } from '../util/apply-mixins.js';
 
@@ -21,37 +25,58 @@ export namespace Entity {
   export const getMetadata = EntityMetadata.get;
   export const getOwnMetadata = EntityMetadata.getOwn;
 
-  export function getField<T>(ctor: Type<T>, key: keyof T | string): Maybe<AnyFieldMetadata> {
+  export function getField<T>(
+    ctor: Type<T>,
+    key: keyof T | string,
+  ): Maybe<AnyFieldMetadata> {
     const model = EntityMetadata.get(ctor);
     return model && EntityMetadata.getField(model, key as string);
   }
 
-  export function getColumnField<T>(ctor: Type<T>, key: keyof T | string): Maybe<ColumnFieldMetadata> {
+  export function getColumnField<T>(
+    ctor: Type<T>,
+    key: keyof T | string,
+  ): Maybe<ColumnFieldMetadata> {
     const model = EntityMetadata.get(ctor);
     return model && EntityMetadata.getColumnField(model, key as string);
   }
 
-  export function getEmbeddedField<T>(ctor: Type<T>, key: keyof T | string): Maybe<EmbeddedFieldMetadata> {
+  export function getEmbeddedField<T>(
+    ctor: Type<T>,
+    key: keyof T | string,
+  ): Maybe<EmbeddedFieldMetadata> {
     const model = EntityMetadata.get(ctor);
     return model && EntityMetadata.getEmbeddedField(model, key as string);
   }
 
-  export function getAssociationField<T>(ctor: Type<T>, key: keyof T | string): Maybe<AssociationFieldMetadata> {
+  export function getAssociationField<T>(
+    ctor: Type<T>,
+    key: keyof T | string,
+  ): Maybe<AssociationFieldMetadata> {
     const model = EntityMetadata.get(ctor);
     return model && EntityMetadata.getAssociationField(model, key as string);
   }
 
-  export function getColumnFieldByFieldName(ctor: Type, fieldName: string): Maybe<ColumnFieldMetadata> {
+  export function getColumnFieldByFieldName(
+    ctor: Type,
+    fieldName: string,
+  ): Maybe<ColumnFieldMetadata> {
     const model = EntityMetadata.get(ctor);
     return model && EntityMetadata.getColumnFieldByFieldName(model, fieldName);
   }
 
-  export function find(ctor: Type, predicate: (el: AnyFieldMetadata) => boolean): Maybe<AnyFieldMetadata> {
+  export function find(
+    ctor: Type,
+    predicate: (el: AnyFieldMetadata) => boolean,
+  ): Maybe<AnyFieldMetadata> {
     const model = EntityMetadata.get(ctor);
     return model && EntityMetadata.findField(model, predicate);
   }
 
-  export function getFieldNames(ctor: Type, filter?: (el: AnyFieldMetadata) => boolean): string[] {
+  export function getFieldNames(
+    ctor: Type,
+    filter?: (el: AnyFieldMetadata) => boolean,
+  ): string[] {
     const model = EntityMetadata.get(ctor);
     return (model && EntityMetadata.getFieldNames(model, filter)) || [];
   }
@@ -96,8 +121,15 @@ export namespace Entity {
     return EntityMetadata.getPrimaryIndexColumns(model);
   }
 
-  export function mixin<A, B>(derivedCtor: Type<A>, baseB: Type<B>): Type<A & B>;
-  export function mixin<A, B, C>(derivedCtor: Type<A>, baseB: Type<B>, baseC: Type<C>): Type<A & B & C>;
+  export function mixin<A, B>(
+    derivedCtor: Type<A>,
+    baseB: Type<B>,
+  ): Type<A & B>;
+  export function mixin<A, B, C>(
+    derivedCtor: Type<A>,
+    baseB: Type<B>,
+    baseC: Type<C>,
+  ): Type<A & B & C>;
   export function mixin<A, B, C, D>(
     derivedCtor: Type<A>,
     baseB: Type<B>,
@@ -173,7 +205,11 @@ export namespace Entity {
   }
 
   export function Union<A, B>(baseA: Type<A>, baseB: Type<B>): Type<A & B>;
-  export function Union<A, B, C>(baseA: Type<A>, baseB: Type<B>, baseC: Type<C>): Type<A & B & C>;
+  export function Union<A, B, C>(
+    baseA: Type<A>,
+    baseB: Type<B>,
+    baseC: Type<C>,
+  ): Type<A & B & C>;
   export function Union<A, B, C, D>(
     baseA: Type<A>,
     baseB: Type<B>,
@@ -225,7 +261,12 @@ function applyConstructorProperties(
     for (const key of keys) {
       const srcDesc = Object.getOwnPropertyDescriptor(tempInstance, key);
       const trgDesc = Object.getOwnPropertyDescriptor(target, key);
-      if (!srcDesc || trgDesc || (isPropertyInherited && !isPropertyInherited(key))) continue;
+      if (
+        !srcDesc ||
+        trgDesc ||
+        (isPropertyInherited && !isPropertyInherited(key))
+      )
+        continue;
       Object.defineProperty(target, key, srcDesc);
     }
   } catch {

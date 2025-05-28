@@ -1,4 +1,4 @@
-const {Connection} = require('postgrejs');
+const { Connection } = require('postgrejs');
 
 module.exports = async function createSchema() {
   const connection = new Connection();

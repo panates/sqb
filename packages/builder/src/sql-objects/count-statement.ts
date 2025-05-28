@@ -25,7 +25,9 @@ export class CountStatement extends Serializable {
    * @override
    */
   _serialize(ctx: SerializeContext): string {
-    return ctx.serialize(this._type, undefined, () => this.__defaultSerialize(ctx, undefined));
+    return ctx.serialize(this._type, undefined, () =>
+      this.__defaultSerialize(ctx, undefined),
+    );
   }
 
   // noinspection JSUnusedLocalSymbols

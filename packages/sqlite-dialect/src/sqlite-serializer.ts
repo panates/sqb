@@ -1,4 +1,9 @@
-import { DefaultSerializeFunction, SerializationType, SerializeContext, SerializerExtension } from '@sqb/builder';
+import {
+  DefaultSerializeFunction,
+  SerializationType,
+  SerializeContext,
+  SerializerExtension,
+} from '@sqb/builder';
 
 export class SqliteSerializer implements SerializerExtension {
   dialect = 'sqlite';
@@ -19,7 +24,11 @@ export class SqliteSerializer implements SerializerExtension {
     }
   }
 
-  private _serializeSelect(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeSelect(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     let out = defFn(ctx, o);
     const limit = o.limit || 0;
     const offset = Math.max(o.offset || 0, 0);
@@ -29,7 +38,11 @@ export class SqliteSerializer implements SerializerExtension {
   }
 
   // noinspection JSUnusedLocalSymbols
-  private _serializeReturning(ctx: SerializeContext, arr: any[], defFn: DefaultSerializeFunction): string {
+  private _serializeReturning(
+    ctx: SerializeContext,
+    arr: any[],
+    defFn: DefaultSerializeFunction,
+  ): string {
     defFn(ctx, arr);
     return '';
   }

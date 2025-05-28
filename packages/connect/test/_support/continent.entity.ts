@@ -11,17 +11,23 @@ export class Continent {
   @Column()
   declare name: string;
 
-  @(Link({ exclusive: true }).toMany(async () => (await import('./country.entity.js')).Country, {
-    sourceKey: 'code',
-    targetKey: 'continentCode',
-  }))
+  @(Link({ exclusive: true }).toMany(
+    async () => (await import('./country.entity.js')).Country,
+    {
+      sourceKey: 'code',
+      targetKey: 'continentCode',
+    },
+  ))
   declare countries: Country[];
 
-  @(Link({ exclusive: true }).toMany(async () => (await import('./country.entity.js')).Country, {
-    sourceKey: 'code',
-    targetKey: 'continentCode',
-    where: { hasMarket: true },
-  }))
+  @(Link({ exclusive: true }).toMany(
+    async () => (await import('./country.entity.js')).Country,
+    {
+      sourceKey: 'code',
+      targetKey: 'continentCode',
+      where: { hasMarket: true },
+    },
+  ))
   declare marketCountries: Country[];
 
   @(Link({ exclusive: true })

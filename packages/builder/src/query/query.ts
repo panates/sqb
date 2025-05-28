@@ -34,7 +34,8 @@ export abstract class Query extends Serializable {
   }
 
   values(obj: any): this {
-    if (typeof obj !== 'object' || Array.isArray(obj)) throw new TypeError('Invalid argument');
+    if (typeof obj !== 'object' || Array.isArray(obj))
+      throw new TypeError('Invalid argument');
     this._params = obj;
     return this;
   }

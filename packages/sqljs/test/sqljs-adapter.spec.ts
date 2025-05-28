@@ -1,4 +1,7 @@
-import { getInsertSQLsForTestData, initAdapterTests } from '../../connect/test/_shared/adapter-tests.js';
+import {
+  getInsertSQLsForTestData,
+  initAdapterTests,
+} from '../../connect/test/_shared/adapter-tests.js';
 import { SqljsAdapter } from '../src/sqljs-adapter.js';
 
 describe('SqljsAdapter', () => {

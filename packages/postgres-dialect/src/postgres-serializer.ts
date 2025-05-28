@@ -12,7 +12,9 @@ export class PostgresSerializer implements SerializerExtension {
   dialect = 'postgres';
 
   isReservedWord(ctx, s) {
-    return s && typeof s === 'string' && reservedWords.includes(s.toLowerCase());
+    return (
+      s && typeof s === 'string' && reservedWords.includes(s.toLowerCase())
+    );
   }
 
   serialize(
@@ -33,7 +35,11 @@ export class PostgresSerializer implements SerializerExtension {
     }
   }
 
-  private _serializeSelect(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeSelect(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     let out = defFn(ctx, o);
     const limit = o.limit || 0;
     const offset = Math.max(o.offset || 0, 0);
@@ -42,11 +48,16 @@ export class PostgresSerializer implements SerializerExtension {
     return out;
   }
 
-  private _serializeComparison(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeComparison(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     if (o.right) {
       if (
         (o.right.expression && o.right?.expression === 'null') ||
-        (o.right.value == null && (!o.right.expression || o.right.expression.startsWith('$')))
+        (o.right.value == null &&
+          (!o.right.expression || o.right.expression.startsWith('$')))
       ) {
         if (o.right.expression?.startsWith('$')) {
           const i = parseInt(o.right.expression.substring(1), 10);
@@ -55,23 +66,45 @@ export class PostgresSerializer implements SerializerExtension {
             _ctx.removedParams = _ctx.removedParams || [];
             if (!_ctx.removedParams.includes(i)) {
               _ctx.removedParams.push(i);
-              if (Array.isArray(ctx.preparedParams)) ctx.preparedParams.splice(i - 1, 1);
-              if (Array.isArray(ctx.paramOptions)) ctx.paramOptions.splice(i - 1, 1);
+              if (Array.isArray(ctx.preparedParams))
+                ctx.preparedParams.splice(i - 1, 1);
+              if (Array.isArray(ctx.paramOptions))
+                ctx.paramOptions.splice(i - 1, 1);
             }
           }
 
           o.right.expression = 'null';
           o.right.isParam = false;
         }
-        if (o.operatorType === 'eq') return defFn(ctx, { ...o, operatorType: OperatorType.is, symbol: 'is' });
-        if (o.operatorType === 'ne') return defFn(ctx, { ...o, operatorType: OperatorType.isNot, symbol: 'is not' });
+        if (o.operatorType === 'eq')
+          return defFn(ctx, {
+            ...o,
+            operatorType: OperatorType.is,
+            symbol: 'is',
+          });
+        if (o.operatorType === 'ne')
+          return defFn(ctx, {
+            ...o,
+            operatorType: OperatorType.isNot,
+            symbol: 'is not',
+          });
       }
 
-      if (o.left.isParam && o.left.isArray && o.left.value != null && !Array.isArray(o.left.value)) {
+      if (
+        o.left.isParam &&
+        o.left.isArray &&
+        o.left.value != null &&
+        !Array.isArray(o.left.value)
+      ) {
         o.left.value = [o.left.value];
       }
 
-      if (o.right.isParam && o.right.isArray && o.right.value != null && !Array.isArray(o.right.value)) {
+      if (
+        o.right.isParam &&
+        o.right.isArray &&
+        o.right.value != null &&
+        !Array.isArray(o.right.value)
+      ) {
         o.right.value = [o.right.value];
       }
 
@@ -89,7 +122,8 @@ export class PostgresSerializer implements SerializerExtension {
           });
         }
         if (o.left.isArray && o.right.isArray) {
-          if (o.operatorType === 'notIn') o.left.expression = 'not ' + o.left.expression;
+          if (o.operatorType === 'notIn')
+            o.left.expression = 'not ' + o.left.expression;
           return defFn(ctx, { ...o, symbol: '&&' });
         }
         if (!o.left.isArray && o.right.isArray && o.right.isParam) {
@@ -105,7 +139,11 @@ export class PostgresSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
-  private _serializeParameter(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeParameter(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     ctx.preparedParams = ctx.preparedParams || [];
     defFn(ctx, o);
     return '$' + ctx.preparedParams.length;

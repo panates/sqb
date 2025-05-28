@@ -31,6 +31,8 @@ export class UnionQuery extends Query {
   }
 
   protected __defaultSerialize(ctx: SerializeContext, o: any): string {
-    return o.queries.join(o.unionType === 'all' ? '\nUNION ALL\n' : '\nUNION\n');
+    return o.queries.join(
+      o.unionType === 'all' ? '\nUNION ALL\n' : '\nUNION\n',
+    );
   }
 }

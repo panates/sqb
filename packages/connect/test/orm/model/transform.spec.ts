@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Entity, EntityMetadata, Parse, Serialize } from '@sqb/connect';
 
 describe('Model / Parse', () => {

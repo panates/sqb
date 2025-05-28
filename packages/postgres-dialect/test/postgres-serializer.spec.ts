@@ -1,4 +1,11 @@
-import { Eq, Param, Raw, Select, SerializerRegistry, Update } from '@sqb/builder';
+import {
+  Eq,
+  Param,
+  Raw,
+  Select,
+  SerializerRegistry,
+  Update,
+} from '@sqb/builder';
 import { PostgresSerializer } from '../src/postgres-serializer.js';
 
 describe('PostgresSerializer', () => {
@@ -29,13 +36,17 @@ describe('PostgresSerializer', () => {
   it('should replace "!= null" to "is not null": test1', () => {
     const query = Select().from('table1').where({ 'ID !=': null });
     const result = query.generate({ dialect: 'postgres' });
-    expect(result.sql).toStrictEqual('select * from table1 where ID is not null');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 where ID is not null',
+    );
   });
 
   it('should replace "!= null" to "is not null": test2', () => {
     const query = Select().from('table1').where({ 'ID !=': null });
     const result = query.generate({ dialect: 'postgres' });
-    expect(result.sql).toStrictEqual('select * from table1 where ID is not null');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 where ID is not null',
+    );
   });
 
   it('should serialize reserved word', () => {
@@ -114,7 +125,9 @@ describe('PostgresSerializer', () => {
       .from('table1')
       .where({ 'ID !=': Raw('null') });
     const result = query.generate({ dialect: 'postgres' });
-    expect(result.sql).toStrictEqual('select * from table1 where ID is not null');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 where ID is not null',
+    );
   });
 
   it('Should compare array params using "in" operator', () => {
@@ -133,7 +146,9 @@ describe('PostgresSerializer', () => {
       .where({ 'ID !in': Param('id') })
       .values({ id: [1, 2, 3] });
     const result = query.generate({ dialect: 'postgres' });
-    expect(result.sql).toStrictEqual('select * from table1 where ID != ANY($1)');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 where ID != ANY($1)',
+    );
     expect(result.params).toStrictEqual([[1, 2, 3]]);
   });
 
@@ -145,7 +160,9 @@ describe('PostgresSerializer', () => {
       dialect: 'postgres',
       params: { ID: 5 },
     });
-    expect(result.sql).toStrictEqual('select * from table1 where ID in (1,2,3)');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 where ID in (1,2,3)',
+    );
   });
 
   it('Should serialize array params for "not in" operator', () => {
@@ -154,7 +171,9 @@ describe('PostgresSerializer', () => {
       .where({ 'ID !in': Param('id') })
       .values({ id: [1, 2, 3] });
     const result = query.generate({ dialect: 'postgres' });
-    expect(result.sql).toStrictEqual('select * from table1 where ID != ANY($1)');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 where ID != ANY($1)',
+    );
     expect(result.params).toStrictEqual([[1, 2, 3]]);
   });
 
@@ -163,7 +182,9 @@ describe('PostgresSerializer', () => {
       .from('table1')
       .where({ 'ID !in': [1, 2, 3] });
     const result = query.generate({ dialect: 'postgres' });
-    expect(result.sql).toStrictEqual('select * from table1 where ID not in (1,2,3)');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 where ID not in (1,2,3)',
+    );
   });
 
   it('Should serialize "ne" operator as !=', () => {
@@ -188,7 +209,9 @@ describe('PostgresSerializer', () => {
       .where({ 'ids[] in': Param('id') })
       .values({ id: 1 });
     const result = query.generate({ dialect: 'postgres' });
-    expect(result.sql).toStrictEqual('select * from table1 where $1 = ANY(ids)');
+    expect(result.sql).toStrictEqual(
+      'select * from table1 where $1 = ANY(ids)',
+    );
     expect(result.params).toStrictEqual([1]);
   });
 
@@ -196,6 +219,8 @@ describe('PostgresSerializer', () => {
     const query = Update('table1', { id: 1 }).returning('id');
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('update table1 set id = 1 returning id');
-    expect(result.returningFields).toStrictEqual([{ field: 'id', alias: undefined }]);
+    expect(result.returningFields).toStrictEqual([
+      { field: 'id', alias: undefined },
+    ]);
   });
 });

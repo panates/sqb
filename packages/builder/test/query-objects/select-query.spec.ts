@@ -1,4 +1,11 @@
-import { Eq, Param, Raw, Select, SerializationType, SerializerRegistry } from '../../src/index.js';
+import {
+  Eq,
+  Param,
+  Raw,
+  Select,
+  SerializationType,
+  SerializerRegistry,
+} from '../../src/index.js';
 import { TestSerializer } from '../_support/test_serializer.js';
 
 describe('serialize "SelectQuery"', () => {
@@ -95,7 +102,9 @@ describe('serialize "SelectQuery"', () => {
     const sub = Select('id').from('table2').as('id2');
     const query = Select(sub).from('table1');
     const result = query.generate(options);
-    expect(result.sql).toStrictEqual('select (select id from table2) id2 from table1');
+    expect(result.sql).toStrictEqual(
+      'select (select id from table2) id2 from table1',
+    );
   });
 
   it('should serialize raw in "from" part', () => {
@@ -106,7 +115,18 @@ describe('serialize "SelectQuery"', () => {
 
   it('should serialize sub-select in "from"', () => {
     const query = Select().from(
-      Select('field1', 'field2', 'field3', 'field4', 'field5', 'field6', 'field7', 'field8').from('table1').as('t1'),
+      Select(
+        'field1',
+        'field2',
+        'field3',
+        'field4',
+        'field5',
+        'field6',
+        'field7',
+        'field8',
+      )
+        .from('table1')
+        .as('t1'),
     );
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
@@ -122,7 +142,18 @@ describe('serialize "SelectQuery"', () => {
 
   it('should pretty print - test1', () => {
     const query = Select().from(
-      Select('field1', 'field2', 'field3', 'field4', 'field5', 'field6', 'field7', 'field8').from('table1').as('t1'),
+      Select(
+        'field1',
+        'field2',
+        'field3',
+        'field4',
+        'field5',
+        'field6',
+        'field7',
+        'field8',
+      )
+        .from('table1')
+        .as('t1'),
     );
     const result = query.generate({ prettyPrint: true });
     expect(result.sql).toStrictEqual(
@@ -157,7 +188,12 @@ describe('serialize "SelectQuery"', () => {
   it('should pretty print - test2', () => {
     const query = Select()
       .from('table1')
-      .where(Eq('ID', 1), Eq('name', 'value of the field should be too long'), Eq('ID', 1), Eq('ID', 12345678))
+      .where(
+        Eq('ID', 1),
+        Eq('name', 'value of the field should be too long'),
+        Eq('ID', 1),
+        Eq('ID', 12345678),
+      )
       .groupBy('field1', 'field2', Raw('field3'));
     const result = query.generate({ prettyPrint: true });
     expect(result.sql).toStrictEqual(

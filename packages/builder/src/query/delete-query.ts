@@ -13,10 +13,16 @@ export class DeleteQuery extends Query {
 
   constructor(tableName: string | RawStatement) {
     super();
-    if (!tableName || !(typeof tableName === 'string' || isRawStatement(tableName))) {
-      throw new TypeError('String or Raw instance required as first argument (tableName) for UpdateQuery');
+    if (
+      !tableName ||
+      !(typeof tableName === 'string' || isRawStatement(tableName))
+    ) {
+      throw new TypeError(
+        'String or Raw instance required as first argument (tableName) for UpdateQuery',
+      );
     }
-    this._table = typeof tableName === 'string' ? new TableName(tableName) : tableName;
+    this._table =
+      typeof tableName === 'string' ? new TableName(tableName) : tableName;
   }
 
   get _type(): SerializationType {

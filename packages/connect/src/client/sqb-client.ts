@@ -1,6 +1,12 @@
 import { classes } from '@sqb/builder';
 import _debug from 'debug';
-import { createPool, Pool as LightningPool, PoolConfiguration, PoolFactory, PoolState } from 'lightning-pool';
+import {
+  createPool,
+  Pool as LightningPool,
+  PoolConfiguration,
+  PoolFactory,
+  PoolState,
+} from 'lightning-pool';
 import { coerceToBoolean, coerceToInt } from 'putil-varhelpers';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
 import { Maybe, Type } from 'ts-gems';
@@ -32,7 +38,9 @@ interface SqbClientEvents {
   'connection-return': (connection: SqbConnection) => Promise<void>;
 }
 
-export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(AsyncEventEmitter) {
+export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(
+  AsyncEventEmitter,
+) {
   private readonly _adapter: Adapter;
   private readonly _pool: LightningPool<Adapter.Connection>;
   private readonly _defaults: ClientDefaults;
@@ -40,17 +48,27 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(AsyncEven
 
   constructor(config: ClientConfiguration) {
     super();
-    if (!(config && typeof config === 'object')) throw new TypeError('Configuration object required');
+    if (!(config && typeof config === 'object'))
+      throw new TypeError('Configuration object required');
 
     let adapter;
     if (config.driver) {
       adapter = AdapterRegistry.findDriver(config.driver);
-      if (!adapter) throw new Error(`No database adapter registered for "${config.driver}" driver`);
+      if (!adapter)
+        throw new Error(
+          `No database adapter registered for "${config.driver}" driver`,
+        );
     } else if (config.dialect) {
       adapter = AdapterRegistry.findDialect(config.dialect);
-      if (!adapter) throw new Error(`No database adapter registered for "${config.dialect}" dialect`);
+      if (!adapter)
+        throw new Error(
+          `No database adapter registered for "${config.dialect}" dialect`,
+        );
     }
-    if (!adapter) throw new Error(`You must provide one of "driver" or "dialect" properties`);
+    if (!adapter)
+      throw new Error(
+        `You must provide one of "driver" or "dialect" properties`,
+      );
 
     this._adapter = adapter;
 
@@ -60,7 +78,10 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(AsyncEven
     const popts = config.pool || {};
     poolOptions.acquireMaxRetries = coerceToInt(popts.acquireMaxRetries, 0);
     poolOptions.acquireRetryWait = coerceToInt(popts.acquireRetryWait, 2000);
-    poolOptions.acquireTimeoutMillis = coerceToInt(popts.acquireTimeoutMillis, 0);
+    poolOptions.acquireTimeoutMillis = coerceToInt(
+      popts.acquireTimeoutMillis,
+      0,
+    );
     poolOptions.idleTimeoutMillis = coerceToInt(popts.idleTimeoutMillis, 30000);
     poolOptions.max = coerceToInt(popts.max, 10);
     poolOptions.maxQueue = coerceToInt(popts.maxQueue, 1000);
@@ -117,7 +138,10 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(AsyncEven
   /**
    * Obtains a connection from the connection pool and executes the callback
    */
-  async acquire(fn: TransactionFunction, options?: ConnectionOptions): Promise<any>;
+  async acquire(
+    fn: TransactionFunction,
+    options?: ConnectionOptions,
+  ): Promise<any>;
   /**
    * Obtains a connection from the connection pool.
    */
@@ -137,9 +161,13 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(AsyncEven
     const opts = { autoCommit: this.defaults.autoCommit, ...options };
     const connection = new SqbConnection(this, adapterConnection, opts);
     await this.emitAsyncSerial('acquire', connection);
-    connection.on('execute', (request: QueryRequest) => this.emit('execute', request));
+    connection.on('execute', (request: QueryRequest) =>
+      this.emit('execute', request),
+    );
     connection.on('error', (error: Error) => this.emit('error', error));
-    connection.on('close', () => this.emitAsyncSerial('connection-return', connection));
+    connection.on('close', () =>
+      this.emitAsyncSerial('connection-return', connection),
+    );
     return connection;
   }
 
@@ -154,7 +182,10 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(AsyncEven
   /**
    * Executes a query or callback with a new acquired connection.
    */
-  async execute(query: string | classes.Query, options?: QueryExecuteOptions): Promise<QueryResult> {
+  async execute(
+    query: string | classes.Query,
+    options?: QueryExecuteOptions,
+  ): Promise<QueryResult> {
     debug('execute');
     const connection = await this.acquire();
     try {
@@ -181,14 +212,18 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(AsyncEven
     }
   }
 
-  getRepository<T>(entity: Type<T> | string, opts?: { schema?: string }): Repository<T> {
+  getRepository<T>(
+    entity: Type<T> | string,
+    opts?: { schema?: string },
+  ): Repository<T> {
     let ctor;
     if (typeof entity === 'string') {
       ctor = this.getEntity<T>(entity);
       if (!ctor) throw new Error(`Repository "${entity}" is not registered`);
     } else ctor = entity;
     const entityDef = EntityMetadata.get(ctor);
-    if (!entityDef) throw new Error(`You must provide an @Entity annotated constructor`);
+    if (!entityDef)
+      throw new Error(`You must provide an @Entity annotated constructor`);
     return new Repository<T>(entityDef, this, opts?.schema);
   }
 
@@ -197,7 +232,13 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(AsyncEven
   }
 
   toString() {
-    return '[object ' + Object.getPrototypeOf(this).constructor.name + '(' + this.dialect + ')]';
+    return (
+      '[object ' +
+      Object.getPrototypeOf(this).constructor.name +
+      '(' +
+      this.dialect +
+      ')]'
+    );
   }
 
   [inspect]() {

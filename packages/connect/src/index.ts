@@ -29,5 +29,10 @@ export * from './orm/model/link-chain.js';
 export * from './orm/orm.const.js';
 export * from './orm/orm.type.js';
 export * from './orm/repository.class.js';
-export { isAssociationField, isColumnField, isEmbeddedField, isEntityClass } from './orm/util/orm.helper.js';
+export {
+  isAssociationField,
+  isColumnField,
+  isEmbeddedField,
+  isEntityClass,
+} from './orm/util/orm.helper.js';
 export * from './orm/util/parse-fields-projection.js';

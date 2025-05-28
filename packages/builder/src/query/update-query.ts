@@ -15,13 +15,24 @@ export class UpdateQuery extends ReturningQuery {
 
   constructor(tableName: string | RawStatement, input: any) {
     super();
-    if (!tableName || !(typeof tableName === 'string' || isRawStatement(tableName))) {
-      throw new TypeError('String or Raw instance required as first argument (tableName) for UpdateQuery');
+    if (
+      !tableName ||
+      !(typeof tableName === 'string' || isRawStatement(tableName))
+    ) {
+      throw new TypeError(
+        'String or Raw instance required as first argument (tableName) for UpdateQuery',
+      );
     }
-    if (!input || !((typeof input === 'object' && !Array.isArray(input)) || input.isSelect)) {
-      throw new TypeError('Object or Raw instance required as second argument (input) for UpdateQuery');
+    if (
+      !input ||
+      !((typeof input === 'object' && !Array.isArray(input)) || input.isSelect)
+    ) {
+      throw new TypeError(
+        'Object or Raw instance required as second argument (input) for UpdateQuery',
+      );
     }
-    this._table = typeof tableName === 'string' ? new TableName(tableName) : tableName;
+    this._table =
+      typeof tableName === 'string' ? new TableName(tableName) : tableName;
     this._input = input;
   }
 

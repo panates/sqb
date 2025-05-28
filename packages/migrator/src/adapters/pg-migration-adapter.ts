@@ -17,9 +17,9 @@ import { MigrationStatus } from '../types.js';
 const pgAdapter = new PgAdapter();
 
 export class PgMigrationAdapter extends MigrationAdapter {
-  protected declare _connection: Connection;
+  declare protected _connection: Connection;
   protected _infoSchema = 'public';
-  protected declare _migrationPackage: MigrationPackage;
+  declare protected _migrationPackage: MigrationPackage;
   protected _version = 0;
   protected _status: MigrationStatus = MigrationStatus.idle;
   protected defaultVariables = {
@@ -60,7 +60,8 @@ export class PgMigrationAdapter extends MigrationAdapter {
     },
   ): Promise<PgMigrationAdapter> {
     // Create connection
-    const connection = ((await pgAdapter.connect(options.connection)) as any).intlcon as Connection;
+    const connection = ((await pgAdapter.connect(options.connection)) as any)
+      .intlcon as Connection;
     try {
       const adapter = new PgMigrationAdapter();
       adapter._connection = connection;
@@ -68,12 +69,17 @@ export class PgMigrationAdapter extends MigrationAdapter {
       adapter._infoSchema = options.infoSchema || '__migration';
       adapter.defaultVariables.schema = options.connection.schema || '';
       if (!adapter.defaultVariables.schema) {
-        const r = await connection.query('SELECT CURRENT_SCHEMA ', { objectRows: true });
-        adapter.defaultVariables.schema = r.rows?.[0]?.current_schema || 'public';
+        const r = await connection.query('SELECT CURRENT_SCHEMA ', {
+          objectRows: true,
+        });
+        adapter.defaultVariables.schema =
+          r.rows?.[0]?.current_schema || 'public';
       }
 
       // Check if migration schema
-      await connection.query(`CREATE SCHEMA IF NOT EXISTS ${adapter.infoSchema} AUTHORIZATION postgres;`);
+      await connection.query(
+        `CREATE SCHEMA IF NOT EXISTS ${adapter.infoSchema} AUTHORIZATION postgres;`,
+      );
       // Create summary table if not exists
       await connection.execute(`
 CREATE TABLE IF NOT EXISTS ${adapter.summaryTableFull}
@@ -103,14 +109,20 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
 )`);
 
       // Insert summary record if not exists
-      const r = await connection.query(`SELECT status FROM ${adapter.summaryTableFull} WHERE package_name = $1`, {
-        params: [adapter.packageName],
-        objectRows: true,
-      });
+      const r = await connection.query(
+        `SELECT status FROM ${adapter.summaryTableFull} WHERE package_name = $1`,
+        {
+          params: [adapter.packageName],
+          objectRows: true,
+        },
+      );
       if (!(r && r.rows?.length)) {
-        await connection.query(`insert into ${adapter.summaryTableFull} (package_name, status) values ($1, $2)`, {
-          params: [adapter.packageName, MigrationStatus.idle],
-        });
+        await connection.query(
+          `insert into ${adapter.summaryTableFull} (package_name, status) values ($1, $2)`,
+          {
+            params: [adapter.packageName, MigrationStatus.idle],
+          },
+        );
       }
 
       await adapter.refresh();
@@ -126,17 +138,23 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
   }
 
   async refresh(): Promise<void> {
-    const r = await this._connection.query(`SELECT * FROM ${this.summaryTableFull} WHERE package_name = $1`, {
-      params: [this.packageName],
-      objectRows: true,
-    });
+    const r = await this._connection.query(
+      `SELECT * FROM ${this.summaryTableFull} WHERE package_name = $1`,
+      {
+        params: [this.packageName],
+        objectRows: true,
+      },
+    );
     const row = r.rows && r.rows[0];
     if (!row) throw new Error('Summary record did not created');
     this._version = row.current_version;
     this._status = row.status;
   }
 
-  async update(info: { status?: MigrationStatus; version?: number }): Promise<void> {
+  async update(info: {
+    status?: MigrationStatus;
+    version?: number;
+  }): Promise<void> {
     let sql = '';
     const params: any[] = [];
     if (info.status && info.status !== this.status) {
@@ -166,7 +184,15 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
       '(package_name, version, event, event_time, title, message, filename, details) ' +
       'values ($1, $2, $3, CURRENT_TIMESTAMP, $4, $5, $6, $7)';
     await this._connection.query(sql, {
-      params: [this.packageName, event.version, event.event, event.title, event.message, event.filename, event.details],
+      params: [
+        this.packageName,
+        event.version,
+        event.event,
+        event.title,
+        event.message,
+        event.filename,
+        event.details,
+      ],
     });
   }
 
@@ -184,14 +210,21 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
       try {
         let script: string | undefined;
         if (typeof task.script === 'function') {
-          script = await task.script({ migrationPackage, migration, task, variables });
+          script = await task.script({
+            migrationPackage,
+            migration,
+            task,
+            variables,
+          });
         } else script = task.script;
         if (typeof script !== 'string') return;
         script = this.replaceVariables(script, variables);
         await this._connection.execute(script);
       } catch (e: any) {
         let msg = `Error in task "${task.title}"`;
-        if (task.filename) msg += '\n at ' + path.relative(migrationPackage.baseDir, task.filename);
+        if (task.filename)
+          msg +=
+            '\n at ' + path.relative(migrationPackage.baseDir, task.filename);
         if (e.lineNr) {
           if (!task.filename) e.message += '\n at';
           msg += ` (${e.lineNr},${e.colNr}):\n` + e.line;
@@ -210,7 +243,9 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
 
     if (isInsertDataMigrationTask(task)) {
       const tableName = this.replaceVariables(task.tableName, variables);
-      const script = task.rows.map(row => this.rowToSql(tableName, row)).join('\n');
+      const script = task.rows
+        .map(row => this.rowToSql(tableName, row))
+        .join('\n');
       await this._connection.execute(script);
     }
   }

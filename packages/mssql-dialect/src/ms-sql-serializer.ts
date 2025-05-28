@@ -1,4 +1,9 @@
-import { DefaultSerializeFunction, SerializationType, SerializeContext, SerializerExtension } from '@sqb/builder';
+import {
+  DefaultSerializeFunction,
+  SerializationType,
+  SerializeContext,
+  SerializerExtension,
+} from '@sqb/builder';
 
 const reservedWords = ['comment'];
 
@@ -6,7 +11,9 @@ export class MSSqlSerializer implements SerializerExtension {
   dialect = 'mssql';
 
   isReservedWord(ctx, s) {
-    return s && typeof s === 'string' && reservedWords.includes(s.toLowerCase());
+    return (
+      s && typeof s === 'string' && reservedWords.includes(s.toLowerCase())
+    );
   }
 
   serialize(
@@ -25,16 +32,25 @@ export class MSSqlSerializer implements SerializerExtension {
     }
   }
 
-  private _serializeSelect(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeSelect(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     let out = defFn(ctx, o);
     const limit = o.limit || 0;
     const offset = Math.max(o.offset || 0, 0);
     if (offset) out += '\nOFFSET ' + offset + ' ROWS';
-    if (limit) out += (!offset ? '\n' : ' ') + 'FETCH NEXT ' + limit + ' ROWS ONLY';
+    if (limit)
+      out += (!offset ? '\n' : ' ') + 'FETCH NEXT ' + limit + ' ROWS ONLY';
     return out;
   }
 
-  private _serializeParameter(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeParameter(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     defFn(ctx, o);
     return '@' + o.name;
   }

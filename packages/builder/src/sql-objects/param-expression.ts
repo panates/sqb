@@ -8,7 +8,9 @@ export class ParamExpression extends Serializable {
   _dataType?: DataType;
   _isArray?: boolean;
 
-  constructor(arg: string | { name: string; dataType?: DataType; isArray?: boolean }) {
+  constructor(
+    arg: string | { name: string; dataType?: DataType; isArray?: boolean },
+  ) {
     super();
     if (typeof arg === 'object') {
       this._name = arg.name;
@@ -42,7 +44,8 @@ export class ParamExpression extends Serializable {
     },
   ): string {
     let prmValue = (ctx.params && ctx.params[o.name]) ?? null;
-    if (prmValue != null && o.isArray && !Array.isArray(prmValue)) prmValue = [prmValue];
+    if (prmValue != null && o.isArray && !Array.isArray(prmValue))
+      prmValue = [prmValue];
     ctx.preparedParams = ctx.preparedParams || {};
     if (Array.isArray(ctx.preparedParams)) ctx.preparedParams.push(prmValue);
     else ctx.preparedParams[o.name] = prmValue;
@@ -51,7 +54,8 @@ export class ParamExpression extends Serializable {
       dataType: this._dataType,
       isArray: this._isArray,
     };
-    ctx.paramOptions = ctx.paramOptions || (Array.isArray(ctx.preparedParams) ? [] : {});
+    ctx.paramOptions =
+      ctx.paramOptions || (Array.isArray(ctx.preparedParams) ? [] : {});
     if (Array.isArray(ctx.paramOptions)) ctx.paramOptions.push(paramOps);
     else ctx.paramOptions[o.name] = paramOps;
     return ':' + o.name;

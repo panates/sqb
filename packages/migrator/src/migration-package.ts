@@ -20,7 +20,10 @@ export interface Migration {
   backup?: boolean;
 }
 
-export type MigrationTask = SqlScriptMigrationTask | CustomMigrationTask | InsertDataMigrationTask;
+export type MigrationTask =
+  | SqlScriptMigrationTask
+  | CustomMigrationTask
+  | InsertDataMigrationTask;
 
 export interface BaseMigrationTask {
   title?: string;
@@ -41,27 +44,50 @@ export interface CustomMigrationTask extends BaseMigrationTask {
 }
 
 export function isSqlScriptMigrationTask(x: any): x is SqlScriptMigrationTask {
-  return typeof x === 'object' && (typeof x.script === 'string' || typeof x.script === 'function');
+  return (
+    typeof x === 'object' &&
+    (typeof x.script === 'string' || typeof x.script === 'function')
+  );
 }
 
-export function isInsertDataMigrationTask(x: any): x is InsertDataMigrationTask {
-  return typeof x === 'object' && typeof x.tableName === 'string' && Array.isArray(x.rows);
+export function isInsertDataMigrationTask(
+  x: any,
+): x is InsertDataMigrationTask {
+  return (
+    typeof x === 'object' &&
+    typeof x.tableName === 'string' &&
+    Array.isArray(x.rows)
+  );
 }
 
 export function isCustomMigrationTask(x: any): x is CustomMigrationTask {
   return typeof x === 'object' && typeof x.fn === 'function';
 }
 
-export interface MigrationPackageConfig extends PartialSome<StrictOmit<MigrationPackage, 'migrations'>, 'baseDir'> {
-  migrations: (string | MigrationConfig | (() => MigrationConfig) | (() => Promise<MigrationConfig>))[];
+export interface MigrationPackageConfig
+  extends PartialSome<StrictOmit<MigrationPackage, 'migrations'>, 'baseDir'> {
+  migrations: (
+    | string
+    | MigrationConfig
+    | (() => MigrationConfig)
+    | (() => Promise<MigrationConfig>)
+  )[];
 }
 
-export interface MigrationConfig extends StrictOmit<Migration, 'tasks' | 'baseDir'> {
-  tasks: (string | MigrationTask | (() => MigrationTask) | (() => Promise<MigrationTask>))[];
+export interface MigrationConfig
+  extends StrictOmit<Migration, 'tasks' | 'baseDir'> {
+  tasks: (
+    | string
+    | MigrationTask
+    | (() => MigrationTask)
+    | (() => Promise<MigrationTask>)
+  )[];
 }
 
 export namespace MigrationPackage {
-  export async function load(asyncConfig: MigrationPackageConfig): Promise<MigrationPackage> {
+  export async function load(
+    asyncConfig: MigrationPackageConfig,
+  ): Promise<MigrationPackage> {
     const baseDir = asyncConfig.baseDir || path.dirname(getCallingFilename(1));
 
     const out: MigrationPackage = {
@@ -71,7 +97,9 @@ export namespace MigrationPackage {
     };
 
     if (!Array.isArray(asyncConfig.migrations)) {
-      throw new TypeError('You must provide array of MigrationConfig in "migrations" property');
+      throw new TypeError(
+        'You must provide array of MigrationConfig in "migrations" property',
+      );
     }
 
     if (asyncConfig.migrations?.length) {
@@ -83,14 +111,20 @@ export namespace MigrationPackage {
         x = typeof x === 'function' ? await x() : x;
         if (typeof x === 'object' && x.tasks) srcMigrations.push(x);
         else if (typeof x === 'string') {
-          srcMigrations.push(...(await loadMigrations(baseDir, x.replace(/\\/g, '/'))));
+          srcMigrations.push(
+            ...(await loadMigrations(baseDir, x.replace(/\\/g, '/'))),
+          );
         }
       }
 
       srcMigrations.sort((a, b) => a.version - b.version);
 
       for (const migration of srcMigrations) {
-        const trgMigration: Migration = { baseDir: '', ...migration, tasks: [] };
+        const trgMigration: Migration = {
+          baseDir: '',
+          ...migration,
+          tasks: [],
+        };
         trgMigrations.push(trgMigration);
         const srcTasks = migration.tasks;
         trgMigration.tasks = [];
@@ -99,7 +133,9 @@ export namespace MigrationPackage {
             trgMigration.tasks.push(t);
           } else if (typeof t === 'string') {
             let pattern = t.replace(/\\/g, '/');
-            pattern = path.resolve(path.join(baseDir, trgMigration.baseDir, pattern));
+            pattern = path.resolve(
+              path.join(baseDir, trgMigration.baseDir, pattern),
+            );
             const files = await glob(pattern, {
               absolute: true,
               onlyFiles: true,
@@ -115,22 +151,31 @@ export namespace MigrationPackage {
                   filename,
                   script,
                 } satisfies SqlScriptMigrationTask);
-              } else if (['.json', '.js', '.ts', '.cjs', '.mjs'].includes(ext)) {
+              } else if (
+                ['.json', '.js', '.ts', '.cjs', '.mjs'].includes(ext)
+              ) {
                 try {
                   let json: any =
-                    ext === '.json' ? JSON.parse(await fs.readFile(filename, 'utf-8')) : await import(filename);
+                    ext === '.json'
+                      ? JSON.parse(await fs.readFile(filename, 'utf-8'))
+                      : await import(filename);
                   if (typeof json !== 'object') continue;
                   if (json.__esModule) json = json.default;
                   if (json.script) {
                     json.title = json.title || 'Run sql script';
                     json.filename = filename;
-                    trgMigration.tasks.push(json satisfies SqlScriptMigrationTask);
+                    trgMigration.tasks.push(
+                      json satisfies SqlScriptMigrationTask,
+                    );
                     continue;
                   }
                   if (json.tableName && json.rows) {
-                    json.title = json.title || 'Migrate data into ' + json.tableName;
+                    json.title =
+                      json.title || 'Migrate data into ' + json.tableName;
                     json.filename = filename;
-                    trgMigration.tasks.push(json satisfies InsertDataMigrationTask);
+                    trgMigration.tasks.push(
+                      json satisfies InsertDataMigrationTask,
+                    );
                     continue;
                   }
                   if (typeof json.fn === 'function') {
@@ -153,9 +198,15 @@ export namespace MigrationPackage {
   }
 }
 
-async function loadMigrations(baseDir: string, pattern: string): Promise<Migration[]> {
+async function loadMigrations(
+  baseDir: string,
+  pattern: string,
+): Promise<Migration[]> {
   const out: Migration[] = [];
-  const files = await glob(path.join(baseDir, pattern), { absolute: true, onlyFiles: true });
+  const files = await glob(path.join(baseDir, pattern), {
+    absolute: true,
+    onlyFiles: true,
+  });
   for (const filename of files) {
     const ext = path.extname(filename).toLowerCase();
     if (path.basename(filename, ext) !== 'migration') continue;
@@ -171,7 +222,12 @@ async function loadMigrations(baseDir: string, pattern: string): Promise<Migrati
         throw e;
       }
     }
-    if (json && typeof json === 'object' && json.version && Array.isArray(json.tasks)) {
+    if (
+      json &&
+      typeof json === 'object' &&
+      json.version &&
+      Array.isArray(json.tasks)
+    ) {
       json.baseDir = path.relative(baseDir, path.dirname(filename));
       out.push(json);
     }

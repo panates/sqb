@@ -10,7 +10,8 @@ export class ReturningColumn extends BaseField {
   constructor(field: string) {
     super();
     const m = field.match(RETURNING_COLUMN_PATTERN);
-    if (!m) throw new TypeError(`"${field}" does not match returning column format`);
+    if (!m)
+      throw new TypeError(`"${field}" does not match returning column format`);
     this._field = m[1];
     this._alias = m[2];
   }
@@ -29,7 +30,9 @@ export class ReturningColumn extends BaseField {
     return ctx.serialize(
       this._type,
       o,
-      () => ctx.escapeReserved(o.field) + (o.alias ? ' as ' + ctx.escapeReserved(o.alias) : ''),
+      () =>
+        ctx.escapeReserved(o.field) +
+        (o.alias ? ' as ' + ctx.escapeReserved(o.alias) : ''),
     );
   }
 }

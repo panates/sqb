@@ -18,18 +18,23 @@ export function isColumnField(f: any): f is ColumnFieldMetadata {
   return !!(f && f.name && f.kind === 'column');
 }
 
-export const isEmbeddedField = (f: any): f is EmbeddedFieldMetadata => !!(f && f.name && f.kind === 'object');
+export const isEmbeddedField = (f: any): f is EmbeddedFieldMetadata =>
+  !!(f && f.name && f.kind === 'object');
 
 export const isAssociationField = (f: any): f is AssociationFieldMetadata =>
   !!(f && f.name && f.kind === 'association');
 
-export async function resolveEntity(ctorThunk: TypeThunk): Promise<Type | undefined> {
+export async function resolveEntity(
+  ctorThunk: TypeThunk,
+): Promise<Type | undefined> {
   if (typeof ctorThunk !== 'function') return;
   if (!isClass(ctorThunk)) ctorThunk = await (ctorThunk as TypeResolver<any>)();
   if (isEntityClass(ctorThunk)) return ctorThunk as Type;
 }
 
-export async function resolveEntityMeta(ctorThunk: TypeThunk): Promise<EntityMetadata | undefined> {
+export async function resolveEntityMeta(
+  ctorThunk: TypeThunk,
+): Promise<EntityMetadata | undefined> {
   const ctor = await resolveEntity(ctorThunk);
   return ctor && Reflect.getMetadata(ENTITY_METADATA_KEY, ctor);
 }

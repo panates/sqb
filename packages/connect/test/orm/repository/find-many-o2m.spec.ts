@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Eq, In } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
 import { Continent } from '../../_support/continent.entity.js';
@@ -46,7 +45,10 @@ describe('Repository.findMany() (OneToMany)', () => {
         expect(Array.isArray(country.customers)).toBeTruthy();
         expect(country.customers!.length).toBeGreaterThan(0);
         for (const customer of country.customers!) {
-          expect(Object.keys(customer)).toStrictEqual(['givenName', 'countryCode']);
+          expect(Object.keys(customer)).toStrictEqual([
+            'givenName',
+            'countryCode',
+          ]);
           expect(customer.countryCode).toStrictEqual(country.code);
         }
       }
@@ -84,7 +86,12 @@ describe('Repository.findMany() (OneToMany)', () => {
       const repo = client.getRepository(Continent);
       const rows = await repo.findMany({
         filter: { code: 'AM' },
-        projection: ['code', 'countries.continentCode', 'countries.customers', 'countries.code'],
+        projection: [
+          'code',
+          'countries.continentCode',
+          'countries.customers',
+          'countries.code',
+        ],
       });
       expect(rows).toBeDefined();
       expect(rows.length).toBeGreaterThan(0);
@@ -193,7 +200,12 @@ describe('Repository.findMany() (OneToMany)', () => {
       const repo = client.getRepository(Continent);
       const rows = await repo.findMany({
         filter: { code: 'AM' },
-        projection: ['code', 'countries.continentCode', 'countries.customers', 'countries.code'],
+        projection: [
+          'code',
+          'countries.continentCode',
+          'countries.customers',
+          'countries.code',
+        ],
       });
       expect(rows).toBeDefined();
       expect(rows.length).toBeGreaterThan(0);
@@ -222,7 +234,10 @@ describe('Repository.findMany() (OneToMany)', () => {
         expect(Array.isArray(country.customers)).toBeTruthy();
         expect(country.customers!.length).toBeGreaterThan(0);
         for (const customer of country.customers!) {
-          expect(Object.keys(customer)).toStrictEqual(['givenName', 'countryCode']);
+          expect(Object.keys(customer)).toStrictEqual([
+            'givenName',
+            'countryCode',
+          ]);
           expect(customer.countryCode).toStrictEqual(country.code);
         }
       }

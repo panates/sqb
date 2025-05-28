@@ -10,12 +10,16 @@ export class AdapterRegistry {
 
   static register(...adapters: Adapter[]): void {
     for (const adapter of adapters) {
-      if (!adapter.driver) throw new TypeError('A DatabaseAdapter must contain "driver" property');
+      if (!adapter.driver)
+        throw new TypeError('A DatabaseAdapter must contain "driver" property');
       this.adapters.push(adapter);
     }
   }
 
-  static forEach(callback: (value: Adapter, index: number) => void, thisArg?: any) {
+  static forEach(
+    callback: (value: Adapter, index: number) => void,
+    thisArg?: any,
+  ) {
     return this.adapters.forEach(callback, thisArg);
   }
 

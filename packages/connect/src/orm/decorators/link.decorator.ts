@@ -20,27 +20,45 @@ export function Link(options?: AssociationFieldOptions): LinkPropertyDecorator {
   let root: LinkChain<any>;
   let chain: LinkChain<any>;
 
-  const fn: LinkPropertyDecorator = (target: Object, propertyKey: string | symbol): void => {
-    if (typeof propertyKey !== 'string') throw new TypeError('Symbol properties are not allowed');
+  const fn: LinkPropertyDecorator = (
+    target: Object,
+    propertyKey: string | symbol,
+  ): void => {
+    if (typeof propertyKey !== 'string')
+      throw new TypeError('Symbol properties are not allowed');
     const reflectType = Reflect.getMetadata('design:type', target, propertyKey);
     if (!root) {
       if (reflectType === Array) {
-        throw new TypeError(`Can't get type information while it is an array. Please define entity type`);
+        throw new TypeError(
+          `Can't get type information while it is an array. Please define entity type`,
+        );
       }
-      if (!EntityMetadata.get(reflectType)) throw new TypeError(`No entity metadata found for type "${reflectType}"`);
+      if (!EntityMetadata.get(reflectType))
+        throw new TypeError(
+          `No entity metadata found for type "${reflectType}"`,
+        );
       fn.toOne(reflectType);
     }
     if (reflectType !== Array && root.first.returnsMany()) {
-      throw new TypeError(`Link returns single instance however property type is an array`);
+      throw new TypeError(
+        `Link returns single instance however property type is an array`,
+      );
     }
     if (reflectType === Array && !root.first.returnsMany()) {
-      throw new TypeError(`Link returns array of instances however property type is not an array`);
+      throw new TypeError(
+        `Link returns array of instances however property type is not an array`,
+      );
     }
     const entity = EntityMetadata.define(target.constructor as Type);
     // @ts-ignore
     // noinspection JSConstantReassignment
     root.first.source = entity.ctor;
-    EntityMetadata.defineAssociationField(entity, propertyKey, root.first, options);
+    EntityMetadata.defineAssociationField(
+      entity,
+      propertyKey,
+      root.first,
+      options,
+    );
   };
 
   fn.toOne = <T>(type: TypeThunk<T>, args?: LinkArgs<T>) => {
@@ -72,13 +90,21 @@ export function Link(options?: AssociationFieldOptions): LinkPropertyDecorator {
 /**
  * Crates an Link Chain object
  */
-function linkToOne<T>(type: TypeThunk<T>, targetKey?: keyof T, sourceKey?: string): LinkChain<T> {
+function linkToOne<T>(
+  type: TypeThunk<T>,
+  targetKey?: keyof T,
+  sourceKey?: string,
+): LinkChain<T> {
   return new LinkChain<T>(type, targetKey, sourceKey);
 }
 
 /**
  * Crates an Link Chain object
  */
-function linkToMany<T>(type: TypeThunk<T>, targetKey?: keyof T, sourceKey?: string): LinkChain<T> {
+function linkToMany<T>(
+  type: TypeThunk<T>,
+  targetKey?: keyof T,
+  sourceKey?: string,
+): LinkChain<T> {
   return new LinkChain<T>(type, targetKey, sourceKey, true);
 }

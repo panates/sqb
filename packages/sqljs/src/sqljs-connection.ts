@@ -75,7 +75,9 @@ export class SqljsConnection implements Adapter.Connection {
       }, {});
     }
 
-    const m = query.sql.match(/\b(insert into|update|delete from)\b ("?\w+"?)/i);
+    const m = query.sql.match(
+      /\b(insert into|update|delete from)\b ("?\w+"?)/i,
+    );
     if (m) {
       const stmt = this.intlcon.prepare(query.sql);
       stmt.run(params);
@@ -83,7 +85,9 @@ export class SqljsConnection implements Adapter.Connection {
       out.rowsAffected = this.intlcon.getRowsModified();
       if (query.autoCommit) await this.commit();
       if (out.rowsAffected === 1 && query.returningFields) {
-        const selectFields = query.returningFields.map(x => x.field + (x.alias ? ' as ' + x.alias : ''));
+        const selectFields = query.returningFields.map(
+          x => x.field + (x.alias ? ' as ' + x.alias : ''),
+        );
         let sql = `select ${selectFields.join(',')} from ${m[2]}\n`;
         // Emulate insert into ... returning
         if (m[1].toLowerCase() === 'insert into') {
@@ -105,7 +109,10 @@ export class SqljsConnection implements Adapter.Connection {
       }
     }
 
-    let stmt: Statement | undefined = this.intlcon.prepare(query.sql, query.params);
+    let stmt: Statement | undefined = this.intlcon.prepare(
+      query.sql,
+      query.params,
+    );
     try {
       const colNames = stmt.getColumnNames();
       if (colNames && colNames.length) {

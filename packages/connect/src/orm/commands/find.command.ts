@@ -5,9 +5,20 @@ import { ColumnFieldMetadata } from '../model/column-field-metadata.js';
 import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import { Repository } from '../repository.class.js';
-import { isAssociationField, isColumnField, isEmbeddedField } from '../util/orm.helper.js';
-import { FieldsProjection, parseFieldsProjection } from '../util/parse-fields-projection.js';
-import { joinAssociationGetLast, JoinInfo, prepareFilter } from './command.helper.js';
+import {
+  isAssociationField,
+  isColumnField,
+  isEmbeddedField,
+} from '../util/orm.helper.js';
+import {
+  FieldsProjection,
+  parseFieldsProjection,
+} from '../util/parse-fields-projection.js';
+import {
+  joinAssociationGetLast,
+  JoinInfo,
+  prepareFilter,
+} from './command.helper.js';
 import { RowConverter } from './row-converter.js';
 
 export type FindCommandArgs = {
@@ -36,7 +47,10 @@ export class FindCommand {
   private _filter = And();
   private _sort?: string[];
 
-  protected constructor(selectEntity: EntityMetadata, outputEntity: EntityMetadata) {
+  protected constructor(
+    selectEntity: EntityMetadata,
+    outputEntity: EntityMetadata,
+  ) {
     this.mainEntity = selectEntity;
     this.resultEntity = outputEntity;
     this.converter = new RowConverter(outputEntity.ctor);
@@ -58,16 +72,25 @@ export class FindCommand {
       command = new FindCommand(listingEntity, resultEntity);
       if (node.conditions) await command.filter(node.conditions);
       if (node.next) {
-        const join = await joinAssociationGetLast(command._joins, node.next, command.mainAlias);
+        const join = await joinAssociationGetLast(
+          command._joins,
+          node.next,
+          command.mainAlias,
+        );
         command.resultAlias = join.joinAlias;
       }
     } else {
       listingEntity = source;
       command = new FindCommand(listingEntity, listingEntity);
     }
-    if (!listingEntity.tableName) throw new Error(`${listingEntity.ctor.name} is not decorated with @Entity decorator`);
-    if (typeof opts.maxSubQueries === 'number') command.maxSubQueries = opts.maxSubQueries;
-    if (typeof opts.maxEagerFetch === 'number') command.maxEagerFetch = opts.maxEagerFetch;
+    if (!listingEntity.tableName)
+      throw new Error(
+        `${listingEntity.ctor.name} is not decorated with @Entity decorator`,
+      );
+    if (typeof opts.maxSubQueries === 'number')
+      command.maxSubQueries = opts.maxSubQueries;
+    if (typeof opts.maxEagerFetch === 'number')
+      command.maxEagerFetch = opts.maxEagerFetch;
     return command;
   }
 
@@ -107,9 +130,13 @@ export class FindCommand {
       typeof opts.projection === 'string' || Array.isArray(opts.projection)
         ? parseFieldsProjection(opts.projection)
         : opts.projection;
-    const defaultFields = !projection || !Object.values(projection).find(p => !p.sign);
+    const defaultFields =
+      !projection || !Object.values(projection).find(p => !p.sign);
 
-    const sortFields = opts.sort && opts.sort.length ? opts.sort.map(x => x.toLowerCase()) : undefined;
+    const sortFields =
+      opts.sort && opts.sort.length
+        ? opts.sort.map(x => x.toLowerCase())
+        : undefined;
     const prefix = opts.prefix || '';
     const suffix = opts.suffix || '';
 
@@ -163,7 +190,11 @@ export class FindCommand {
       if (isAssociationField(col)) {
         // OtO relation
         if (!col.association.returnsMany()) {
-          const joinInfo = await joinAssociationGetLast(this._joins, col.association, tableAlias);
+          const joinInfo = await joinAssociationGetLast(
+            this._joins,
+            col.association,
+            tableAlias,
+          );
           const subConverter = converter.addObjectProperty({
             name: col.name,
             type: joinInfo.targetEntity.ctor,
@@ -199,7 +230,10 @@ export class FindCommand {
             sort,
           });
           if (sort) await findCommand.sort(sort);
-          const keyField = findCommand._selectColumn(findCommand.mainAlias, targetCol);
+          const keyField = findCommand._selectColumn(
+            findCommand.mainAlias,
+            targetCol,
+          );
 
           const resultType = await col.association.getLast().resolveTarget();
           converter.addNestedProperty({
@@ -215,8 +249,16 @@ export class FindCommand {
     }
   }
 
-  private _selectColumn(tableAlias: string, el: ColumnFieldMetadata, prefix?: string, suffix?: string): string {
-    const fieldName = (prefix || '').toLowerCase() + el.fieldName.toUpperCase() + (suffix || '').toLowerCase();
+  private _selectColumn(
+    tableAlias: string,
+    el: ColumnFieldMetadata,
+    prefix?: string,
+    suffix?: string,
+  ): string {
+    const fieldName =
+      (prefix || '').toLowerCase() +
+      el.fieldName.toUpperCase() +
+      (suffix || '').toLowerCase();
     const fieldAlias = (tableAlias + '_' + fieldName).substring(0, 30);
     this._selectColumns[fieldAlias] = {
       field: el,
@@ -253,20 +295,33 @@ export class FindCommand {
               elName = '';
               break;
             }
-            const joinInfo = await joinAssociationGetLast(this._joins, col.association, tableAlias);
+            const joinInfo = await joinAssociationGetLast(
+              this._joins,
+              col.association,
+              tableAlias,
+            );
             tableAlias = joinInfo.joinAlias;
             _entityDef = joinInfo.targetEntity;
-          } else throw new Error(`Invalid column (${elName}) declared in sort property`);
+          } else
+            throw new Error(
+              `Invalid column (${elName}) declared in sort property`,
+            );
         }
         if (!elName) continue;
         elName = a.shift() || '';
       }
       const col = EntityMetadata.getField(_entityDef, elName);
-      if (!col) throw new Error(`Unknown field (${elName}) declared in sort property`);
-      if (!isColumnField(col)) throw new Error(`Can not sort by "${elName}", because it is not a data column`);
+      if (!col)
+        throw new Error(`Unknown field (${elName}) declared in sort property`);
+      if (!isColumnField(col))
+        throw new Error(
+          `Can not sort by "${elName}", because it is not a data column`,
+        );
 
       const dir = m[1] || '+';
-      out.push((dir || '') + tableAlias + '.' + prefix + col.fieldName + suffix);
+      out.push(
+        (dir || '') + tableAlias + '.' + prefix + col.fieldName + suffix,
+      );
     }
     this._sort = out;
   }
@@ -274,14 +329,24 @@ export class FindCommand {
   async execute(
     args: Pick<
       FindCommandArgs,
-      'connection' | 'distinct' | 'offset' | 'limit' | 'params' | 'onTransformRow' | 'prettyPrint'
+      | 'connection'
+      | 'distinct'
+      | 'offset'
+      | 'limit'
+      | 'params'
+      | 'onTransformRow'
+      | 'prettyPrint'
     >,
   ): Promise<any[]> {
     // Generate select query
-    const columnSqls = Object.keys(this._selectColumns).map(x => this._selectColumns[x].statement);
+    const columnSqls = Object.keys(this._selectColumns).map(
+      x => this._selectColumns[x].statement,
+    );
     if (!columnSqls.length) columnSqls.push('1');
 
-    const query = Select(...columnSqls).from(this.mainEntity.tableName + ' as ' + this.mainAlias);
+    const query = Select(...columnSqls).from(
+      this.mainEntity.tableName + ' as ' + this.mainAlias,
+    );
 
     if (args.distinct) query.distinct();
 
@@ -310,7 +375,12 @@ export class FindCommand {
 
     // Create objects
     if (resp.rows && resp.fields) {
-      return this.converter.transform(args.connection, resp.fields, resp.rows, args.onTransformRow);
+      return this.converter.transform(
+        args.connection,
+        resp.fields,
+        resp.rows,
+        args.onTransformRow,
+      );
     }
     return [];
   }
@@ -326,11 +396,15 @@ export class FindCommand {
   }
 }
 
-function extractSubFields(colNameLower: string, fields?: string[]): string[] | undefined {
+function extractSubFields(
+  colNameLower: string,
+  fields?: string[],
+): string[] | undefined {
   if (!(fields && fields.length)) return;
   if (fields) {
     return fields.reduce((trg: string[], v: string) => {
-      if (v.startsWith(colNameLower + '.')) trg.push(v.substring(colNameLower.length + 1).toLowerCase());
+      if (v.startsWith(colNameLower + '.'))
+        trg.push(v.substring(colNameLower.length + 1).toLowerCase());
       return trg;
     }, [] as string[]);
   }

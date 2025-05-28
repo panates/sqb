@@ -6,9 +6,12 @@ export class BaseEntity {
   private [REPOSITORY_KEY]?: Repository<any>;
 
   constructor(partial?: any) {
-    const fields = Entity.getColumnFieldNames(Object.getPrototypeOf(this).constructor);
+    const fields = Entity.getColumnFieldNames(
+      Object.getPrototypeOf(this).constructor,
+    );
     if (fields && partial) {
-      for (const k of fields) if (partial[k] !== undefined) this[k] = partial[k];
+      for (const k of fields)
+        if (partial[k] !== undefined) this[k] = partial[k];
     }
   }
 

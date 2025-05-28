@@ -43,6 +43,11 @@ export class CoalesceStatement extends Serializable {
   }
 
   protected __defaultSerialize(ctx: SerializeContext, o: any): string {
-    return 'coalesce(' + o.expressions.join(', ') + ')' + (this._alias ? ' ' + this._alias : '');
+    return (
+      'coalesce(' +
+      o.expressions.join(', ') +
+      ')' +
+      (this._alias ? ' ' + this._alias : '')
+    );
   }
 }

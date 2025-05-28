@@ -45,7 +45,10 @@ export class SelectQuery extends Query {
     for (const arg of column) {
       if (!arg) continue;
       if (Array.isArray(arg)) self.addColumn(...arg);
-      else this._columns.push(isSerializable(arg) ? arg : new FieldExpression(arg));
+      else
+        this._columns.push(
+          isSerializable(arg) ? arg : new FieldExpression(arg),
+        );
     }
     return this;
   }
@@ -171,12 +174,17 @@ export class SelectQuery extends Query {
       // columns part
       /* istanbul ignore else */
       if (o.columns) {
-        out += o.columns.indexOf('\n') >= 0 ? '\n\t' + o.columns + '\b' : ' ' + o.columns;
+        out +=
+          o.columns.indexOf('\n') >= 0
+            ? '\n\t' + o.columns + '\b'
+            : ' ' + o.columns;
       }
 
       // from part
       if (o.from) {
-        out += (o.columns.length > 60 || o.columns.indexOf('\n') >= 0 ? '\n' : ' ') + o.from;
+        out +=
+          (o.columns.length > 60 || o.columns.indexOf('\n') >= 0 ? '\n' : ' ') +
+          o.from;
       }
 
       // join part
@@ -206,13 +214,18 @@ export class SelectQuery extends Query {
         // t._serialize(ctx);
         if (s) {
           if (t instanceof SelectQuery) {
-            if (!t._alias) throw new TypeError('Alias required for sub-select in columns');
+            if (!t._alias)
+              throw new TypeError('Alias required for sub-select in columns');
             arr.push(s + ' ' + t._alias);
           } else arr.push(s);
         }
       }
     }
-    return ctx.serialize(SerializationType.SELECT_QUERY_COLUMNS, arr, () => printArray(arr) || '*');
+    return ctx.serialize(
+      SerializationType.SELECT_QUERY_COLUMNS,
+      arr,
+      () => printArray(arr) || '*',
+    );
   }
 
   /**
@@ -226,7 +239,8 @@ export class SelectQuery extends Query {
         /* istanbul ignore else */
         if (s) {
           if (t instanceof SelectQuery) {
-            if (!t._alias) throw new TypeError('Alias required for sub-select in "from"');
+            if (!t._alias)
+              throw new TypeError('Alias required for sub-select in "from"');
             arr.push('\n\t(' + s + ') ' + t._alias);
           } else arr.push(s);
         }
@@ -250,7 +264,9 @@ export class SelectQuery extends Query {
         if (s) arr.push(s);
       }
     }
-    return ctx.serialize(SerializationType.SELECT_QUERY_JOIN, arr, () => arr.join('\n'));
+    return ctx.serialize(SerializationType.SELECT_QUERY_JOIN, arr, () =>
+      arr.join('\n'),
+    );
   }
 
   /**

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // noinspection JSUnusedLocalSymbols
 
 import { Column, Entity, EntityMetadata, Link, PrimaryKey } from '@sqb/connect';

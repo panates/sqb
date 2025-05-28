@@ -1,11 +1,22 @@
-import { DynamicModule, Global, Inject, Module, OnApplicationShutdown, Provider } from '@nestjs/common';
+import {
+  DynamicModule,
+  Global,
+  Inject,
+  Module,
+  OnApplicationShutdown,
+  Provider,
+} from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { SqbClient } from '@sqb/connect';
 import * as crypto from 'crypto';
 import { defer } from 'rxjs';
 import * as rxjs from 'rxjs';
 import { SQB_MODULE_ID, SQB_MODULE_OPTIONS } from './sqb.constants.js';
-import { SqbModuleAsyncOptions, SqbModuleOptions, SqbOptionsFactory } from './sqb.interface.js';
+import {
+  SqbModuleAsyncOptions,
+  SqbModuleOptions,
+  SqbOptionsFactory,
+} from './sqb.interface.js';
 import { getSQBToken, handleRetry } from './sqb.utils.js';
 
 @Global()
@@ -38,7 +49,8 @@ export class SqbCoreModule implements OnApplicationShutdown {
     const connectionProvider = {
       provide: getSQBToken(options.name),
       inject: [SQB_MODULE_OPTIONS],
-      useFactory: async (sqbOptions: SqbModuleOptions) => this.createConnection(sqbOptions),
+      useFactory: async (sqbOptions: SqbModuleOptions) =>
+        this.createConnection(sqbOptions),
     };
 
     const asyncProviders = this.createAsyncProviders(options);
@@ -58,12 +70,17 @@ export class SqbCoreModule implements OnApplicationShutdown {
   }
 
   async onApplicationShutdown() {
-    const client = this.moduleRef.get<SqbClient>(getSQBToken(this.options.name));
+    const client = this.moduleRef.get<SqbClient>(
+      getSQBToken(this.options.name),
+    );
     if (client) await client.close(this.options.shutdownWaitMs);
   }
 
-  private static createAsyncProviders(options: SqbModuleAsyncOptions): Provider[] {
-    if (options.useExisting || options.useFactory) return [this.createAsyncOptionsProvider(options)];
+  private static createAsyncProviders(
+    options: SqbModuleAsyncOptions,
+  ): Provider[] {
+    if (options.useExisting || options.useFactory)
+      return [this.createAsyncOptionsProvider(options)];
 
     if (options.useClass) {
       return [
@@ -75,10 +92,14 @@ export class SqbCoreModule implements OnApplicationShutdown {
       ];
     }
 
-    throw new Error('Invalid configuration. Must provide useFactory, useClass or useExisting');
+    throw new Error(
+      'Invalid configuration. Must provide useFactory, useClass or useExisting',
+    );
   }
 
-  private static createAsyncOptionsProvider(options: SqbModuleAsyncOptions): Provider {
+  private static createAsyncOptionsProvider(
+    options: SqbModuleAsyncOptions,
+  ): Provider {
     if (options.useFactory) {
       return {
         provide: SQB_MODULE_OPTIONS,
@@ -90,14 +111,19 @@ export class SqbCoreModule implements OnApplicationShutdown {
     if (useClass) {
       return {
         provide: SQB_MODULE_OPTIONS,
-        useFactory: (optionsFactory: SqbOptionsFactory) => optionsFactory.createSqbOptions(options.name),
+        useFactory: (optionsFactory: SqbOptionsFactory) =>
+          optionsFactory.createSqbOptions(options.name),
         inject: [useClass],
       };
     }
-    throw new Error('Invalid configuration. Must provide useFactory, useClass or useExisting');
+    throw new Error(
+      'Invalid configuration. Must provide useFactory, useClass or useExisting',
+    );
   }
 
-  private static async createConnection(options: SqbModuleOptions): Promise<SqbClient> {
+  private static async createConnection(
+    options: SqbModuleOptions,
+  ): Promise<SqbClient> {
     const connectionToken = options.name;
     // NestJS 8
     // @ts-ignore

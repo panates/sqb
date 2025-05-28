@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // noinspection JSUnusedLocalSymbols
 
 import {
@@ -141,7 +141,9 @@ describe('Model / Data Column', () => {
     expect(meta!.name).toStrictEqual('MyEntity');
     expect(meta!.eventListeners).toBeDefined();
     expect(meta!.eventListeners['after-insert']).toBeDefined();
-    expect(meta!.eventListeners['after-insert'][0]).toStrictEqual(MyEntity.prototype.doAfterInsert);
+    expect(meta!.eventListeners['after-insert'][0]).toStrictEqual(
+      MyEntity.prototype.doAfterInsert,
+    );
   });
 
   it(`should validate @AfterInsert() decorator is used for function property`, () => {
@@ -166,12 +168,13 @@ describe('Model / Data Column', () => {
     expect(meta!.name).toStrictEqual('MyEntity');
     expect(meta!.eventListeners).toBeDefined();
     expect(meta!.eventListeners['after-destroy']).toBeDefined();
-    expect(meta!.eventListeners['after-destroy'][0]).toStrictEqual(MyEntity.prototype.doAfterDestroy);
+    expect(meta!.eventListeners['after-destroy'][0]).toStrictEqual(
+      MyEntity.prototype.doAfterDestroy,
+    );
   });
 
   it(`should validate @AfterDestroy() decorator is used for function property`, () => {
     expect(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class MyEntity {
         @AfterDestroy()
         declare notAFunction: 12;
@@ -192,7 +195,9 @@ describe('Model / Data Column', () => {
     expect(meta!.name).toStrictEqual('MyEntity');
     expect(meta!.eventListeners).toBeDefined();
     expect(meta!.eventListeners['after-update']).toBeDefined();
-    expect(meta!.eventListeners['after-update'][0]).toStrictEqual(MyEntity.prototype.doAfterUpdate);
+    expect(meta!.eventListeners['after-update'][0]).toStrictEqual(
+      MyEntity.prototype.doAfterUpdate,
+    );
   });
 
   it(`should validate @AfterUpdate() decorator is used for function property`, () => {
@@ -217,7 +222,9 @@ describe('Model / Data Column', () => {
     expect(meta!.name).toStrictEqual('MyEntity');
     expect(meta!.eventListeners).toBeDefined();
     expect(meta!.eventListeners['before-insert']).toBeDefined();
-    expect(meta!.eventListeners['before-insert'][0]).toStrictEqual(MyEntity.prototype.doBeforeInsert);
+    expect(meta!.eventListeners['before-insert'][0]).toStrictEqual(
+      MyEntity.prototype.doBeforeInsert,
+    );
   });
 
   it(`should validate @BeforeInsert() decorator is used for function property`, () => {
@@ -242,7 +249,9 @@ describe('Model / Data Column', () => {
     expect(meta!.name).toStrictEqual('MyEntity');
     expect(meta!.eventListeners).toBeDefined();
     expect(meta!.eventListeners['before-destroy']).toBeDefined();
-    expect(meta!.eventListeners['before-destroy'][0]).toStrictEqual(MyEntity.prototype.doBeforeDestroy);
+    expect(meta!.eventListeners['before-destroy'][0]).toStrictEqual(
+      MyEntity.prototype.doBeforeDestroy,
+    );
   });
 
   it(`should validate @BeforeDestroy() decorator is used for function property`, () => {
@@ -267,7 +276,9 @@ describe('Model / Data Column', () => {
     expect(meta!.name).toStrictEqual('MyEntity');
     expect(meta!.eventListeners).toBeDefined();
     expect(meta!.eventListeners['before-update']).toBeDefined();
-    expect(meta!.eventListeners['before-update'][0]).toStrictEqual(MyEntity.prototype.doBeforeUpdate);
+    expect(meta!.eventListeners['before-update'][0]).toStrictEqual(
+      MyEntity.prototype.doBeforeUpdate,
+    );
   });
 
   it(`should validate @BeforeUpdate() decorator is used for function property`, () => {

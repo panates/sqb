@@ -12,7 +12,9 @@ export class OracleSerializer implements SerializerExtension {
   dialect = 'oracle';
 
   isReservedWord(ctx, s) {
-    return s && typeof s === 'string' && reservedWords.includes(s.toLowerCase());
+    return (
+      s && typeof s === 'string' && reservedWords.includes(s.toLowerCase())
+    );
   }
 
   serialize(
@@ -45,14 +47,23 @@ export class OracleSerializer implements SerializerExtension {
     }
   }
 
-  private _serializeSelect(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction) {
+  private _serializeSelect(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ) {
     let out = defFn(ctx, o);
     const limit = o.limit || 0;
     const offset = Math.max(o.offset || 0, 0);
 
     if (limit || offset) {
       if (ctx.dialectVersion && ctx.dialectVersion >= '12') {
-        if (offset) out += '\nOFFSET ' + offset + ' ROWS' + (limit ? ' FETCH NEXT ' + limit + ' ROWS ONLY' : '');
+        if (offset)
+          out +=
+            '\nOFFSET ' +
+            offset +
+            ' ROWS' +
+            (limit ? ' FETCH NEXT ' + limit + ' ROWS ONLY' : '');
         else out += '\nFETCH FIRST ' + limit + ' ROWS ONLY';
       } else {
         if (offset || o.orderBy) {
@@ -75,23 +86,47 @@ export class OracleSerializer implements SerializerExtension {
     return out;
   }
 
-  private _serializeFrom(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeFrom(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     return defFn(ctx, o) || 'from dual';
   }
 
-  private _serializeComparison(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
-    if (o.right && o.right.expression?.startsWith(':') && Array.isArray(o.right?.value)) {
+  private _serializeComparison(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
+    if (
+      o.right &&
+      o.right.expression?.startsWith(':') &&
+      Array.isArray(o.right?.value)
+    ) {
       const s = o.right.expression.substring(1);
       if (ctx.params) delete ctx.params[s];
       if (ctx.preparedParams) delete ctx.preparedParams[s];
       if (ctx.paramOptions) delete ctx.paramOptions[s];
       o.right.expression = ctx.anyToSQL(o.right.value);
       o.right.isParam = false;
-      if (o.operatorType === 'eq') return defFn(ctx, { ...o, operatorType: OperatorType.is, symbol: 'in' });
-      if (o.operatorType === 'ne') return defFn(ctx, { ...o, operatorType: OperatorType.isNot, symbol: 'not in' });
+      if (o.operatorType === 'eq')
+        return defFn(ctx, {
+          ...o,
+          operatorType: OperatorType.is,
+          symbol: 'in',
+        });
+      if (o.operatorType === 'ne')
+        return defFn(ctx, {
+          ...o,
+          operatorType: OperatorType.isNot,
+          symbol: 'not in',
+        });
     } else if (
       (o.right?.expression && o.right?.expression === 'null') ||
-      (o.right && o.right?.value == null && (!o.right.expression || o.right.expression.startsWith(':')))
+      (o.right &&
+        o.right?.value == null &&
+        (!o.right.expression || o.right.expression.startsWith(':')))
     ) {
       if (o.right.expression?.startsWith(':')) {
         const s = o.right.expression.substring(1);
@@ -101,23 +136,48 @@ export class OracleSerializer implements SerializerExtension {
         o.right.expression = 'null';
         o.right.isParam = false;
       }
-      if (o.operatorType === 'eq') return defFn(ctx, { ...o, operatorType: OperatorType.is, symbol: 'is' });
-      if (o.operatorType === 'ne') return defFn(ctx, { ...o, operatorType: OperatorType.isNot, symbol: 'is not' });
+      if (o.operatorType === 'eq')
+        return defFn(ctx, {
+          ...o,
+          operatorType: OperatorType.is,
+          symbol: 'is',
+        });
+      if (o.operatorType === 'ne')
+        return defFn(ctx, {
+          ...o,
+          operatorType: OperatorType.isNot,
+          symbol: 'is not',
+        });
     }
     return defFn(ctx, o);
   }
 
-  private _serializeStringValue(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeStringValue(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     if (typeof o === 'string') {
-      if (o.match(/^\d{4}-\d{2}-\d{2}$/)) return 'to_date(' + o + ", 'yyyy-mm-dd')";
-      if (o.match(/^\d{4}-\d{2}-\d{2}T/)) return `to_timestamp_tz('${o}','yyyy-mm-dd"T"hh24:mi:sstzh:tzm')`;
+      if (o.match(/^\d{4}-\d{2}-\d{2}$/))
+        return 'to_date(' + o + ", 'yyyy-mm-dd')";
+      if (o.match(/^\d{4}-\d{2}-\d{2}T/))
+        return `to_timestamp_tz('${o}','yyyy-mm-dd"T"hh24:mi:sstzh:tzm')`;
     }
     return defFn(ctx, o);
   }
 
-  private _serializeDateValue(ctx: SerializeContext, o: any, defFn: DefaultSerializeFunction): string {
+  private _serializeDateValue(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
     const s = defFn(ctx, o);
-    return s && (s.length <= 12 ? 'to_date(' + s + ", 'yyyy-mm-dd')" : 'to_date(' + s + ", 'yyyy-mm-dd hh24:mi:ss')");
+    return (
+      s &&
+      (s.length <= 12
+        ? 'to_date(' + s + ", 'yyyy-mm-dd')"
+        : 'to_date(' + s + ", 'yyyy-mm-dd hh24:mi:ss')")
+    );
   }
 
   private _serializeBooleanValue(_ctx: SerializeContext, o: any): string {
@@ -150,7 +210,12 @@ export class OracleSerializer implements SerializerExtension {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     defFn: DefaultSerializeFunction,
   ): string {
-    return o.genName + '.' + (o.next ? 'nextval' : 'currval') + (o.alias ? ' ' + o.alias : '');
+    return (
+      o.genName +
+      '.' +
+      (o.next ? 'nextval' : 'currval') +
+      (o.alias ? ' ' + o.alias : '')
+    );
   }
 
   private _serializeReturning(): string {

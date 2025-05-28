@@ -7,8 +7,14 @@ export type SerializeFunction = (
   obj: any,
   defFn: DefaultSerializeFunction,
 ) => string | undefined;
-export type DefaultSerializeFunction = (ctx: SerializeContext, o: any) => string;
-export type IsReservedWordFunction = (ctx: SerializeContext, s: string) => boolean;
+export type DefaultSerializeFunction = (
+  ctx: SerializeContext,
+  o: any,
+) => string;
+export type IsReservedWordFunction = (
+  ctx: SerializeContext,
+  s: string,
+) => boolean;
 
 export interface SerializerExtension {
   dialect: string;

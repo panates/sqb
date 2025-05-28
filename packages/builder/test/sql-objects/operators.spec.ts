@@ -73,7 +73,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(And(Eq('id', 1), Eq('id', 2)));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where (id = 1 and id = 2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where (id = 1 and id = 2)',
+      );
     });
 
     it('should wrap native objects to operators', () => {
@@ -81,7 +83,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where({ and: [{ id: 1 }, { id: 2 }] }, { and: { id: 3 } });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where (id = 1 and id = 2) and (id = 3)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where (id = 1 and id = 2) and (id = 3)',
+      );
     });
   });
 
@@ -125,7 +129,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Or(Eq('id', 1), Eq('id', 2)));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where (id = 1 or id = 2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where (id = 1 or id = 2)',
+      );
     });
 
     it('should serialize complex', () => {
@@ -133,7 +139,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Or(And(Eq('id', 1), Eq('id', 2)), Eq('id', 3)));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where ((id = 1 and id = 2) or id = 3)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where ((id = 1 and id = 2) or id = 3)',
+      );
     });
 
     it('should wrap native objects to operators', () => {
@@ -141,7 +149,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where({ OR: [{ id: 1 }, { id: 2 }] });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where (id = 1 or id = 2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where (id = 1 or id = 2)',
+      );
     });
   });
 
@@ -173,7 +183,9 @@ describe('serialize "Operators"', () => {
       const query = Select()
         .from('table1')
         .where(Eq('id', Param('id')));
-      const result = query.generate(Object.assign({ params: { id: 1 } }, options));
+      const result = query.generate(
+        Object.assign({ params: { id: 1 } }, options),
+      );
       expect(result.sql).toStrictEqual('select * from table1 where id = :id');
       expect(result.params.id).toStrictEqual(1);
     });
@@ -181,7 +193,9 @@ describe('serialize "Operators"', () => {
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ a: 1, 'b=': 2, 'c =': 3 });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a = 1 and b = 2 and c = 3');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a = 1 and b = 2 and c = 3',
+      );
     });
 
     it('should use sub select sqls', () => {
@@ -189,7 +203,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where({ a: Select('i').from('table2') });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a = (select i from table2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a = (select i from table2)',
+      );
     });
   });
 
@@ -221,7 +237,9 @@ describe('serialize "Operators"', () => {
       const query = Select()
         .from('table1')
         .where(Ne('id', Param('id')));
-      const result = query.generate(Object.assign({ params: { id: 1 } }, options));
+      const result = query.generate(
+        Object.assign({ params: { id: 1 } }, options),
+      );
       expect(result.sql).toStrictEqual('select * from table1 where id != :id');
       expect(result.params.id).toStrictEqual(1);
     });
@@ -229,7 +247,9 @@ describe('serialize "Operators"', () => {
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a!=': 1, 'b !=': 2 });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a != 1 and b != 2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a != 1 and b != 2',
+      );
     });
   });
 
@@ -252,7 +272,9 @@ describe('serialize "Operators"', () => {
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a>': 1, 'b >': 2 });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a > 1 and b > 2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a > 1 and b > 2',
+      );
     });
   });
 
@@ -275,7 +297,9 @@ describe('serialize "Operators"', () => {
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a<': 1, 'b <': 2 });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a < 1 and b < 2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a < 1 and b < 2',
+      );
     });
   });
 
@@ -298,7 +322,9 @@ describe('serialize "Operators"', () => {
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a>=': 1, 'b >=': 2 });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a >= 1 and b >= 2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a >= 1 and b >= 2',
+      );
     });
   });
 
@@ -321,7 +347,9 @@ describe('serialize "Operators"', () => {
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a<=': 1, 'b <=': 2 });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a <= 1 and b <= 2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a <= 1 and b <= 2',
+      );
     });
   });
 
@@ -340,7 +368,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Between('id', 10, 20));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where id between 10 and 20');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id between 10 and 20',
+      );
     });
 
     it('should serialize with one arg', () => {
@@ -348,7 +378,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Between('id', [10]));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where id between 10 and 10');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id between 10 and 10',
+      );
     });
 
     it('should serialize with one array arg', () => {
@@ -356,7 +388,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Between('id', [10, 20]));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where id between 10 and 20');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id between 10 and 20',
+      );
     });
 
     it('should serialize params', () => {
@@ -374,7 +408,9 @@ describe('serialize "Operators"', () => {
           options,
         ),
       );
-      expect(result.sql).toStrictEqual('select * from table1 where id between :id1 and :id2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id between :id1 and :id2',
+      );
       expect(result.params.id1).toStrictEqual(1);
       expect(result.params.id2).toStrictEqual(5);
     });
@@ -384,7 +420,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where({ 'a btw': [1, 2], 'b between': 2 });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a between 1 and 2 and b between 2 and 2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a between 1 and 2 and b between 2 and 2',
+      );
     });
   });
 
@@ -403,7 +441,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(NotBetween('id', 10, 20));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where id not between 10 and 20');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id not between 10 and 20',
+      );
     });
 
     it('should serialize with one arg', () => {
@@ -411,7 +451,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(NotBetween('id', [10]));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where id not between 10 and 10');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id not between 10 and 10',
+      );
     });
 
     it('should serialize with one array arg', () => {
@@ -419,7 +461,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(NotBetween('id', [10, 20]));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where id not between 10 and 20');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id not between 10 and 20',
+      );
     });
 
     it('should serialize params', () => {
@@ -437,7 +481,9 @@ describe('serialize "Operators"', () => {
           options,
         ),
       );
-      expect(result.sql).toStrictEqual('select * from table1 where id not between :id1 and :id2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id not between :id1 and :id2',
+      );
       expect(result.params.id1).toStrictEqual(1);
       expect(result.params.id2).toStrictEqual(5);
     });
@@ -447,7 +493,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where({ 'a nbtw': [1, 2], 'b notBetween': 2 });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a not between 1 and 2 and b not between 2 and 2');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a not between 1 and 2 and b not between 2 and 2',
+      );
     });
   });
 
@@ -462,9 +510,13 @@ describe('serialize "Operators"', () => {
     });
 
     it('should serialize', () => {
-      const query = Select().from('table1').where(Like('name', "John's"), Like('id', '10'));
+      const query = Select()
+        .from('table1')
+        .where(Like('name', "John's"), Like('id', '10'));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual("select * from table1 where name like 'John''s' and id like '10'");
+      expect(result.sql).toStrictEqual(
+        "select * from table1 where name like 'John''s' and id like '10'",
+      );
     });
 
     it('should serialize params', () => {
@@ -481,7 +533,9 @@ describe('serialize "Operators"', () => {
           options,
         ),
       );
-      expect(result.sql).toStrictEqual('select * from table1 where name like :name');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where name like :name',
+      );
       expect(result.params.name).toStrictEqual('John');
     });
 
@@ -503,9 +557,13 @@ describe('serialize "Operators"', () => {
     });
 
     it('should serialize', () => {
-      const query = Select().from('table1').where(NotLike('name', "John's"), NotLike('id', '10'));
+      const query = Select()
+        .from('table1')
+        .where(NotLike('name', "John's"), NotLike('id', '10'));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual("select * from table1 where name not like 'John''s' and id not like '10'");
+      expect(result.sql).toStrictEqual(
+        "select * from table1 where name not like 'John''s' and id not like '10'",
+      );
     });
 
     it('should serialize params', () => {
@@ -522,14 +580,18 @@ describe('serialize "Operators"', () => {
           options,
         ),
       );
-      expect(result.sql).toStrictEqual('select * from table1 where name not like :name');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where name not like :name',
+      );
       expect(result.params.name).toStrictEqual('John');
     });
 
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a !like': '1' });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual("select * from table1 where a not like '1'");
+      expect(result.sql).toStrictEqual(
+        "select * from table1 where a not like '1'",
+      );
     });
   });
 
@@ -544,9 +606,13 @@ describe('serialize "Operators"', () => {
     });
 
     it('should serialize', () => {
-      const query = Select().from('table1').where(Ilike('name', "John's"), Ilike('id', '10'));
+      const query = Select()
+        .from('table1')
+        .where(Ilike('name', "John's"), Ilike('id', '10'));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual("select * from table1 where name ilike 'John''s' and id ilike '10'");
+      expect(result.sql).toStrictEqual(
+        "select * from table1 where name ilike 'John''s' and id ilike '10'",
+      );
     });
 
     it('should serialize params', () => {
@@ -563,14 +629,18 @@ describe('serialize "Operators"', () => {
           options,
         ),
       );
-      expect(result.sql).toStrictEqual('select * from table1 where name ilike :name');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where name ilike :name',
+      );
       expect(result.params.name).toStrictEqual('John');
     });
 
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a ilike': '1' });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual("select * from table1 where a ilike '1'");
+      expect(result.sql).toStrictEqual(
+        "select * from table1 where a ilike '1'",
+      );
     });
   });
 
@@ -585,9 +655,13 @@ describe('serialize "Operators"', () => {
     });
 
     it('should serialize', () => {
-      const query = Select().from('table1').where(NotILike('name', "John's"), NotILike('id', '10'));
+      const query = Select()
+        .from('table1')
+        .where(NotILike('name', "John's"), NotILike('id', '10'));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual(`select * from table1 where name not ilike 'John''s' and id not ilike '10'`);
+      expect(result.sql).toStrictEqual(
+        `select * from table1 where name not ilike 'John''s' and id not ilike '10'`,
+      );
     });
 
     it('should serialize params', () => {
@@ -604,14 +678,18 @@ describe('serialize "Operators"', () => {
           options,
         ),
       );
-      expect(result.sql).toStrictEqual('select * from table1 where name not ilike :name');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where name not ilike :name',
+      );
       expect(result.params.name).toStrictEqual('John');
     });
 
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a !ilike': '1' });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual("select * from table1 where a not ilike '1'");
+      expect(result.sql).toStrictEqual(
+        "select * from table1 where a not ilike '1'",
+      );
     });
   });
 
@@ -630,7 +708,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Or(In('id', 1), In('id', [4, 5, 6])));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where (id in (1) or id in (4,5,6))');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where (id in (1) or id in (4,5,6))',
+      );
     });
 
     it('should serialize params', () => {
@@ -656,7 +736,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where({ 'a in': 1, 'b in': [1, 2] });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a in (1) and b in (1,2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a in (1) and b in (1,2)',
+      );
     });
 
     it('should ignore if list is empty', () => {
@@ -683,7 +765,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Or(NotIn('id', 1), NotIn('id', [4, 5, 6])));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where (id not in (1) or id not in (4,5,6))');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where (id not in (1) or id not in (4,5,6))',
+      );
     });
 
     it('should serialize params', () => {
@@ -700,7 +784,9 @@ describe('serialize "Operators"', () => {
           options,
         ),
       );
-      expect(result.sql).toStrictEqual('select * from table1 where id not in :id');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id not in :id',
+      );
       expect(result.params.id).toStrictEqual([1, 2, 3]);
     });
 
@@ -709,7 +795,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where({ 'a !in': 1, 'b !in': [1, 2] });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a not in (1) and b not in (1,2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a not in (1) and b not in (1,2)',
+      );
     });
   });
 
@@ -732,7 +820,9 @@ describe('serialize "Operators"', () => {
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a.a is': null });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a.a is null');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a.a is null',
+      );
     });
   });
 
@@ -749,13 +839,17 @@ describe('serialize "Operators"', () => {
     it('should serialize', () => {
       const query = Select().from('table1').where(IsNot('id', null));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where id is not null');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id is not null',
+      );
     });
 
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ 'a !is': null });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where a is not null');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where a is not null',
+      );
     });
   });
 
@@ -774,13 +868,17 @@ describe('serialize "Operators"', () => {
     it('should serialize', () => {
       const query = Select().from('table1').where(Exists(q));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where exists (select * from table2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where exists (select * from table2)',
+      );
     });
 
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ exists: q });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where exists (select * from table2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where exists (select * from table2)',
+      );
     });
   });
 
@@ -799,13 +897,17 @@ describe('serialize "Operators"', () => {
     it('should serialize', () => {
       const query = Select().from('table1').where(NotExists(q));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where not exists (select * from table2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where not exists (select * from table2)',
+      );
     });
 
     it('should wrap native objects to operators', () => {
       const query = Select().from('table1').where({ '!exists': q });
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where not exists (select * from table2)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where not exists (select * from table2)',
+      );
     });
   });
 
@@ -824,7 +926,9 @@ describe('serialize "Operators"', () => {
     it('should serialize', () => {
       const query = Select().from('table1').where(Not(q));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where not field1 = 1');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where not field1 = 1',
+      );
     });
   });
 
@@ -837,7 +941,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Eq(Select('id').from('table'), 1));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where (select id from table) = 1');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where (select id from table) = 1',
+      );
     });
 
     it('should use raw as expression', () => {
@@ -853,7 +959,9 @@ describe('serialize "Operators"', () => {
         .from('table1')
         .where(Eq('id', Select('id').from('table')));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1 where id = (select id from table)');
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id = (select id from table)',
+      );
     });
 
     it('should use raw as value', () => {
@@ -896,11 +1004,15 @@ describe('serialize "Operators"', () => {
     });
 
     it('should validate when wrapping native objects to operators', () => {
-      expect(() => Select().from('table1').where({ '#id=': 3 })).toThrow('is not a valid');
+      expect(() => Select().from('table1').where({ '#id=': 3 })).toThrow(
+        'is not a valid',
+      );
     });
 
     it('should validate when wrapping native objects to operators', () => {
-      expect(() => Select().from('table1').where({ 'id non': 3 })).toThrow('Unknown operator');
+      expect(() => Select().from('table1').where({ 'id non': 3 })).toThrow(
+        'Unknown operator',
+      );
     });
   });
 });

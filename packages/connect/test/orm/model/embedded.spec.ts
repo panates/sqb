@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Column, Embedded, Entity, EntityMetadata } from '@sqb/connect';
 
 describe('Model / Embedded object element', () => {

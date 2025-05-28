@@ -25,7 +25,9 @@ describe('serialize "Max"', () => {
   it('should serialize sub query', () => {
     const query = Select(Max(Select().from('table2'))).from('table1');
     const result = query.generate(options);
-    expect(result.sql).toStrictEqual(`select max((select * from table2)) from table1`);
+    expect(result.sql).toStrictEqual(
+      `select max((select * from table2)) from table1`,
+    );
   });
 
   it('should serialize alias', () => {

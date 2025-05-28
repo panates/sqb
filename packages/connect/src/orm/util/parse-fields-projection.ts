@@ -14,7 +14,10 @@ export namespace FieldsProjection {
   }
 }
 
-export function parseFieldsProjection(projection: string | string[], keepCase?: boolean): FieldsProjection | undefined {
+export function parseFieldsProjection(
+  projection: string | string[],
+  keepCase?: boolean,
+): FieldsProjection | undefined {
   const arr = Array.isArray(projection) ? projection : [projection];
   if (!(arr && arr.length)) return;
   const out = new FieldsProjection();
@@ -27,7 +30,10 @@ export function parseFieldsProjection(projection: string | string[], keepCase?: 
 
 function parse(input: string, target: FieldsProjection) {
   /** Add dot before brackets which is required to split fields */
-  input = input.replace(NO_DOT_BRACKET_PATTERN, s => s.charAt(0) + '.' + s.substring(1));
+  input = input.replace(
+    NO_DOT_BRACKET_PATTERN,
+    s => s.charAt(0) + '.' + s.substring(1),
+  );
   const fields = splitString(input, {
     delimiters: '.',
     brackets: true,
@@ -51,13 +57,15 @@ function parse(input: string, target: FieldsProjection) {
     if (!m) throw new TypeError(`Invalid field path (${input})`);
 
     const fieldName = m[2];
-    const treeItem = (target[fieldName] = target[fieldName] || new FieldsProjection.Item());
+    const treeItem = (target[fieldName] =
+      target[fieldName] || new FieldsProjection.Item());
     if (m[1]) treeItem.sign = m[1];
 
     if (i === fields.length - 1) {
       delete treeItem.projection;
     } else {
-      target = treeItem.projection = treeItem.projection || new FieldsProjection();
+      target = treeItem.projection =
+        treeItem.projection || new FieldsProjection();
     }
   }
 }

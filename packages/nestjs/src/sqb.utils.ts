@@ -11,7 +11,9 @@ const logger = new Logger('SqbModule');
  * a SqbClient, or a ConnectionOptions or a string.
  * @returns {string | symbol} The Connection injection token.
  */
-export function getSQBToken(name?: string | symbol | Type<SqbClient>): string | symbol | Type<SqbClient> {
+export function getSQBToken(
+  name?: string | symbol | Type<SqbClient>,
+): string | symbol | Type<SqbClient> {
   if (!name) return SqbClient;
   if (typeof name === 'symbol' || typeof name === 'function') return name;
   return `${name}_SqbConnection`;
@@ -33,8 +35,12 @@ export function handleRetry(
               throw error;
             }
             const connectionInfo =
-              !connectionName || connectionName === SqbClient ? 'default' : ` (${String(connectionName)})`;
-            const verboseMessage = verboseRetryLog ? ` Message: ${error.message}.` : '';
+              !connectionName || connectionName === SqbClient
+                ? 'default'
+                : ` (${String(connectionName)})`;
+            const verboseMessage = verboseRetryLog
+              ? ` Message: ${error.message}.`
+              : '';
 
             logger.error(
               `Unable to connect to the database ${connectionInfo}.${verboseMessage} Retrying (${errorCount + 1})...`,

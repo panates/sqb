@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { Adapter, ArrayRowset, ObjectRowset } from '@sqb/connect';
 import {
   applyNamingStrategy,
@@ -25,37 +24,65 @@ describe('Helpers', () => {
 
   describe('applyNamingStrategy', () => {
     it('should return given value as lowercase', () => {
-      expect(applyNamingStrategy('hello_world', 'lowercase')).toStrictEqual('hello_world');
+      expect(applyNamingStrategy('hello_world', 'lowercase')).toStrictEqual(
+        'hello_world',
+      );
       // @ts-ignore
-      expect(applyNamingStrategy('Hello_World', 'LowerCase')).toStrictEqual('hello_world');
+      expect(applyNamingStrategy('Hello_World', 'LowerCase')).toStrictEqual(
+        'hello_world',
+      );
     });
 
     it('should return given value as uppercase', () => {
-      expect(applyNamingStrategy('hello_world', 'uppercase')).toStrictEqual('HELLO_WORLD');
+      expect(applyNamingStrategy('hello_world', 'uppercase')).toStrictEqual(
+        'HELLO_WORLD',
+      );
       // @ts-ignore
-      expect(applyNamingStrategy('Hello_World', 'UpperCase')).toStrictEqual('HELLO_WORLD');
+      expect(applyNamingStrategy('Hello_World', 'UpperCase')).toStrictEqual(
+        'HELLO_WORLD',
+      );
     });
 
     it('should return given value as camelcase', () => {
-      expect(applyNamingStrategy('helloWorld', 'camelcase')).toStrictEqual('helloWorld');
-      expect(applyNamingStrategy('HELLO_WORLD', 'camelcase')).toStrictEqual('helloWorld');
-      expect(applyNamingStrategy('hello_world', 'camelcase')).toStrictEqual('helloWorld');
-      expect(applyNamingStrategy('Hello_World', 'camelcase')).toStrictEqual('helloWorld');
+      expect(applyNamingStrategy('helloWorld', 'camelcase')).toStrictEqual(
+        'helloWorld',
+      );
+      expect(applyNamingStrategy('HELLO_WORLD', 'camelcase')).toStrictEqual(
+        'helloWorld',
+      );
+      expect(applyNamingStrategy('hello_world', 'camelcase')).toStrictEqual(
+        'helloWorld',
+      );
+      expect(applyNamingStrategy('Hello_World', 'camelcase')).toStrictEqual(
+        'helloWorld',
+      );
     });
 
     it('should return given value as pascalcase', () => {
-      expect(applyNamingStrategy('helloWorld', 'pascalcase')).toStrictEqual('HelloWorld');
-      expect(applyNamingStrategy('HELLO_WORLD', 'pascalcase')).toStrictEqual('HelloWorld');
-      expect(applyNamingStrategy('hello_world', 'pascalcase')).toStrictEqual('HelloWorld');
-      expect(applyNamingStrategy('Hello_World', 'pascalcase')).toStrictEqual('HelloWorld');
+      expect(applyNamingStrategy('helloWorld', 'pascalcase')).toStrictEqual(
+        'HelloWorld',
+      );
+      expect(applyNamingStrategy('HELLO_WORLD', 'pascalcase')).toStrictEqual(
+        'HelloWorld',
+      );
+      expect(applyNamingStrategy('hello_world', 'pascalcase')).toStrictEqual(
+        'HelloWorld',
+      );
+      expect(applyNamingStrategy('Hello_World', 'pascalcase')).toStrictEqual(
+        'HelloWorld',
+      );
     });
 
     it('should use custom function', () => {
-      expect(applyNamingStrategy('hello_world', x => x.toUpperCase())).toStrictEqual('HELLO_WORLD');
+      expect(
+        applyNamingStrategy('hello_world', x => x.toUpperCase()),
+      ).toStrictEqual('HELLO_WORLD');
     });
 
     it('should do nothing if no strategy given', () => {
-      expect(applyNamingStrategy('hello_world', undefined)).toStrictEqual('hello_world');
+      expect(applyNamingStrategy('hello_world', undefined)).toStrictEqual(
+        'hello_world',
+      );
     });
   });
 
@@ -129,7 +156,9 @@ describe('Helpers', () => {
 
     it('should remove null field values ignoreNulls == true', () => {
       const fields = wrapAdapterFields(adapterFields, 'camelcase');
-      const rows = normalizeRowsToObjectRows(fields, 'object', objectRows, { ignoreNulls: true });
+      const rows = normalizeRowsToObjectRows(fields, 'object', objectRows, {
+        ignoreNulls: true,
+      });
       expect(rows[0].fieldName1).toStrictEqual('a');
       expect(rows[0].fieldName2).toStrictEqual('b');
       expect(rows[0].fieldName3).toStrictEqual(undefined);

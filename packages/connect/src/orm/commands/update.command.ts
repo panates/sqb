@@ -30,7 +30,10 @@ export class UpdateCommand {
   static async execute(args: UpdateCommandArgs): Promise<number> {
     const { entity } = args;
     const tableName = entity.tableName;
-    if (!tableName) throw new Error(`${entity.ctor.name} is not decorated with @Entity decorator`);
+    if (!tableName)
+      throw new Error(
+        `${entity.ctor.name} is not decorated with @Entity decorator`,
+      );
 
     // Create a context
     const ctx: UpdateCommandContext = {
@@ -46,7 +49,9 @@ export class UpdateCommand {
     if (!ctx.colCount) return 0;
 
     if (args.filter) await this._prepareFilter(ctx, args.filter);
-    const query = Update(tableName + ' as T', ctx.queryValues).where(...ctx.queryFilter);
+    const query = Update(tableName + ' as T', ctx.queryValues).where(
+      ...ctx.queryFilter,
+    );
     const qr = await args.connection.execute(query, {
       params: args.params ? [...args.params, ctx.queryParams] : ctx.queryParams,
       objectRows: false,
@@ -55,7 +60,10 @@ export class UpdateCommand {
     return qr.rowsAffected || 0;
   }
 
-  protected static async _prepareFilter(ctx: UpdateCommandContext, filter: any) {
+  protected static async _prepareFilter(
+    ctx: UpdateCommandContext,
+    filter: any,
+  ) {
     if (filter) {
       const where = And();
       await prepareFilter(ctx.entity, filter, where);
@@ -79,7 +87,10 @@ export class UpdateCommand {
       if (isColumnField(col)) {
         if (col.noUpdate) continue;
         if (typeof col.serialize === 'function') v = col.serialize(v, col.name);
-        if (v === null && col.notNull) throw new Error(`${entity.name}.${col.name} is required and can't be null`);
+        if (v === null && col.notNull)
+          throw new Error(
+            `${entity.name}.${col.name} is required and can't be null`,
+          );
         if (v === undefined) continue;
         ColumnFieldMetadata.checkEnumValue(col, v);
         const fieldName = prefix + col.fieldName + suffix;
@@ -93,7 +104,13 @@ export class UpdateCommand {
         ctx.colCount++;
       } else if (v != null && isEmbeddedField(col)) {
         const type = await EmbeddedFieldMetadata.resolveType(col);
-        await this._prepareParams(ctx, type, v, col.fieldNamePrefix, col.fieldNameSuffix);
+        await this._prepareParams(
+          ctx,
+          type,
+          v,
+          col.fieldNamePrefix,
+          col.fieldNameSuffix,
+        );
       }
     }
   }

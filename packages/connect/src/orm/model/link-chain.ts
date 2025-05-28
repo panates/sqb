@@ -28,11 +28,19 @@ export class LinkChain<T> {
     return this;
   }
 
-  linkToOne<K>(target: Type<K> | TypeResolver<K>, targetColumn?: keyof K, parentColumn?: keyof T): LinkChain<K> {
+  linkToOne<K>(
+    target: Type<K> | TypeResolver<K>,
+    targetColumn?: keyof K,
+    parentColumn?: keyof T,
+  ): LinkChain<K> {
     return this._newNode(target, targetColumn, parentColumn);
   }
 
-  linkToMany<K>(target: Type<K> | TypeResolver<K>, targetColumn?: keyof K, parentColumn?: keyof T): LinkChain<K> {
+  linkToMany<K>(
+    target: Type<K> | TypeResolver<K>,
+    targetColumn?: keyof K,
+    parentColumn?: keyof T,
+  ): LinkChain<K> {
     return this._newNode(target, targetColumn, parentColumn, true);
   }
 
