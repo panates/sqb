@@ -1,7 +1,7 @@
 {
   "name": "@sqb/oracle",
   "description": "SQB serialization extension for Oracle database",
-  "version": "4.19.6",
+  "version": "4.20.0",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -26,9 +26,9 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^4.19.6",
-    "@sqb/connect": "^4.19.6",
-    "@sqb/oracle-dialect": "^4.19.6",
+    "@sqb/builder": "^4.20.0",
+    "@sqb/connect": "^4.20.0",
+    "@sqb/oracle-dialect": "^4.20.0",
     "oracledb": ">= 6.4.0"
   },
   "devDependencies": {
