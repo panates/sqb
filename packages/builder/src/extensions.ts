@@ -29,7 +29,7 @@ export class SerializerRegistry {
   }
 
   static unRegister(...extensions: SerializerExtension[]) {
-    this.serializers = extensions.filter(x => !extensions.includes(x));
+    this.serializers = this.serializers.filter(x => !extensions.includes(x));
   }
 
   static getAll(dialect: string): SerializerExtension[] {
