@@ -1,7 +1,7 @@
 {
   "name": "@sqb/sqlite-dialect",
   "description": "SQB serialization extension for SQLite database",
-  "version": "4.19.6",
+  "version": "4.20.0",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -26,7 +26,7 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^4.19.6"
+    "@sqb/builder": "^4.20.0"
   },
   "devDependencies": {
     "expect": "^30.0.5"
