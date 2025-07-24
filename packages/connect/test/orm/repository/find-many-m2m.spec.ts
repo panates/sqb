@@ -1,15 +1,16 @@
 import { SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { Customer } from '../../_support/customer.entity.js';
 import { initClient } from '../../_support/init-client.js';
 
-describe('Repository.findMany() (ManyToMany)', () => {
+describe('connect:Repository.findMany() (ManyToMany)', () => {
   let client: SqbClient;
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 

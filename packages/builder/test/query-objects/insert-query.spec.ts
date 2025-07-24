@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   Insert,
   Param,
@@ -6,7 +7,7 @@ import {
   SerializationType,
 } from '../../src/index.js';
 
-describe('Serialize insert query', () => {
+describe('builder:Serialize insert query', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

@@ -1,17 +1,18 @@
 import { Select } from '@sqb/builder';
 import { Cursor, SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { SqbConnection } from '../../src/client/sqb-connection.js';
 import { initClient } from '../_support/init-client.js';
 
-describe('Cursor', () => {
+describe('connect:Cursor', () => {
   let client: SqbClient;
   let cursor: Cursor | undefined;
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient({ defaults: { cursor: true, objectRows: true } });
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 

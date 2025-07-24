@@ -2,8 +2,6 @@
   "extends": "../../tsconfig-base.json",
   "include": ["src"],
   "compilerOptions": {
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "baseUrl": "./",
     "paths": {
       "@sqb/builder": ["../builder/src/index.ts"],

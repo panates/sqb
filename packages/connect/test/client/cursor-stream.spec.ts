@@ -1,5 +1,6 @@
 import { Select } from '@sqb/builder';
 import { Cursor, SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { Readable } from 'stream';
 import { SqbConnection } from '../../src/client/sqb-connection.js';
 import { initClient } from '../_support/init-client.js';
@@ -36,15 +37,15 @@ function readObjectStream(stream: Readable): Promise<any> {
   });
 }
 
-describe('CursorStream', () => {
+describe('connect:CursorStream', () => {
   let client: SqbClient;
   let cursor: Cursor;
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient({ defaults: { cursor: true, objectRows: true } });
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 

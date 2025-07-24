@@ -12,7 +12,7 @@ import * as crypto from 'crypto';
 import { defer } from 'rxjs';
 import * as rxjs from 'rxjs';
 import { SQB_MODULE_ID, SQB_MODULE_OPTIONS } from './sqb.constants.js';
-import {
+import type {
   SqbModuleAsyncOptions,
   SqbModuleOptions,
   SqbOptionsFactory,

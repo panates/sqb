@@ -1,10 +1,12 @@
+import { getDirname } from 'cross-dirname';
+import { expect } from 'expect';
 import {
   isInsertDataMigrationTask,
   isSqlScriptMigrationTask,
   MigrationPackage,
 } from '../src/migration-package.js';
 
-describe('MigrationPackage', () => {
+describe('migrator:MigrationPackage', () => {
   it('should load sync', async () => {
     const pkg = await MigrationPackage.load({
       name: 'test',
@@ -17,7 +19,7 @@ describe('MigrationPackage', () => {
     });
     expect(pkg).toEqual({
       name: 'test',
-      baseDir: __dirname,
+      baseDir: getDirname(),
       migrations: [
         {
           version: 1,
@@ -40,7 +42,7 @@ describe('MigrationPackage', () => {
     });
     expect(pkg).toEqual({
       name: 'test',
-      baseDir: __dirname,
+      baseDir: getDirname(),
       migrations: [
         {
           version: 1,
@@ -63,7 +65,7 @@ describe('MigrationPackage', () => {
     });
     expect(pkg).toEqual({
       name: 'test',
-      baseDir: __dirname,
+      baseDir: getDirname(),
       migrations: [
         {
           version: 1,

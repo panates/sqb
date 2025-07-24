@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Select } from '../../src/index.js';
 
-describe('serialize "GroupColumn"', () => {
+describe('builder:serialize "GroupColumn"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

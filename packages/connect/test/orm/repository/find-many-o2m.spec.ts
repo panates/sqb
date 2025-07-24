@@ -1,22 +1,23 @@
 import { Eq, In } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { Continent } from '../../_support/continent.entity.js';
 import { Country } from '../../_support/country.entity.js';
 import { Customer } from '../../_support/customer.entity.js';
 import { initClient } from '../../_support/init-client.js';
 
-describe('Repository.findMany() (OneToMany)', () => {
+describe('connect:Repository.findMany() (OneToMany)', () => {
   let client: SqbClient;
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 
-  describe('linkToMany', () => {
+  describe('connect:linkToMany', () => {
     it('return associated rows as array property', async () => {
       const repo = client.getRepository(Continent);
       const rows = await repo.findMany({
@@ -178,7 +179,7 @@ describe('Repository.findMany() (OneToMany)', () => {
     });
   });
 
-  describe('linkFromMany', () => {
+  describe('connect:linkFromMany', () => {
     it('return associated rows as array property', async () => {
       const repo = client.getRepository(Country);
       const rows = await repo.findMany({
@@ -294,7 +295,7 @@ describe('Repository.findMany() (OneToMany)', () => {
     });
   });
 
-  describe('Association chain', () => {
+  describe('connect:Association chain', () => {
     it('associations with target conditions', async () => {
       const repo = client.getRepository(Country);
       const rows = await repo.findMany({

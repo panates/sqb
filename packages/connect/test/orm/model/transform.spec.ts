@@ -1,6 +1,7 @@
 import { Entity, EntityMetadata, Parse, Serialize } from '@sqb/connect';
+import { expect } from 'expect';
 
-describe('Model / Parse', () => {
+describe('connect:Model / Parse', () => {
   it(`should @Parse() decorator set "parse" property of metadata`, () => {
     const fn = v => '>' + v;
 
@@ -18,7 +19,7 @@ describe('Model / Parse', () => {
   });
 });
 
-describe('Model / Serialize', () => {
+describe('connect:Model / Serialize', () => {
   it(`should @Serialize() decorator set "parse" property of metadata`, () => {
     const fn = v => '>' + v;
 

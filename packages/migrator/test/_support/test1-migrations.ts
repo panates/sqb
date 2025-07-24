@@ -1,8 +1,9 @@
+import { getDirname } from 'cross-dirname';
 import { MigrationPackageConfig } from '../../src/index.js';
 
 export const Test1MigrationPackage: MigrationPackageConfig = {
   name: 'Test',
-  baseDir: __dirname,
+  baseDir: getDirname(),
   migrations: [
     {
       version: 10,

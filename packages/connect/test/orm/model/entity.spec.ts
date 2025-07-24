@@ -1,6 +1,7 @@
 import { BaseEntity, Column, Entity, Link, PrimaryKey } from '@sqb/connect';
+import { expect } from 'expect';
 
-describe('Model / Entity', () => {
+describe('connect:Model / Entity', () => {
   it(`should @Entity() decorator attach metadata to class`, () => {
     @Entity()
     class MyEntity {}

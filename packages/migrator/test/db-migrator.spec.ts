@@ -5,7 +5,7 @@ import { DbMigrator, DbMigratorOptions } from '../src/index.js';
 import { Test1MigrationPackage } from './_support/test1-migrations.js';
 import { Test2MigrationPackage } from './_support/test2-migrations.js';
 
-describe('DbMigrator', () => {
+describe('migrator:DbMigrator', () => {
   const connectionConfig: ClientConfiguration = {
     dialect: 'postgres',
     database: 'sqb_test',
@@ -16,7 +16,7 @@ describe('DbMigrator', () => {
   };
   let connection: Connection;
 
-  beforeAll(async () => {
+  before(async () => {
     connection = new Connection({ database: 'postgres' });
     await connection.connect();
     const r = await connection.query(
@@ -39,7 +39,7 @@ describe('DbMigrator', () => {
     );
   });
 
-  afterAll(async () => {
+  after(async () => {
     await connection.close(0);
   });
 
@@ -144,7 +144,8 @@ describe('DbMigrator', () => {
     });
 
     const r = await connection.query(
-      `SELECT id, name FROM ${connectionConfig.schema}.table1`,
+      `SELECT id, name
+       FROM ${connectionConfig.schema}.table1`,
     );
     assert.ok(r.rows);
     assert.strictEqual(r.rows?.length, 2);
@@ -178,7 +179,8 @@ describe('DbMigrator', () => {
     assert.strictEqual(r.rows[0][0], 'table4');
 
     r = await connection.query(
-      `SELECT id, name FROM ${connectionConfig.schema}.table3`,
+      `SELECT id, name
+       FROM ${connectionConfig.schema}.table3`,
     );
     assert.ok(r.rows);
     assert.strictEqual(r.rows.length, 4);

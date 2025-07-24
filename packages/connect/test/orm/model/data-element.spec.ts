@@ -13,8 +13,9 @@ import {
   Entity,
   EntityMetadata,
 } from '@sqb/connect';
+import { expect } from 'expect';
 
-describe('Model / Data Column', () => {
+describe('connect:Model / Data Column', () => {
   it(`should @Column() decorator init column metadata`, () => {
     class MyEntity {
       @Column()

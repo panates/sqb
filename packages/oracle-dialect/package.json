@@ -15,7 +15,7 @@
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier . --write --log-level=warn",
     "check": "madge --circular src/**",
-    "test": "jest --runInBand",
+    "test": "mocha",
     "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
     "clean:src": "ts-cleanup -s src --all",
     "clean:test": "ts-cleanup -s test --all",
@@ -27,6 +27,9 @@
   },
   "peerDependencies": {
     "@sqb/builder": "^4.19.6"
+  },
+  "devDependencies": {
+    "expect": "^30.0.5"
   },
   "type": "module",
   "exports": {
@@ -52,12 +55,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/sqbjs/sqb.git",
+    "url": "https://github.com/panates/sqb.git",
     "directory": "packages/oracle-dialect"
   },
   "engines": {
-    "node": ">=16.0",
-    "npm": ">=7.0.0"
+    "node": ">=18.0"
   },
   "files": [
     "bin/",

@@ -2,6 +2,7 @@
 // noinspection JSUnusedLocalSymbols
 
 import { Column, Entity, EntityMetadata, Link, PrimaryKey } from '@sqb/connect';
+import { expect } from 'expect';
 import { isAssociationField } from '../../../src/orm/util/orm.helper.js';
 
 class Country {
@@ -22,7 +23,7 @@ class BaseCustomer {
   declare countryCode: string;
 }
 
-describe('Model / Link field', () => {
+describe('connect:Model / Link field', () => {
   it(`should @Link() decorator define association element`, () => {
     class Customer extends BaseCustomer {
       @(Link().toOne(Country))

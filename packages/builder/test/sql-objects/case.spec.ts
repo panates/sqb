@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   Case,
   Eq,
@@ -7,7 +8,7 @@ import {
   SerializationType,
 } from '../../src/index.js';
 
-describe('serialize "Case"', () => {
+describe('builder:serialize "Case"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

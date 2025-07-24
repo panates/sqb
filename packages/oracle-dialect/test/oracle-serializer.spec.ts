@@ -6,14 +6,15 @@ import {
   SerializerRegistry,
   StringAGG,
 } from '@sqb/builder';
+import { expect } from 'expect';
 import { OracleSerializer } from '../src/oracle-serializer.js';
 
-describe('OracleSerializer', () => {
+describe('oracle-dialect:OracleSerializer', () => {
   const oracleSerializer = new OracleSerializer();
-  beforeAll(() => SerializerRegistry.register(oracleSerializer));
-  afterAll(() => SerializerRegistry.unRegister(oracleSerializer));
+  before(() => SerializerRegistry.register(oracleSerializer));
+  after(() => SerializerRegistry.unRegister(oracleSerializer));
 
-  describe('all versions', () => {
+  describe('oracle-dialect:all versions', () => {
     it('should use dual when no table given', () => {
       const query = Select().from();
       const result = query.generate({ dialect: 'oracle' });
@@ -117,7 +118,7 @@ describe('OracleSerializer', () => {
     });
   });
 
-  describe('Oracle version < 12', () => {
+  describe('oracle-dialect:Oracle version < 12', () => {
     it('should serialize "limit"', () => {
       const query = Select().from('table1').limit(10);
       const result = query.generate({ dialect: 'oracle' });
@@ -195,7 +196,7 @@ describe('OracleSerializer', () => {
     });
   });
 
-  describe('Oracle version >= 12', () => {
+  describe('oracle-dialect:Oracle version >= 12', () => {
     it('should serialize "limit"', () => {
       const query = Select().from('table1').limit(10);
       const result = query.generate({

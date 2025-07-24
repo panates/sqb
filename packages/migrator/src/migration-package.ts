@@ -211,9 +211,9 @@ async function loadMigrations(
     const ext = path.extname(filename).toLowerCase();
     if (path.basename(filename, ext) !== 'migration') continue;
     let json: any;
-    if (['.js', '.ts', '.cjs', '.mjs'].includes(ext)) {
+    if (['.js', '.ts', '.cjs', '.mjs', 'mts', 'cts'].includes(ext)) {
       json = await import(filename);
-      if (json.__esModule) json = json.default;
+      if (json.default?.version) json = json.default;
     } else if (ext === '.json') {
       try {
         json = JSON.parse(await fs.readFile(filename, 'utf-8'));

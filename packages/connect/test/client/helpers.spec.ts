@@ -1,4 +1,5 @@
 import { Adapter, ArrayRowset, ObjectRowset } from '@sqb/connect';
+import { expect } from 'expect';
 import {
   applyNamingStrategy,
   normalizeRowsToArrayRows,
@@ -6,7 +7,7 @@ import {
   wrapAdapterFields,
 } from '../../src/client/helpers.js';
 
-describe('Helpers', () => {
+describe('connect:Helpers', () => {
   const arrayRows: ArrayRowset = [
     ['a', 'b', null],
     ['c', 'd', null],
@@ -22,7 +23,7 @@ describe('Helpers', () => {
     { fieldName: 'field_name3' },
   ] as Adapter.Field[];
 
-  describe('applyNamingStrategy', () => {
+  describe('connect:applyNamingStrategy', () => {
     it('should return given value as lowercase', () => {
       expect(applyNamingStrategy('hello_world', 'lowercase')).toStrictEqual(
         'hello_world',
@@ -86,7 +87,7 @@ describe('Helpers', () => {
     });
   });
 
-  describe('normalizeFieldMap', () => {
+  describe('connect:normalizeFieldMap', () => {
     it('should convert Adapter.Field[] to FieldInfoMap', () => {
       const fields = wrapAdapterFields(adapterFields);
       expect(!Array.isArray(fields)).toBeTruthy();
@@ -105,7 +106,7 @@ describe('Helpers', () => {
     });
   });
 
-  describe('normalizeRowsToObjectRows', () => {
+  describe('connect:normalizeRowsToObjectRows', () => {
     it('should convert array rows to object rows', () => {
       const fields = wrapAdapterFields(adapterFields);
       const rows = normalizeRowsToObjectRows(fields, 'array', arrayRows as any);
@@ -174,7 +175,7 @@ describe('Helpers', () => {
     });
   });
 
-  describe('normalizeRowsToArrayRows', () => {
+  describe('connect:normalizeRowsToArrayRows', () => {
     it('should convert object rows to array rows if objectRows = false', () => {
       const fields = wrapAdapterFields(adapterFields);
       const rows = normalizeRowsToArrayRows(fields, 'object', objectRows);

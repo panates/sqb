@@ -1,6 +1,7 @@
 import { Column, Embedded, Entity, EntityMetadata } from '@sqb/connect';
+import { expect } from 'expect';
 
-describe('Model / Embedded object element', () => {
+describe('connect:Model / Embedded object element', () => {
   class PersonName {
     @Column()
     declare given: string;

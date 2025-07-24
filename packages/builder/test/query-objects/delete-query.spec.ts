@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Delete, Eq, Raw, SerializationType } from '../../src/index.js';
 
-describe('Serialize delete query', () => {
+describe('builder:Serialize delete query', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

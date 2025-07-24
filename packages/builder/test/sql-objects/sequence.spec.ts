@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   Select,
   SequenceCurr,
@@ -5,7 +6,7 @@ import {
   SerializationType,
 } from '../../src/index.js';
 
-describe('serialize "Sequence Getter"', () => {
+describe('builder:serialize "Sequence Getter"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

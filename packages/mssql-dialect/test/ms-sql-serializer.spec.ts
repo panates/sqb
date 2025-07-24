@@ -1,10 +1,11 @@
 import { Param, Select, SerializerRegistry } from '@sqb/builder';
+import { expect } from 'expect';
 import { MSSqlSerializer } from '../src/ms-sql-serializer.js';
 
-describe('MSSqlSerializer', () => {
+describe('mssql-dialect:MSSqlSerializer', () => {
   const mssqlSerializer = new MSSqlSerializer();
-  beforeAll(() => SerializerRegistry.register(mssqlSerializer));
-  afterAll(() => SerializerRegistry.unRegister(mssqlSerializer));
+  before(() => SerializerRegistry.register(mssqlSerializer));
+  after(() => SerializerRegistry.unRegister(mssqlSerializer));
 
   it('should serialize "limit"', () => {
     const query = Select().from('table1').as('t1').limit(10);

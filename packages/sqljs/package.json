@@ -15,7 +15,7 @@
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier . --write --log-level=warn",
     "check": "madge --circular src/**",
-    "test": "jest --runInBand",
+    "test": "mocha",
     "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
     "clean:src": "ts-cleanup -s src --all",
     "clean:test": "ts-cleanup -s test --all",
@@ -28,13 +28,14 @@
   },
   "devDependencies": {
     "@types/sql.js": "^1.4.9",
+    "expect": "^30.0.5",
     "sql.js": "^1.12.0"
   },
   "peerDependencies": {
     "@sqb/builder": "^4.19.6",
     "@sqb/connect": "^4.19.6",
     "@sqb/sqlite-dialect": "^4.19.6",
-    "sql.js": "^1.8.0"
+    "sql.js": "^1.13.0"
   },
   "type": "module",
   "exports": {
@@ -60,12 +61,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/sqbjs/sqb.git",
+    "url": "https://github.com/panates/sqb.git",
     "directory": "packages/sqljs"
   },
   "engines": {
-    "node": ">=16.0",
-    "npm": ">=7.0.0"
+    "node": ">=18.0"
   },
   "files": [
     "bin/",

@@ -5,9 +5,10 @@ import {
   ForeignKey,
   Index,
 } from '@sqb/connect';
+import { expect } from 'expect';
 
-describe('Model / Entity mapping', () => {
-  describe('UnionEntity()', () => {
+describe('connect:Model / Entity mapping', () => {
+  describe('connect:UnionEntity()', () => {
     it(`should combine properties`, () => {
       @Entity()
       class EntityA {
@@ -86,7 +87,7 @@ describe('Model / Entity mapping', () => {
     });
   });
 
-  describe('Entity.Pick()', () => {
+  describe('connect:Entity.Pick()', () => {
     it(`should pick given properties`, () => {
       @Entity()
       class EntityA {
@@ -161,7 +162,7 @@ describe('Model / Entity mapping', () => {
     });
   });
 
-  describe('Entity.Omit()', () => {
+  describe('connect:Entity.Omit()', () => {
     it(`should omit given properties`, () => {
       @Entity()
       class EntityA {

@@ -1,17 +1,18 @@
 import { In } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { Customer } from '../../_support/customer.entity.js';
 import { initClient } from '../../_support/init-client.js';
 import { createCustomer } from './update.spec.js';
 
-describe('Repository.updateMany()', () => {
+describe('connect:Repository.updateMany()', () => {
   let client: SqbClient;
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 

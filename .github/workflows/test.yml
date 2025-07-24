@@ -1,0 +1,85 @@
+name: Test
+on:
+  # Can be called from other workflows
+  workflow_call:
+    secrets:
+      PERSONAL_ACCESS_TOKEN:
+        required: true
+
+  # Can be run manually
+  workflow_dispatch:
+
+  # on git push
+  push:
+    branches:
+      - dev
+    paths:
+      - 'packages/*/src/**'
+      - 'packages/*/test/**'
+      - 'packages/*/*.{json,js,mjs,cjs}'
+      - 'support/test/**'
+      - '.mocharc.cjs'
+      - 'package.json'
+      - 'tsconfig*.json'
+
+# Only one run per branch at a time
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'push' &&
+        !(
+          contains(github.event.head_commit.message, 'no-test') ||
+          ( 
+            startsWith(github.event.head_commit.message, 'Merge pull request') &&
+            contains(github.event.head_commit.message, '/dev')
+          )
+        )
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 'Setup Environment'
+        uses: panates/ghac-setup-node@v1
+        with:
+          node-version: '20.18.1'
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Install rman
+        run: npm install rman -g
+
+      - name: Run qc tests
+        run: rman run qc
+
+      - name: Run unit tests
+        run: npm run citest
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+
+      - name: Send coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

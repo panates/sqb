@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Select, SerializationType, Union, UnionAll } from '../../src/index.js';
 
-describe('serialize "Union"', () => {
+describe('builder:serialize "Union"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

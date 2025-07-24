@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Entity, PrimaryKey } from '@sqb/connect';
+import { expect } from 'expect';
 
-describe('Model / PrimaryKey', () => {
+describe('connect:Model / PrimaryKey', () => {
   it(`should define primary index field with string argument`, () => {
     @PrimaryKey('id')
     class MyEntity {}

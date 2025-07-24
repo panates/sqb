@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Eq, Select, SerializationType } from '../src/index.js';
 
-describe('Hooking serialization', () => {
+describe('builder:Hooking serialization', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

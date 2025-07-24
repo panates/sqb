@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   And,
   Between,
@@ -27,7 +28,7 @@ import {
   SerializationType,
 } from '../../src/index.js';
 
-describe('serialize "Operators"', () => {
+describe('builder:serialize "Operators"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,
@@ -36,7 +37,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('and operator', () => {
+  describe('builder:and operator', () => {
     it('should initialize', () => {
       const op = And();
       expect(op._type).toStrictEqual(SerializationType.LOGICAL_EXPRESSION);
@@ -92,7 +93,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('or operator', () => {
+  describe('builder:or operator', () => {
     it('should initialize', () => {
       const op = Or();
       expect(op._type).toStrictEqual(SerializationType.LOGICAL_EXPRESSION);
@@ -158,7 +159,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('eq (=) operator', () => {
+  describe('builder:eq (=) operator', () => {
     it('should initialize', () => {
       const op = Eq('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -212,7 +213,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('ne (!=) operator', () => {
+  describe('builder:ne (!=) operator', () => {
     it('should initialize', () => {
       const op = Ne('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -256,7 +257,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('gt (>) operator', () => {
+  describe('builder:gt (>) operator', () => {
     it('should initialize', () => {
       const op = Gt('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -281,7 +282,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('lt (<) operator', () => {
+  describe('builder:lt (<) operator', () => {
     it('should initialize', () => {
       const op = Lt('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -306,7 +307,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('gte (>=) operator', () => {
+  describe('builder:gte (>=) operator', () => {
     it('should initialize', () => {
       const op = Gte('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -331,7 +332,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('lte (<=) operator', () => {
+  describe('builder:lte (<=) operator', () => {
     it('should initialize', () => {
       const op = Lte('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -356,7 +357,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('between operator', () => {
+  describe('builder:between operator', () => {
     it('should initialize', () => {
       const op = Between('id', 1, 3);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -429,7 +430,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('notBetween operator', () => {
+  describe('builder:notBetween operator', () => {
     it('should initialize', () => {
       const op = NotBetween('id', 1, 3);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -502,7 +503,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('like operator', () => {
+  describe('builder:like operator', () => {
     it('should initialize', () => {
       const op = Like('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -549,7 +550,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('notLike operator', () => {
+  describe('builder:notLike operator', () => {
     it('should initialize', () => {
       const op = NotLike('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -598,7 +599,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('ilike operator', () => {
+  describe('builder:ilike operator', () => {
     it('should initialize', () => {
       const op = Ilike('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -647,7 +648,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('notILike operator', () => {
+  describe('builder:notILike operator', () => {
     it('should initialize', () => {
       const op = NotILike('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -696,7 +697,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('in operator', () => {
+  describe('builder:in operator', () => {
     it('should initialize', () => {
       const op = In('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -753,7 +754,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('notIn operator', () => {
+  describe('builder:notIn operator', () => {
     it('should initialize', () => {
       const op = NotIn('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -804,7 +805,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('is operator', () => {
+  describe('builder:is operator', () => {
     it('should initialize', () => {
       const op = Is('id', null);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -829,7 +830,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('not operator', () => {
+  describe('builder:not operator', () => {
     it('should initialize', () => {
       const op = IsNot('id', 1);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
@@ -856,7 +857,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('exists operator', () => {
+  describe('builder:exists operator', () => {
     const q = Select().from('table2');
 
     it('should initialize', () => {
@@ -885,7 +886,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('notExists operator', () => {
+  describe('builder:notExists operator', () => {
     const q = Select().from('table2');
 
     it('should initialize', () => {
@@ -914,7 +915,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('not operator', () => {
+  describe('builder:not operator', () => {
     const q = Eq('field1', 1);
 
     it('should initialize', () => {
@@ -935,7 +936,7 @@ describe('serialize "Operators"', () => {
   /*
    *
    */
-  describe('common', () => {
+  describe('builder:common', () => {
     it('should use sub-select as expression', () => {
       const query = Select()
         .from('table1')

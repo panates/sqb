@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Field, Min, Select, SerializationType } from '../../src/index.js';
 
-describe('serialize "Min"', () => {
+describe('builder:serialize "Min"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

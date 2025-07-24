@@ -1,8 +1,9 @@
 import 'reflect-metadata';
+import { expect } from 'expect';
 import { parseFieldsProjection } from '../../../src/index.js';
 
-describe('parseFieldsProjection()', () => {
-  afterAll(() => global.gc && global.gc());
+describe('connect:parseFieldsProjection()', () => {
+  after(() => global.gc && global.gc());
 
   it('Should parse comma seperated field names', async () => {
     const out = parseFieldsProjection('a,b,c');

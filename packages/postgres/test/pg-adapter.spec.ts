@@ -2,13 +2,13 @@ import { initAdapterTests } from '../../connect/test/_shared/adapter-tests.js';
 import { PgAdapter } from '../src/pg-adapter.js';
 import { createTestSchema } from './_support/create-db.js';
 
-describe('PgAdapter', () => {
+describe('postgres:PgAdapter', () => {
   const adapter = new PgAdapter();
 
   if (process.env.SKIP_CREATE_DB !== 'true') {
-    beforeAll(async () => {
+    before(async () => {
       await createTestSchema('test_sqb_postgres');
-    }, 30000);
+    }).timeout(30000);
   }
 
   const env = process.env;

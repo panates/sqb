@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Field, Max, Select, SerializationType } from '../../src/index.js';
 
-describe('serialize "Max"', () => {
+describe('builder:serialize "Max"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

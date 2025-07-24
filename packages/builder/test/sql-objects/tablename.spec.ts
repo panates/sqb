@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Select } from '../../src/index.js';
 
-describe('serialize "TableName"', () => {
+describe('builder:serialize "TableName"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

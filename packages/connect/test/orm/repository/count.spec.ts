@@ -1,15 +1,16 @@
 import { SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { Country } from '../../_support/country.entity.js';
 import { initClient } from '../../_support/init-client.js';
 
-describe('Repository.count()', () => {
+describe('connect:Repository.count()', () => {
   let client: SqbClient;
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 

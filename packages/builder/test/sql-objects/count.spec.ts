@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Count, Select, SerializationType } from '../../src/index.js';
 
-describe('serialize "Count"', () => {
+describe('builder:serialize "Count"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

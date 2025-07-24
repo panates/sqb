@@ -5,6 +5,8 @@ import {
   ClientConfiguration,
   QueryRequest,
 } from '@sqb/connect';
+import { getDirname } from 'cross-dirname';
+import { expect } from 'expect';
 import fs from 'fs';
 import path from 'path';
 
@@ -23,8 +25,8 @@ export function initAdapterTests(
     },
   };
 
-  beforeAll(() => AdapterRegistry.register(adapter));
-  afterAll(() => AdapterRegistry.unRegister(adapter));
+  before(() => AdapterRegistry.register(adapter));
+  after(() => AdapterRegistry.unRegister(adapter));
   afterEach(() => connection && connection.close());
 
   async function adapterExecute(
@@ -63,8 +65,7 @@ export function initAdapterTests(
       connection = await adapter.connect(clientConfig);
       expect(connection).toBeDefined();
     },
-    10000,
-  );
+  ).timeout(10000);
 
   if (adapter.features?.schema) {
     it('should set active working schema', async () => {
@@ -403,7 +404,7 @@ export function getInsertSQLsForTestData(opts: {
   stringifyValueForSQL?: (v: any) => string;
 }) {
   const result: { table: string; scripts: string[] }[] = [];
-  const repositoryRoot = path.resolve(__dirname, '../../../..');
+  const repositoryRoot = path.resolve(getDirname(), '../../../..');
 
   const dataFiles: any[] = [
     'continents',

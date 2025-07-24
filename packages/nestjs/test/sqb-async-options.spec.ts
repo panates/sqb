@@ -5,7 +5,7 @@ import { Server } from 'http';
 import request from 'supertest';
 import { AsyncOptionsFactoryModule } from './_support/photo-app/async-options.module.js';
 
-describe('Sqb-Nestjs (async-options)', () => {
+describe('nestjs:Sqb-Nestjs (async-options)', () => {
   let server: Server;
   let app: INestApplication;
 
@@ -19,12 +19,10 @@ describe('Sqb-Nestjs (async-options)', () => {
     await app.init();
   });
 
+  afterEach(async () => app.close());
+
   it(`should return created entity`, () =>
     request(server)
       .post('/photo')
       .expect(201, { name: 'Nest', description: 'Is great!', views: 6000 }));
-
-  afterEach(async () => {
-    await app.close();
-  });
 });

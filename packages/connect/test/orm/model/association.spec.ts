@@ -5,6 +5,7 @@ import {
   ForeignKey,
   PrimaryKey,
 } from '@sqb/connect';
+import { expect } from 'expect';
 
 class Country {
   @PrimaryKey()
@@ -36,7 +37,7 @@ class CustomerNotes extends Record {
   declare customerId: number;
 }
 
-describe('Model / Association', () => {
+describe('connect:Model / Association', () => {
   it(`should resolve source entity (entity class)`, async () => {
     const association = new Association('', {
       source: Customer,

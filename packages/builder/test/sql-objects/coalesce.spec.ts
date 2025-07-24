@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Coalesce, Field, Select, SerializationType } from '../../src/index.js';
 
-describe('serialize "Coalesce"', () => {
+describe('builder:serialize "Coalesce"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

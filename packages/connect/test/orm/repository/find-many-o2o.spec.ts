@@ -1,5 +1,6 @@
 import { Eq, op } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { Customer } from '../../_support/customer.entity.js';
 import { initClient } from '../../_support/init-client.js';
 
@@ -7,18 +8,18 @@ function toJSON(obj: any): any {
   return obj ? JSON.parse(JSON.stringify(obj)) : undefined;
 }
 
-describe('Repository.findMany() (OneToOne)', () => {
+describe('connect:Repository.findMany() (OneToOne)', () => {
   let client: SqbClient;
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 
-  describe('linkToOne', () => {
+  describe('connect:linkToOne', () => {
     it('return associated row as object property', async () => {
       const repo = client.getRepository(Customer);
       const rows = await repo.findMany({
@@ -155,7 +156,7 @@ where (exists (select 1 from countries K
     });
   });
 
-  describe('linkFromOne', () => {
+  describe('connect:linkFromOne', () => {
     it('return associated row as object property', async () => {
       const repo = client.getRepository(Customer);
       const rows = await repo.findMany({
@@ -205,7 +206,7 @@ where (exists (select 1 from countries K
     });
   });
 
-  describe('Association chain', () => {
+  describe('connect:Association chain', () => {
     it('return row of last association in the chain as object property', async () => {
       const repo = client.getRepository(Customer);
       const rows = await repo.findMany({

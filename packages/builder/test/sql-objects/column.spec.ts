@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { DataType, Field, Select } from '../../src/index.js';
 
-describe('serialize "TableField"', () => {
+describe('builder:serialize "TableField"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

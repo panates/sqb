@@ -1,17 +1,18 @@
 import { In } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { Customer } from '../../_support/customer.entity.js';
 import { initClient } from '../../_support/init-client.js';
 import { createCustomer } from './update.spec.js';
 
 let client: SqbClient;
 
-describe('Repository.updateOnly()', () => {
-  beforeAll(async () => {
+describe('connect:Repository.updateOnly()', () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 
@@ -92,12 +93,12 @@ describe('Repository.updateOnly()', () => {
   });
 });
 
-describe('updateAll()', () => {
-  beforeAll(async () => {
+describe('connect:updateAll()', () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 

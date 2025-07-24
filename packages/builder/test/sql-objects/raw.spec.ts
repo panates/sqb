@@ -1,6 +1,7 @@
+import { expect } from 'expect';
 import { Raw, Select, SerializationType } from '../../src/index.js';
 
-describe('serialize "Raw"', () => {
+describe('builder:serialize "Raw"', () => {
   const options = {
     prettyPrint: false,
   };

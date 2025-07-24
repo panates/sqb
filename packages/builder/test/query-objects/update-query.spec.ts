@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   Eq,
   Param,
@@ -7,7 +8,7 @@ import {
   Update,
 } from '../../src/index.js';
 
-describe('Serialize update query', () => {
+describe('builder:Serialize update query', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   CrossJoin,
   Eq,
@@ -14,7 +15,7 @@ import {
   SerializationType,
 } from '../../src/index.js';
 
-describe('serialize "Join"', () => {
+describe('builder:serialize "Join"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

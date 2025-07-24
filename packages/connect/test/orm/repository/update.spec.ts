@@ -1,6 +1,7 @@
 import { DataType } from '@sqb/builder';
 import { Column, Entity, PrimaryKey, SqbClient } from '@sqb/connect';
-import { PartialDTO } from 'ts-gems';
+import { expect } from 'expect';
+import type { PartialDTO } from 'ts-gems';
 import { Customer } from '../../_support/customer.entity.js';
 import { initClient } from '../../_support/init-client.js';
 import { Tag } from '../../_support/tags.entity.js';
@@ -33,14 +34,14 @@ export const createCustomer = async function (
   return await repo.create(v);
 };
 
-describe('Repository.update()', () => {
+describe('connect:Repository.update()', () => {
   let client: SqbClient;
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 

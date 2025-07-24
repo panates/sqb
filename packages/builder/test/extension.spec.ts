@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   Select,
   SerializationType,
@@ -5,7 +6,7 @@ import {
   SerializerRegistry,
 } from '../src/index.js';
 
-describe('Serializer Extensions', () => {
+describe('builder:Serializer Extensions', () => {
   it('should register serialization extension', () => {
     const oldLen = SerializerRegistry.size;
     const extension1: SerializerExtension = {
@@ -21,6 +22,7 @@ describe('Serializer Extensions', () => {
     expect(SerializerRegistry.get(oldLen)).toStrictEqual(extension1);
     expect(SerializerRegistry.get(oldLen + 1)).toStrictEqual(extension2);
     SerializerRegistry.unRegister(extension1, extension2);
+    SerializerRegistry.unRegister();
   });
 
   it('should an extension hook serialization process', () => {

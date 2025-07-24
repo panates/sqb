@@ -1,10 +1,11 @@
 import { Param, Select, SerializerRegistry } from '@sqb/builder';
+import { expect } from 'expect';
 import { SqliteSerializer } from '../src/sqlite-serializer.js';
 
-describe('SqliteSerializer', () => {
+describe('sqlite-dialect:SqliteSerializer', () => {
   const postgresSerializer = new SqliteSerializer();
-  beforeAll(() => SerializerRegistry.register(postgresSerializer));
-  afterAll(() => SerializerRegistry.unRegister(postgresSerializer));
+  before(() => SerializerRegistry.register(postgresSerializer));
+  after(() => SerializerRegistry.unRegister(postgresSerializer));
 
   it('should serialize "limit"', () => {
     const query = Select().from('table1').limit(10);

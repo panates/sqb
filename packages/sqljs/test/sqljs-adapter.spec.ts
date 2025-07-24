@@ -4,17 +4,17 @@ import {
 } from '../../connect/test/_shared/adapter-tests.js';
 import { SqljsAdapter } from '../src/sqljs-adapter.js';
 
-describe('SqljsAdapter', () => {
+describe('sqljs:SqljsAdapter', () => {
   const adapter = new SqljsAdapter();
 
-  beforeAll(async () => {
+  before(async () => {
     const connection = await adapter.connect({ database: ':memory:' });
     try {
       await createTestSchema((connection as any).intlcon);
     } finally {
       await connection.close();
     }
-  }, 30000);
+  }).timeout(30000);
 
   initAdapterTests(adapter, { database: ':memory:' });
 });

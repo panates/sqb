@@ -6,12 +6,13 @@ import {
   SerializerRegistry,
   Update,
 } from '@sqb/builder';
+import { expect } from 'expect';
 import { PostgresSerializer } from '../src/postgres-serializer.js';
 
-describe('PostgresSerializer', () => {
+describe('postgres-dialect:PostgresSerializer', () => {
   const postgresSerializer = new PostgresSerializer();
-  beforeAll(() => SerializerRegistry.register(postgresSerializer));
-  afterAll(() => SerializerRegistry.unRegister(postgresSerializer));
+  before(() => SerializerRegistry.register(postgresSerializer));
+  after(() => SerializerRegistry.unRegister(postgresSerializer));
 
   it('should replace "= null" to "is null": test1', () => {
     const query = Select().from('table1').where({ ID: null });

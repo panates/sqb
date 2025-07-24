@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   Eq,
   Param,
@@ -8,7 +9,7 @@ import {
 } from '../../src/index.js';
 import { TestSerializer } from '../_support/test_serializer.js';
 
-describe('serialize "SelectQuery"', () => {
+describe('builder:serialize "SelectQuery"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,
@@ -16,8 +17,8 @@ describe('serialize "SelectQuery"', () => {
 
   const testSerializer = new TestSerializer();
 
-  beforeAll(() => SerializerRegistry.register(testSerializer));
-  afterAll(() => SerializerRegistry.unRegister(testSerializer));
+  before(() => SerializerRegistry.register(testSerializer));
+  after(() => SerializerRegistry.unRegister(testSerializer));
 
   it('should initialize SelectQuery', () => {
     const q = Select();

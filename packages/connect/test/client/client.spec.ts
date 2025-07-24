@@ -1,17 +1,18 @@
 import { DataType, Insert, Param, Select } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
+import { expect } from 'expect';
 import { initClient } from '../_support/init-client.js';
 
-describe('Client', () => {
+describe('connect:Client', () => {
   let client: SqbClient;
   const dialect = 'postgres';
   const insertedIds: any[] = [];
 
-  beforeAll(async () => {
+  before(async () => {
     client = await initClient();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await client.close(0);
   });
 

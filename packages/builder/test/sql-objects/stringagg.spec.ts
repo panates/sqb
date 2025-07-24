@@ -1,3 +1,4 @@
+import { expect } from 'expect';
 import {
   Field,
   Select,
@@ -5,7 +6,7 @@ import {
   StringAGG,
 } from '../../src/index.js';
 
-describe('serialize "StringAGG"', () => {
+describe('builder:serialize "StringAGG"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,
