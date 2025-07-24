@@ -1,14 +1,10 @@
 import '@sqb/postgres';
-import {Module} from '@nestjs/common';
-import {SqbModule} from '@sqb/nestjs';
-import {dbConfig} from './config.js';
-import {PhotoModule} from './photo/photo.module.js';
+import { Module } from '@nestjs/common';
+import { SqbModule } from '@sqb/nestjs';
+import { dbConfig } from './config.js';
+import { PhotoModule } from './photo/photo.module.js';
 
 @Module({
-    imports: [
-        SqbModule.forRoot(dbConfig),
-        PhotoModule
-    ]
+  imports: [SqbModule.forRoot(dbConfig), PhotoModule],
 })
-export class ApplicationModule {
-}
+export class ApplicationModule {}

@@ -1,49 +1,53 @@
 {
   "name": "sqb.v4",
   "private": true,
-  "version": "4.0.7",
+  "version": "4.0.8",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sqbjs/sqb.git"
+    "url": "https://github.com/panates/sqb.git"
   },
   "workspaces": [
-    "packages/**"
+    "packages/*"
   ],
   "scripts": {
     "preclean": "rimraf build coverage",
     "clean": "rman run clean",
     "build": "rman build",
-    "test": "jest --passWithNoTests",
+    "test": "mocha",
     "precover": "rimraf coverage",
-    "cover": "jest --passWithNoTests --coverage",
-    "precitest": "rimraf coverage",
-    "citest": "jest --passWithNoTests --coverage --coverageReporters=lcov"
+    "format": "prettier . --write --log-level=warn",
+    "precitest": "rimraf coverage reports",
+    "citest": "c8 mocha",
+    "qc": "rman run lint && rman run check",
+    "lint": "rman run lint",
+    "lint:fix": "rman run lint:fix",
+    "check": "rman run check"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.22.9",
-    "@tsconfig/recommended": "^1.0.2",
-    "@types/jest": "^29.5.3",
-    "@types/node": "^20.4.2",
-    "@typescript-eslint/eslint-plugin": "^6.1.0",
-    "@typescript-eslint/parser": "^6.1.0",
-    "eslint": "^8.45.0",
-    "eslint-config-google": "^0.14.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-security": "^1.7.1",
-    "eslint-plugin-simple-import-sort": "^10.0.0",
-    "eslint-plugin-unused-imports": "^3.0.0",
-    "jest": "^29.6.1",
-    "prettier": "^3.0.0",
-    "ts-cleanup": "^0.2.6",
-    "ts-jest": "^29.1.1",
-    "ts-loader": "^9.4.4",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
+    "@panates/eslint-config": "^2.0.6",
+    "@panates/eslint-config-ts": "^2.0.6",
+    "@panates/tsconfig": "^2.0.6",
+    "@swc/core": "^1.13.2",
+    "@swc/helpers": "^0.5.17",
+    "@swc-node/register": "^1.10.10",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.1.0",
+    "@types/sinon": "^17.0.4",
+    "c8": "^10.1.3",
+    "globals": "^16.3.0",
+    "madge": "^8.0.0",
+    "mocha": "11.7.1",
+    "npm-check-updates": "^18.0.2",
+    "postgrejs": "^2.22.4",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
+    "ts-cleanup": "^1.3.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">= 16.0",
-    "npm": ">= 7.0"
+    "node": ">= 18.0"
   }
 }

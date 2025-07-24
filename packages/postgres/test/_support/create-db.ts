@@ -1,10 +1,10 @@
-import {Connection, stringifyValueForSQL} from 'postgresql-client';
-import {getInsertSQLsForTestData} from '../../../connect/test/_shared/adapter-tests.js';
+import { Connection, stringifyValueForSQL } from 'postgrejs';
+import { getInsertSQLsForTestData } from '../../../connect/test/_shared/adapter-tests.js';
 
 const schemaCreated = {};
 
 function getSql(schema: string) {
-    return `
+  return `
 LOCK TABLE pg_catalog.pg_namespace;
 DROP SCHEMA IF EXISTS ${schema} CASCADE;
 CREATE SCHEMA ${schema} AUTHORIZATION postgres;
@@ -151,30 +151,29 @@ values
    '{"a": 1}', '<tag1>123</tag1>', '2010-03-22', '2020-01-10 15:45:12.123',
     '2005-07-01 01:21:11.123+03:00', 'ABCDE', '(-1.2, 3.5)', '<(-1.2, 3.5), 4.6>',
     '[(1.2, 3.5), (4.6, 5.2)]', '((-1.6, 3.0), (4.6, 0.1))');
-`
+`;
 }
 
 export async function createTestSchema(schema: string) {
-    if (schemaCreated[schema])
-        return;
-    schemaCreated[schema] = true;
-    const connection = new Connection();
-    await connection.connect();
-    try {
-        const r = await connection.query('SELECT schema_name FROM information_schema.schemata ' +
-            'where schema_name = \'' + schema + '\'');
-        if (r.rows && r.rows.length)
-            return;
-        const sql = getSql(schema);
-        await connection.execute(sql);
-        const dataFiles = getInsertSQLsForTestData({
-            dialect: 'postgres',
-            schema,
-            stringifyValueForSQL
-        });
-        for (const table of dataFiles)
-            await connection.execute(table.scripts.join(';\n'));
-    } finally {
-        await connection.close(0);
-    }
+  if (schemaCreated[schema]) return;
+  schemaCreated[schema] = true;
+  const connection = new Connection();
+  await connection.connect();
+  try {
+    const r = await connection.query(
+      `SELECT schema_name FROM information_schema.schemata where schema_name = '${schema}'`,
+    );
+    if (r.rows && r.rows.length) return;
+    const sql = getSql(schema);
+    await connection.execute(sql);
+    const dataFiles = getInsertSQLsForTestData({
+      dialect: 'postgres',
+      schema,
+      stringifyValueForSQL,
+    });
+    for (const table of dataFiles)
+      await connection.execute(table.scripts.join(';\n'));
+  } finally {
+    await connection.close(0);
+  }
 }

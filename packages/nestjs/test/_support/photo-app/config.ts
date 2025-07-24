@@ -1,5 +1,5 @@
 export const dbConfig = {
-    "name": "db1",
-    "dialect": "postgres",
-    "min": 0
-}
+  name: 'db1',
+  dialect: 'postgres',
+  min: 0,
+};

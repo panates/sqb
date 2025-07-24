@@ -1,8 +1,6 @@
 const migration = {
   version: 14,
-  tasks: [
-    '*'
-  ]
+  tasks: ['*'],
 };
 
 export default migration;

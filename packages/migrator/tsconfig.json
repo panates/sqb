@@ -1,12 +1,11 @@
 {
   "extends": "../../tsconfig-base.json",
+  "include": ["src"],
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@sqb/builder": ["../builder/src"],
-      "@sqb/connect": ["../connect/src"]
+      "@sqb/connect": ["../connect/src/index.ts"],
+      "@sqb/postgres": ["../postgres/src/index.ts"]
     }
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "test"]
+  }
 }

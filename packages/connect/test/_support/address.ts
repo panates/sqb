@@ -1,12 +1,12 @@
-import {Column} from '@sqb/connect';
+import { Column } from '@sqb/connect';
 
 export class Address {
-    @Column()
-    city: string;
+  @Column()
+  declare city: string;
 
-    @Column()
-    street: string;
+  @Column()
+  declare street: string;
 
-    @Column({fieldName: 'zip_code'})
-    zipCode: string;
+  @Column({ fieldName: 'zip_code' })
+  declare zipCode: string;
 }

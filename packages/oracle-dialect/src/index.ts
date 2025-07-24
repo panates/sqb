@@ -1,4 +1,4 @@
-import {registerSerializer} from '@sqb/builder'
-import {OracleSerializer} from './oracle-serializer.js';
+import { SerializerRegistry } from '@sqb/builder';
+import { OracleSerializer } from './oracle-serializer.js';
 
-registerSerializer(new OracleSerializer());
+SerializerRegistry.register(new OracleSerializer());

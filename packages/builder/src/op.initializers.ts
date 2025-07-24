@@ -1,5 +1,6 @@
 import { SelectQuery } from './query/select-query.js';
 import { Serializable } from './serializable.js';
+import { Operator } from './sql-objects/operator.js';
 import { WrapOps } from './sql-objects/operators/logical-operator.js';
 import { OpAnd } from './sql-objects/operators/op-and.js';
 import { OpBetween } from './sql-objects/operators/op-between.js';
@@ -22,12 +23,13 @@ import { OpNotILike } from './sql-objects/operators/op-not-ilike.js';
 import { OpNotIn } from './sql-objects/operators/op-not-in.js';
 import { OpNotLike } from './sql-objects/operators/op-not-like.js';
 import { OpOr } from './sql-objects/operators/op-or.js';
+import { RawStatement } from './sql-objects/raw-statement.js';
 
-function And(...args: (Serializable | Object)[]) {
+function And(...args: (Operator | RawStatement)[]) {
   return new OpAnd(...args);
 }
 
-function Or(...args: (Serializable | Object)[]) {
+function Or(...args: (Operator | RawStatement)[]) {
   return new OpOr(...args);
 }
 
@@ -55,18 +57,24 @@ function Lte(expression: string | Serializable, value: any) {
   return new OpLte(expression, value);
 }
 
-function Between(expression: string | Serializable, values: Serializable)
-function Between(expression: string | Serializable, values: any[])
-function Between(expression: string | Serializable, value1: any, value2: any)
+function Between(expression: string | Serializable, values: any[]);
+function Between(expression: string | Serializable, value1: any, value2: any);
 function Between(expression: string | Serializable, value1: any, value2?: any) {
   const values = Array.isArray(value1) ? value1 : [value1, value2];
   return new OpBetween(expression, values);
 }
 
-function NotBetween(expression: string | Serializable, values: Serializable)
-function NotBetween(expression: string | Serializable, values: any[])
-function NotBetween(expression: string | Serializable, value1: any, value2: any)
-function NotBetween(expression: string | Serializable, value1: any, value2?: any) {
+function NotBetween(expression: string | Serializable, values: any[]);
+function NotBetween(
+  expression: string | Serializable,
+  value1: any,
+  value2: any,
+);
+function NotBetween(
+  expression: string | Serializable,
+  value1: any,
+  value2?: any,
+) {
   const values = Array.isArray(value1) ? value1 : [value1, value2];
   return new OpNotBetween(expression, values);
 }
@@ -87,11 +95,9 @@ function NotLike(expression: string | Serializable, value: any) {
   return new OpNotLike(expression, value);
 }
 
-
 function Ilike(expression: string | Serializable, value: any) {
   return new OpILike(expression, value);
 }
-
 
 function NotILike(expression: string | Serializable, value: any) {
   return new OpNotILike(expression, value);
@@ -156,8 +162,8 @@ const op = {
   '!is': IsNot,
   exists: Exists,
   notExists: NotExists,
-  '!exists': NotExists
-}
+  '!exists': NotExists,
+};
 
 Object.assign(WrapOps, op);
 
@@ -165,33 +171,33 @@ export { op };
 
 export {
   And,
-  Or,
+  Between,
   Eq,
   Eq as Equal,
-  Ne,
-  Ne as NotEqual,
-  Gt,
-  Gt as GreaterThan,
-  Gte,
+  Exists,
   Gte as GreaterAnEqualTo,
-  Lt,
-  Lt as LowerThan,
-  Lte,
-  Lte as LowerAndEqualTo,
-  Between,
-  NotBetween,
-  In,
-  NotIn,
-  NotIn as Nin,
-  Like,
-  NotLike,
-  NotLike as NLike,
+  Gt as GreaterThan,
+  Gt,
+  Gte,
   Ilike,
-  NotILike,
-  NotILike as Nilike,
+  In,
   Is,
   IsNot,
-  Exists,
+  Like,
+  Lte as LowerAndEqualTo,
+  Lt as LowerThan,
+  Lt,
+  Lte,
+  Ne,
+  NotILike as Nilike,
+  NotIn as Nin,
+  NotLike as NLike,
+  Not,
+  NotBetween,
+  Ne as NotEqual,
   NotExists,
-  Not
-}
+  NotILike,
+  NotIn,
+  NotLike,
+  Or,
+};

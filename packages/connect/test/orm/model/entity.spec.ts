@@ -1,248 +1,183 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-    BaseEntity,
-    Column,
-    DataType,
-    Entity,
-    Link,
-    PrimaryKey,
-} from '@sqb/connect';
+import { BaseEntity, Column, Entity, Link, PrimaryKey } from '@sqb/connect';
+import { expect } from 'expect';
 
-describe('Model / Entity', function () {
+describe('connect:Model / Entity', () => {
+  it(`should @Entity() decorator attach metadata to class`, () => {
+    @Entity()
+    class MyEntity {}
 
-    it(`should @Entity() decorator attach metadata to class`, () => {
-        @Entity()
-        class MyEntity {
+    const meta = Entity.getMetadata(MyEntity);
+    expect(meta).toBeDefined();
+    expect(meta!.name).toStrictEqual('MyEntity');
+  });
 
-        }
+  it(`should @Entity(string) decorator set tableName`, () => {
+    @Entity('CustomEntity')
+    class MyEntity {}
 
-        const meta = Entity.getMetadata(MyEntity);
-        expect(meta).toBeDefined();
-        expect(meta!.name).toStrictEqual('MyEntity');
-    });
+    const meta = Entity.getMetadata(MyEntity);
+    expect(meta).toBeDefined();
+    expect(meta!.name).toStrictEqual('MyEntity');
+    expect(meta!.tableName).toStrictEqual('CustomEntity');
+  });
 
-    it(`should @Entity(string) decorator set tableName`, () => {
-        @Entity('CustomEntity')
-        class MyEntity {
+  it(`should @Entity(object) decorator set options`, () => {
+    @Entity({
+      tableName: 'CustomEntity',
+      schema: 'my_schema',
+      comment: 'comment',
+    })
+    class MyEntity {}
 
-        }
+    const meta = Entity.getMetadata(MyEntity);
+    expect(meta).toBeDefined();
+    expect(meta!.name).toStrictEqual('MyEntity');
+    expect(meta!.tableName).toStrictEqual('CustomEntity');
+    expect(meta!.schema).toStrictEqual('my_schema');
+    expect(meta!.comment).toStrictEqual('comment');
+  });
 
-        const meta = Entity.getMetadata(MyEntity);
-        expect(meta).toBeDefined();
-        expect(meta!.name).toStrictEqual('MyEntity');
-        expect(meta!.tableName).toStrictEqual('CustomEntity');
-    });
+  it(`should inherit from other entity class`, () => {
+    class Base {
+      @Column()
+      @PrimaryKey()
+      declare id: number;
+    }
 
-    it(`should @Entity(object) decorator set options`, () => {
-        @Entity({
-            tableName: 'CustomEntity',
-            schema: 'my_schema',
-            comment: 'comment'
-        })
-        class MyEntity {
+    @Entity({ schema: 'my_schema', comment: 'comment' })
+    class MyEntity extends Base {
+      @Column()
+      declare code: string;
+    }
 
-        }
+    const primaryIndex1 = Entity.getPrimaryIndex(Base);
+    expect(primaryIndex1).toBeDefined();
+    const primaryIndex2 = Entity.getPrimaryIndex(MyEntity);
+    expect(primaryIndex2).toBeDefined();
+    expect(primaryIndex1!.columns).toStrictEqual(primaryIndex2!.columns);
+  });
 
-        const meta = Entity.getMetadata(MyEntity);
-        expect(meta).toBeDefined();
-        expect(meta!.name).toStrictEqual('MyEntity');
-        expect(meta!.tableName).toStrictEqual('CustomEntity');
-        expect(meta!.schema).toStrictEqual('my_schema');
-        expect(meta!.comment).toStrictEqual('comment');
-    });
+  it(`should Entity.getElementNames() return all element names`, () => {
+    @Entity()
+    class Country {
+      @Column()
+      declare code: string;
+    }
 
-    it(`should inherit from other entity class`, () => {
-        class Base {
-            @Column()
-            @PrimaryKey()
-            id: number
-        }
+    @Entity()
+    class BaseCustomer extends BaseEntity {
+      @Column()
+      declare id: string;
 
-        @Entity({schema: 'my_schema', comment: 'comment'})
-        class MyEntity extends Base {
-            @Column()
-            code: string
-        }
+      @Column()
+      declare name: number;
 
-        const primaryIndex1 = Entity.getPrimaryIndex(Base);
-        expect(primaryIndex1).toBeDefined()
-        const primaryIndex2 = Entity.getPrimaryIndex(MyEntity);
-        expect(primaryIndex2).toBeDefined();
-        expect(primaryIndex1!.columns).toStrictEqual(primaryIndex2!.columns);
-    });
+      @Link()
+      declare country: Country;
+    }
 
-    it(`should entity instance serialize to JSON`, () => {
-        @Entity()
-        class MyEntity {
-            @Column(DataType.DATE)
-            date1: Date;
+    @Entity()
+    class Customer extends BaseCustomer {
+      @Column()
+      declare code: string;
+    }
 
-            @Column()
-            date2: Date;
+    expect(Entity.getFieldNames(Customer)).toStrictEqual([
+      'id',
+      'name',
+      'country',
+      'code',
+    ]);
+  });
 
-            @Column()
-            buffer: Buffer;
+  it(`should EntityDefinition.getDataColumnNames() return only data column names`, () => {
+    @Entity()
+    class Country {
+      @Column()
+      declare code: string;
+    }
 
-            @Column(DataType.INTEGER)
-            int: number;
+    @Entity()
+    class BaseCustomer extends BaseEntity {
+      @Column()
+      declare id: string;
 
-            @Column(DataType.SMALLINT)
-            smallint: number;
+      @Column()
+      declare name: number;
 
-            @Column()
-            bigint: bigint;
+      @Link()
+      declare country: Country;
+    }
 
-            // noinspection JSMismatchedCollectionQueryUpdate
-            @Column(DataType.INTEGER)
-            arr1: number[];
+    @Entity()
+    class Customer extends BaseCustomer {
+      @Column()
+      declare code: string;
+    }
 
-            declare toJSON: Function;
-        }
+    expect(Entity.getColumnFieldNames(Customer)).toStrictEqual([
+      'id',
+      'name',
+      'code',
+    ]);
+  });
 
-        const inst = new MyEntity();
-        inst.date1 = new Date('2008-01-31T01:25:18');
-        inst.date2 = new Date('2008-01-31T01:25:18');
-        inst.buffer = Buffer.from('012345');
-        inst.int = 3.5;
-        inst.smallint = 2.5;
-        inst.bigint = BigInt(12345);
-        inst.arr1 = [1, 2.5, 3.5];
-        const o = inst.toJSON();
+  it(`should getInsertColumnNames() return only data column names to insert`, () => {
+    @Entity()
+    class Country {
+      @Column()
+      declare code: string;
+    }
 
-        expect(o).toStrictEqual({
-            date1: '2008-01-31',
-            date2: '2008-01-31T01:25:18',
-            buffer: 'MDEyMzQ1',
-            int: 3,
-            smallint: 2,
-            bigint: '12345',
-            arr1: [1, 2, 3]
-        });
+    @Entity()
+    class BaseCustomer extends BaseEntity {
+      @Column({ noInsert: true })
+      declare id: string;
 
-        const s = JSON.stringify(inst);
-        expect(s).toStrictEqual('{"date1":"2008-01-31",' +
-            '"date2":"2008-01-31T01:25:18","buffer":"MDEyMzQ1",' +
-            '"int":3,"smallint":2,"bigint":"12345","arr1":[1,2,3]}');
-    });
+      @Column({ noUpdate: true })
+      declare name: number;
 
-    it(`should Entity.getElementNames() return all element names`, function () {
-        @Entity()
-        class Country {
-            @Column()
-            code: string;
-        }
+      @Link()
+      declare country: Country;
+    }
 
-        @Entity()
-        class BaseCustomer extends BaseEntity {
+    @Entity()
+    class Customer extends BaseCustomer {
+      @Column()
+      declare code: string;
+    }
 
-            @Column()
-            id: string;
+    expect(Entity.getInsertColumnNames(Customer)).toStrictEqual([
+      'name',
+      'code',
+    ]);
+  });
 
-            @Column()
-            name: number;
+  it(`should EntityDefinition.getInsertColumnNames() return only data column names to insert`, () => {
+    @Entity()
+    class Country {
+      @Column()
+      declare code: string;
+    }
 
-            @Link()
-            country: Country;
+    @Entity()
+    class BaseCustomer extends BaseEntity {
+      @Column({ noInsert: true })
+      declare id: string;
 
-        }
+      @Column({ noUpdate: true })
+      declare name: number;
 
-        @Entity()
-        class Customer extends BaseCustomer {
-            @Column()
-            code: string
-        }
+      @Link()
+      declare country: Country;
+    }
 
-        expect(Entity.getFieldNames(Customer)).toStrictEqual(['id', 'name', 'country', 'code']);
-    });
+    @Entity()
+    class Customer extends BaseCustomer {
+      @Column()
+      declare code: string;
+    }
 
-    it(`should EntityDefinition.getDataColumnNames() return only data column names`, function () {
-        @Entity()
-        class Country {
-            @Column()
-            code: string;
-        }
-
-        @Entity()
-        class BaseCustomer extends BaseEntity {
-
-            @Column()
-            id: string;
-
-            @Column()
-            name: number;
-
-            @Link()
-            country: Country;
-
-        }
-
-        @Entity()
-        class Customer extends BaseCustomer {
-            @Column()
-            code: string
-        }
-
-        expect(Entity.getColumnFieldNames(Customer)).toStrictEqual(['id', 'name', 'code']);
-    });
-
-    it(`should getInsertColumnNames() return only data column names to insert`, function () {
-        @Entity()
-        class Country {
-            @Column()
-            code: string;
-        }
-
-        @Entity()
-        class BaseCustomer extends BaseEntity {
-
-            @Column({noInsert: true})
-            id: string;
-
-            @Column({noUpdate: true})
-            name: number;
-
-            @Link()
-            country: Country;
-
-        }
-
-        @Entity()
-        class Customer extends BaseCustomer {
-            @Column()
-            code: string
-        }
-
-        expect(Entity.getInsertColumnNames(Customer)).toStrictEqual(['name', 'code']);
-    });
-
-    it(`should EntityDefinition.getInsertColumnNames() return only data column names to insert`, function () {
-        @Entity()
-        class Country {
-            @Column()
-            code: string;
-        }
-
-        @Entity()
-        class BaseCustomer extends BaseEntity {
-
-            @Column({noInsert: true})
-            id: string;
-
-            @Column({noUpdate: true})
-            name: number;
-
-            @Link()
-            country: Country;
-
-        }
-
-        @Entity()
-        class Customer extends BaseCustomer {
-            @Column()
-            code: string
-        }
-
-        expect(Entity.getUpdateColumnNames(Customer)).toStrictEqual(['id', 'code']);
-    });
-
+    expect(Entity.getUpdateColumnNames(Customer)).toStrictEqual(['id', 'code']);
+  });
 });

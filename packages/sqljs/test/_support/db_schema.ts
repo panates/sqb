@@ -69,4 +69,4 @@ CREATE TABLE customer_tags
     PRIMARY KEY (customer_id, tag_id)
 );
 
-`
+`;

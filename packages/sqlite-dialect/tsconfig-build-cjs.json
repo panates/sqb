@@ -1,15 +1,10 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": ["./tsconfig.json", "../../tsconfig-build.json"],
   "compilerOptions": {
     "module": "CommonJS",
+    "moduleResolution": "Node",
     "rootDir": "src",
-    "outDir": "../../build/sqlite-dialect/cjs",
-    "paths": {
-      "@sqb/builder": ["../../build/builder"]
-    },
-    "sourceMap": false,
-    "noEmit": false,
-    "declaration": false,
-  },
-  "include": ["src"]
+    "outDir": "./build/cjs",
+    "declaration": false
+  }
 }

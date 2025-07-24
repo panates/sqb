@@ -1,34 +1,28 @@
-import {Module} from '@nestjs/common';
-import {
-    SqbModule,
-    SqbModuleOptions,
-    SqbOptionsFactory,
-} from '@sqb/nestjs';
-import {dbConfig} from './config.js';
-import {PhotoModule} from './photo/photo.module.js';
+import { Module } from '@nestjs/common';
+import { SqbModule, SqbModuleOptions, SqbOptionsFactory } from '@sqb/nestjs';
+import { dbConfig } from './config.js';
+import { PhotoModule } from './photo/photo.module.js';
 
 class ConfigService implements SqbOptionsFactory {
-    createSqbOptions(): SqbModuleOptions {
-        return dbConfig;
-    }
+  createSqbOptions(): SqbModuleOptions {
+    return dbConfig;
+  }
 }
 
 @Module({
-    providers: [ConfigService],
-    exports: [ConfigService],
+  providers: [ConfigService],
+  exports: [ConfigService],
 })
-class ConfigModule {
-}
+class ConfigModule {}
 
 @Module({
-    imports: [
-        SqbModule.forRootAsync({
-            imports: [ConfigModule],
-            name: 'db1',
-            useExisting: ConfigService,
-        }),
-        PhotoModule,
-    ]
+  imports: [
+    SqbModule.forRootAsync({
+      imports: [ConfigModule],
+      name: 'db1',
+      useExisting: ConfigService,
+    }),
+    PhotoModule,
+  ],
 })
-export class AsyncOptionsExistingModule {
-}
+export class AsyncOptionsExistingModule {}

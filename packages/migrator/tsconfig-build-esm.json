@@ -1,14 +1,10 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": ["./tsconfig.json", "../../tsconfig-build.json"],
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "ES2020",
+    "moduleResolution": "Node",
     "rootDir": "src",
-    "outDir": "../../build/migrator/esm",
-    "paths": {
-    },
-    "sourceMap": false,
-    "noEmit": false,
-    "declaration": true
-  },
-  "include": ["src"]
+    "outDir": "./build/esm",
+    "declarationDir": "./build/types",
+  }
 }

@@ -1,4 +1,4 @@
-import {registerSerializer} from '@sqb/builder'
-import {SqliteSerializer} from './sqlite-serializer.js';
+import { SerializerRegistry } from '@sqb/builder';
+import { SqliteSerializer } from './sqlite-serializer.js';
 
-registerSerializer(new SqliteSerializer());
+SerializerRegistry.register(new SqliteSerializer());

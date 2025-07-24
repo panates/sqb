@@ -6,7 +6,7 @@ export enum JoinType {
   RIGHT_OUTER = 'right outer',
   OUTER = 'outer',
   FULL_OUTER = 'full outer',
-  CROSS = 'cross'
+  CROSS = 'cross',
 }
 
 export enum SerializationType {
@@ -22,6 +22,7 @@ export enum SerializationType {
   UPDATE_QUERY = 'update_query',
   UPDATE_QUERY_VALUES = 'update_query.values',
   DELETE_QUERY = 'delete_query',
+  UNION_QUERY = 'union_query',
   FIELD_NAME = 'field_name',
   GROUP_COLUMN = 'group_column',
   ORDER_COLUMN = 'order_column',
@@ -36,8 +37,6 @@ export enum SerializationType {
   UPPER_STATEMENT = 'upper_expression',
   MAX_STATEMENT = 'max_expression',
   MIN_STATEMENT = 'min_expression',
-  SEQUENCE_GETTER_STATEMENT = 'sequence_getter_statement',
-  STRINGAGG_STATEMENT = 'StringAGG_expression',
   COUNT_STATEMENT = 'count_expression',
   CONDITIONS_BLOCK = 'conditions_block',
   COMPARISON_EXPRESSION = 'comparison_expression',
@@ -50,6 +49,8 @@ export enum SerializationType {
   NUMBER_VALUE = 'number_value',
   EXTERNAL_PARAMETER = 'external_parameter',
   ARRAY = 'array',
+  SEQUENCE_GETTER_STATEMENT = 'sequence_getter_statement',
+  STRINGAGG_STATEMENT = 'String_agg_statement',
 }
 
 export enum OperatorType {
@@ -73,7 +74,7 @@ export enum OperatorType {
   isNot = 'isNot',
   exists = 'exists',
   notExists = 'notExists',
-  not = 'not'
+  not = 'not',
 }
 
 export enum DataType {
@@ -93,5 +94,5 @@ export enum DataType {
   BINARY = 'BINARY',
   TEXT = 'TEXT',
   GUID = 'GUID',
-  JSON = 'JSON'
+  JSON = 'JSON',
 }

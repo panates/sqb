@@ -1,11 +1,4 @@
 {
-  "include": [
-    "./packages"
-  ],
-  "exclude": [
-    "node_modules",
-    "build",
-    "coverage",
-    "docs"
-  ]
+  "include": ["./packages", "./support", "./examples", "./"],
+  "exclude": ["node_modules", "build", "coverage", "docs"]
 }

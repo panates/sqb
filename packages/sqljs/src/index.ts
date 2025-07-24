@@ -1,4 +1,4 @@
-import {registerAdapter} from '@sqb/connect';
-import {SqljsAdapter} from './sqljs-adapter.js';
+import { AdapterRegistry } from '@sqb/connect';
+import { SqljsAdapter } from './sqljs-adapter.js';
 
-registerAdapter(new SqljsAdapter());
+AdapterRegistry.register(new SqljsAdapter());

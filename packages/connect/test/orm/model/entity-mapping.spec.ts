@@ -1,255 +1,239 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
-    Column,
-    Entity, EntityMetadata,
-    ForeignKey, Index
+  Column,
+  Entity,
+  EntityMetadata,
+  ForeignKey,
+  Index,
 } from '@sqb/connect';
+import { expect } from 'expect';
 
-describe('Model / Entity mapping', function () {
+describe('connect:Model / Entity mapping', () => {
+  describe('connect:UnionEntity()', () => {
+    it(`should combine properties`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        declare id: number;
+      }
 
-    describe('UnionEntity()', function () {
+      class EntityB {
+        @Column()
+        declare name: string;
+      }
 
-        it(`should combine properties`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                id: number
-            }
+      @Entity()
+      class NewEntityClass extends Entity.Union(EntityA, EntityB) {}
 
-            class EntityB {
-                @Column()
-                name: string
-            }
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(EntityMetadata.getField(meta!, 'id')).toBeDefined();
+      expect(EntityMetadata.getField(meta!, 'name')).toBeDefined();
+    });
 
-            @Entity()
-            class NewEntityClass extends Entity.Union(EntityA, EntityB) {
-            }
+    it(`should combine foreign keys`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        declare id: number;
+      }
 
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(EntityMetadata.getField(meta!, 'id')).toBeDefined();
-            expect(EntityMetadata.getField(meta!, 'name')).toBeDefined();
-        });
+      class EntityC {
+        @Column()
+        declare id: number;
+      }
 
-        it(`should combine foreign keys`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                id: number
-            }
+      class EntityB {
+        @Column()
+        declare name: string;
 
-            class EntityC {
-                @Column()
-                id: number
-            }
+        @Column()
+        @ForeignKey(EntityC)
+        declare cId: string;
+      }
 
-            class EntityB {
-                @Column()
-                name: string
+      @Entity()
+      class NewEntityClass extends Entity.Union(EntityA, EntityB) {}
 
-                @Column()
-                @ForeignKey(EntityC)
-                cId: string
-            }
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(meta!.foreignKeys.length).toStrictEqual(1);
+      expect(meta!.foreignKeys[0].target).toStrictEqual(EntityC);
+      expect(meta!.foreignKeys[0].source).toStrictEqual(NewEntityClass);
+    });
 
-            @Entity()
-            class NewEntityClass extends Entity.Union(EntityA, EntityB) {
-            }
+    it(`should combine indexes`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        declare id: number;
+      }
 
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(meta!.foreignKeys.length).toStrictEqual(1);
-            expect(meta!.foreignKeys[0].target).toStrictEqual(EntityC);
-            expect(meta!.foreignKeys[0].source).toStrictEqual(NewEntityClass);
-        });
+      class EntityB {
+        @Column()
+        @Index()
+        declare name: string;
+      }
 
-        it(`should combine indexes`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                id: number
-            }
+      @Entity()
+      class NewEntityClass extends Entity.Union(EntityA, EntityB) {}
 
-            class EntityB {
-                @Column()
-                @Index()
-                name: string
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(meta!.indexes.length).toStrictEqual(1);
+      expect(meta!.indexes[0].columns).toStrictEqual(['name']);
+    });
+  });
 
-            }
+  describe('connect:Entity.Pick()', () => {
+    it(`should pick given properties`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        declare id: number;
+        @Column()
+        declare name: string;
+      }
 
-            @Entity()
-            class NewEntityClass extends Entity.Union(EntityA, EntityB) {
-            }
+      @Entity()
+      class NewEntityClass extends Entity.Pick(EntityA, ['id']) {}
 
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(meta!.indexes.length).toStrictEqual(1);
-            expect(meta!.indexes[0].columns).toStrictEqual(['name']);
-        });
-    })
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(EntityMetadata.getField(meta!, 'id')).toBeDefined();
+      expect(EntityMetadata.getField(meta!, 'name')).not.toBeDefined();
+    });
 
-    describe('Entity.Pick()', function () {
+    it(`should pick foreign keys for only given keys`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        declare id: number;
+      }
 
-        it(`should pick given properties`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                id: number
-                @Column()
-                name: string
-            }
+      class EntityB {
+        @Column()
+        declare name: string;
 
-            @Entity()
-            class NewEntityClass extends Entity.Pick(EntityA, ['id']) {
-            }
+        @Column()
+        @ForeignKey(EntityA)
+        declare aId1: string;
 
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(EntityMetadata.getField(meta!, 'id')).toBeDefined();
-            expect(EntityMetadata.getField(meta!, 'name')).not.toBeDefined();
-        });
+        @Column()
+        @ForeignKey(EntityA)
+        declare aId2: string;
+      }
 
-        it(`should pick foreign keys for only given keys`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                id: number
-            }
+      @Entity()
+      class NewEntityClass extends Entity.Pick(EntityB, ['name', 'aId1']) {}
 
-            class EntityB {
-                @Column()
-                name: string
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(meta!.foreignKeys.length).toStrictEqual(1);
+      expect(meta!.foreignKeys[0].target).toStrictEqual(EntityA);
+      expect(meta!.foreignKeys[0].source).toStrictEqual(NewEntityClass);
+      expect(meta!.foreignKeys[0].sourceKey).toStrictEqual('aId1');
+    });
 
-                @Column()
-                @ForeignKey(EntityA)
-                aId1: string
+    it(`should pick indexes for only given keys`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        @Index()
+        declare id: number;
 
-                @Column()
-                @ForeignKey(EntityA)
-                aId2: string
-            }
+        @Column()
+        @Index()
+        declare name: string;
+      }
 
-            @Entity()
-            class NewEntityClass extends Entity.Pick(EntityB, ['name', 'aId1']) {
-            }
+      @Entity()
+      class NewEntityClass extends Entity.Pick(EntityA, ['name']) {}
 
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(meta!.foreignKeys.length).toStrictEqual(1);
-            expect(meta!.foreignKeys[0].target).toStrictEqual(EntityA);
-            expect(meta!.foreignKeys[0].source).toStrictEqual(NewEntityClass);
-            expect(meta!.foreignKeys[0].sourceKey).toStrictEqual('aId1');
-        });
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(meta!.indexes.length).toStrictEqual(1);
+      expect(meta!.indexes[0].columns).toStrictEqual(['name']);
+    });
+  });
 
-        it(`should pick indexes for only given keys`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                @Index()
-                id: number
+  describe('connect:Entity.Omit()', () => {
+    it(`should omit given properties`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        declare id: number;
+        @Column()
+        declare name: string;
+      }
 
-                @Column()
-                @Index()
-                name: string
-            }
+      @Entity()
+      class NewEntityClass extends Entity.Omit(EntityA, ['id']) {}
 
-            @Entity()
-            class NewEntityClass extends Entity.Pick(EntityA, ['name']) {
-            }
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(EntityMetadata.getField(meta!, 'id')).not.toBeDefined();
+      expect(EntityMetadata.getField(meta!, 'name')).toBeDefined();
+    });
 
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(meta!.indexes.length).toStrictEqual(1);
-            expect(meta!.indexes[0].columns).toStrictEqual(['name']);
-        });
+    it(`should omit foreign keys for only given keys`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        declare id: number;
+      }
 
-    })
+      class EntityB {
+        @Column()
+        declare name: string;
 
-    describe('Entity.Omit()', function () {
+        @Column()
+        @ForeignKey(EntityA)
+        declare aId1: string;
 
-        it(`should omit given properties`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                id: number
-                @Column()
-                name: string
-            }
+        @Column()
+        @ForeignKey(EntityA)
+        declare aId2: string;
+      }
 
-            @Entity()
-            class NewEntityClass extends Entity.Omit(EntityA, ['id']) {
-            }
+      @Entity()
+      class NewEntityClass extends Entity.Omit(EntityB, ['name', 'aId1']) {}
 
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(EntityMetadata.getField(meta!, 'id')).not.toBeDefined();
-            expect(EntityMetadata.getField(meta!, 'name')).toBeDefined();
-        });
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(meta!.foreignKeys.length).toStrictEqual(1);
+      expect(meta!.foreignKeys[0].target).toStrictEqual(EntityA);
+      expect(meta!.foreignKeys[0].source).toStrictEqual(NewEntityClass);
+      expect(meta!.foreignKeys[0].sourceKey).toStrictEqual('aId2');
+    });
 
-        it(`should omit foreign keys for only given keys`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                id: number
-            }
+    it(`should omit indexes for only given keys`, () => {
+      @Entity()
+      class EntityA {
+        @Column()
+        @Index()
+        declare id: number;
 
-            class EntityB {
-                @Column()
-                name: string
+        @Column()
+        @Index()
+        declare name: string;
+      }
 
-                @Column()
-                @ForeignKey(EntityA)
-                aId1: string
+      @Entity()
+      class NewEntityClass extends Entity.Omit(EntityA, ['name']) {}
 
-                @Column()
-                @ForeignKey(EntityA)
-                aId2: string
-            }
-
-            @Entity()
-            class NewEntityClass extends Entity.Omit(EntityB, ['name', 'aId1']) {
-            }
-
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(meta!.foreignKeys.length).toStrictEqual(1);
-            expect(meta!.foreignKeys[0].target).toStrictEqual(EntityA);
-            expect(meta!.foreignKeys[0].source).toStrictEqual(NewEntityClass);
-            expect(meta!.foreignKeys[0].sourceKey).toStrictEqual('aId2');
-        });
-
-        it(`should omit indexes for only given keys`, () => {
-            @Entity()
-            class EntityA {
-                @Column()
-                @Index()
-                id: number
-
-                @Column()
-                @Index()
-                name: string
-            }
-
-            @Entity()
-            class NewEntityClass extends Entity.Omit(EntityA, ['name']) {
-            }
-
-            const meta = Entity.getMetadata(NewEntityClass);
-            expect(meta).toBeDefined();
-            expect(meta!.name).toStrictEqual('NewEntityClass');
-            expect(meta!.indexes.length).toStrictEqual(1);
-            expect(meta!.indexes[0].columns).toStrictEqual(['id']);
-        });
-
-    })
-
-
+      const meta = Entity.getMetadata(NewEntityClass);
+      expect(meta).toBeDefined();
+      expect(meta!.name).toStrictEqual('NewEntityClass');
+      expect(meta!.indexes.length).toStrictEqual(1);
+      expect(meta!.indexes[0].columns).toStrictEqual(['id']);
+    });
+  });
 });

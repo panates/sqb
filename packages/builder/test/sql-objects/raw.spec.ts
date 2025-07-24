@@ -1,20 +1,18 @@
-import {Raw, Select, SerializationType} from '../../src/index.js';
+import { expect } from 'expect';
+import { Raw, Select, SerializationType } from '../../src/index.js';
 
-describe('serialize "Raw"', () => {
+describe('builder:serialize "Raw"', () => {
+  const options = {
+    prettyPrint: false,
+  };
 
-    const options = {
-        prettyPrint: false
-    };
+  it('should initialize Raw', () => {
+    expect(Raw('')._type).toStrictEqual(SerializationType.RAW);
+  });
 
-    it('should initialize Raw', () => {
-        expect(Raw('')._type).toStrictEqual(SerializationType.RAW);
-    });
-
-    it('should serialize Raw', () => {
-        const query = Select(Raw('\'John\'\'s Bike\' f1'))
-            .from('table1');
-        const result = query.generate(options);
-        expect(result.sql).toStrictEqual('select \'John\'\'s Bike\' f1 from table1');
-    });
-
+  it('should serialize Raw', () => {
+    const query = Select(Raw("'John''s Bike' f1")).from('table1');
+    const result = query.generate(options);
+    expect(result.sql).toStrictEqual("select 'John''s Bike' f1 from table1");
+  });
 });

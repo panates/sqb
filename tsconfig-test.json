@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig-base.json",
+  "compilerOptions": {
+    "types": ["node", "mocha"],
+    "baseUrl": ".",
+    "sourceMap": true,
+    "paths": {
+      "@sqb/*": ["./packages/*/src/index.js"],
+    }
+  }
+}

@@ -1,21 +1,34 @@
+import { classes } from '@sqb/builder';
 import assert from 'assert';
 import _debug from 'debug';
 import { TaskQueue } from 'power-tasks';
-import { coalesce, coerceToBoolean, coerceToInt, coerceToString } from "putil-varhelpers";
+import {
+  coalesce,
+  coerceToBoolean,
+  coerceToInt,
+  coerceToString,
+} from 'putil-varhelpers';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
 import { Type } from 'ts-gems';
-import { classes } from '@sqb/builder';
 import { EntityMetadata } from '../orm/model/entity-metadata.js';
 import { Repository } from '../orm/repository.class.js';
 import { Adapter } from './adapter.js';
 import { Cursor } from './cursor.js';
-import { callFetchHooks, normalizeRowsToArrayRows, normalizeRowsToObjectRows, wrapAdapterFields } from './helpers.js';
+import {
+  callFetchHooks,
+  normalizeRowsToArrayRows,
+  normalizeRowsToObjectRows,
+  wrapAdapterFields,
+} from './helpers.js';
 import { SqbClient } from './sqb-client.js';
 import {
-  ConnectionOptions, ExecuteHookFunction, FetchFunction,
+  ConnectionOptions,
+  ExecuteHookFunction,
+  FetchFunction,
   FieldNaming,
-  QueryExecuteOptions, QueryRequest,
-  QueryResult
+  QueryExecuteOptions,
+  QueryRequest,
+  QueryResult,
 } from './types.js';
 
 const debug = _debug('sqb:connection');
@@ -34,17 +47,20 @@ interface SqbConnectionEvents {
   rollback: () => void;
 }
 
-export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(AsyncEventEmitter) {
-
+export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
+  AsyncEventEmitter,
+) {
   private _intlcon?: Adapter.Connection;
   private readonly _tasks = new TaskQueue();
   private readonly _options?: ConnectionOptions;
   private _inTransaction: boolean = false;
   private _refCount = 1;
 
-  constructor(public readonly client: SqbClient,
-              adapterConnection: Adapter.Connection,
-              options?: ConnectionOptions) {
+  constructor(
+    public readonly client: SqbClient,
+    adapterConnection: Adapter.Connection,
+    options?: ConnectionOptions,
+  ) {
     super();
     this._intlcon = adapterConnection;
     this._options = options || {};
@@ -89,8 +105,7 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(A
    * Returns true if connection released.
    */
   release(): boolean {
-    if (!this._intlcon)
-      return true;
+    if (!this._intlcon) return true;
     const ref = --this._refCount;
     this.emit('release', this._refCount);
     debug('[%s] release | refCount: %s', this.sessionId, ref);
@@ -105,30 +120,33 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(A
    * Immediately releases the connection.
    */
   async close(): Promise<void> {
-    if (!this._intlcon)
-      return;
+    if (!this._intlcon) return;
     await this.emitAsyncSerial('close');
     const intlcon = this._intlcon;
     this._intlcon = undefined;
-    this.client.pool.release(intlcon, (e) => {
-      if (e) this.client.emit('error', e)
+    this.client.pool.release(intlcon, (e: any) => {
+      if (e) this.client.emit('error', e);
     });
     debug('[%s] closed', intlcon.sessionId);
   }
 
-  async execute(query: string | classes.Query,
-                options?: QueryExecuteOptions): Promise<any> {
+  async execute(
+    query: string | classes.Query,
+    options?: QueryExecuteOptions,
+  ): Promise<any> {
     if (!this._intlcon)
       throw new Error(`Can't execute query, because connection is released`);
     return this._tasks.enqueue(() => this._execute(query, options)).toPromise();
   }
 
-  getRepository<T>(entity: Type<T> | string, opts?: { schema?: string }): Repository<T> {
+  getRepository<T>(
+    entity: Type<T> | string,
+    opts?: { schema?: string },
+  ): Repository<T> {
     let ctor;
     if (typeof entity === 'string') {
       ctor = this.client.getEntity<T>(entity);
-      if (!ctor)
-        throw new Error(`Repository "${entity}" is not registered`);
+      if (!ctor) throw new Error(`Repository "${entity}" is not registered`);
     } else ctor = entity;
     const entityDef = EntityMetadata.get(ctor);
     if (!entityDef)
@@ -137,23 +155,40 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(A
   }
 
   async getSchema(): Promise<string> {
-    assert.ok(this._intlcon, `Can't set schema, because connection is released`);
-    assert.ok(this._intlcon.getSchema, `${this.client.dialect} adapter does have Schema support`);
+    assert.ok(
+      this._intlcon,
+      `Can't set schema, because connection is released`,
+    );
+    assert.ok(
+      this._intlcon.getSchema,
+      `${this.client.dialect} adapter does have Schema support`,
+    );
     return await this._intlcon.getSchema();
   }
 
   async setSchema(schema: string): Promise<void> {
-    assert.ok(this._intlcon, `Can't set schema, because connection is released`);
-    assert.ok(this._intlcon.setSchema, `${this.client.dialect} adapter does have Schema support`);
+    assert.ok(
+      this._intlcon,
+      `Can't set schema, because connection is released`,
+    );
+    assert.ok(
+      this._intlcon.setSchema,
+      `${this.client.dialect} adapter does have Schema support`,
+    );
     await this._intlcon.setSchema(schema);
   }
 
   /**
    * Executes a query
    */
-  protected async _execute(query: string | classes.Query,
-                           options?: QueryExecuteOptions): Promise<any> {
-    assert.ok(this._intlcon, `Can't execute query, because connection is released`);
+  protected async _execute(
+    query: string | classes.Query,
+    options?: QueryExecuteOptions,
+  ): Promise<any> {
+    assert.ok(
+      this._intlcon,
+      `Can't execute query, because connection is released`,
+    );
     const intlcon = this._intlcon;
     this.retain();
     try {
@@ -174,11 +209,10 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(A
         throw new Error('Database adapter returned an empty response');
 
       const result: QueryResult = {
-        executeTime: Date.now() - startTime
+        executeTime: Date.now() - startTime,
       };
 
-      if (request.showSql)
-        result.query = request;
+      if (request.showSql) result.query = request;
 
       if (response.rows || response.cursor) {
         if (!response.fields)
@@ -189,20 +223,34 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(A
         result.rowType = response.rowType;
 
         if (response.rows) {
-          result.rows = request.objectRows ?
-              normalizeRowsToObjectRows(result.fields, response.rowType, response.rows, request) :
-              normalizeRowsToArrayRows(result.fields, response.rowType, response.rows, request);
+          result.rows = request.objectRows
+            ? normalizeRowsToObjectRows(
+                result.fields,
+                response.rowType,
+                response.rows,
+                request,
+              )
+            : normalizeRowsToArrayRows(
+                result.fields,
+                response.rowType,
+                response.rows,
+                request,
+              );
           callFetchHooks(result.rows, request);
         } else if (response.cursor) {
-          const cursor = result.cursor = new Cursor(this, result.fields, response.cursor, request);
+          const cursor = (result.cursor = new Cursor(
+            this,
+            result.fields,
+            response.cursor,
+            request,
+          ));
           const hook = () => cursor.close();
-          cursor.once('close', () => this.off('close', hook))
+          cursor.once('close', () => this.off('close', hook));
           this.on('close', hook);
         }
       }
 
-      if (response.rowsAffected)
-        result.rowsAffected = response.rowsAffected;
+      if (response.rowsAffected) result.rowsAffected = response.rowsAffected;
 
       return result;
     } finally {
@@ -212,7 +260,9 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(A
 
   async startTransaction(): Promise<void> {
     if (!this._intlcon)
-      throw new Error('Can not call startTransaction() on a released connection');
+      throw new Error(
+        'Can not call startTransaction() on a released connection',
+      );
     await this._intlcon.startTransaction();
     this._inTransaction = true;
     this.emit('start-transaction');
@@ -237,28 +287,40 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(A
   async setSavepoint(savepoint: string): Promise<void> {
     if (!this._intlcon)
       throw new Error('Can not call setSavepoint() on a released connection');
-    if (typeof this._intlcon.setSavepoint !== 'function')
-      throw new Error(this.client.driver + ' does not support setSavepoint method');
-    if (!this.inTransaction)
-      await this.startTransaction();
+    if (typeof this._intlcon.setSavepoint !== 'function') {
+      throw new Error(
+        this.client.driver + ' does not support setSavepoint method',
+      );
+    }
+    if (!this.inTransaction) await this.startTransaction();
     await this._intlcon.setSavepoint(savepoint);
     this.emit('set-savepoint');
   }
 
   async releaseSavepoint(savepoint: string): Promise<void> {
     if (!this._intlcon)
-      throw new Error('Can not call releaseSavepoint() on a released connection');
-    if (typeof this._intlcon.releaseSavepoint !== 'function')
-      throw new Error(this.client.driver + ' does not support releaseSavepoint method');
+      throw new Error(
+        'Can not call releaseSavepoint() on a released connection',
+      );
+    if (typeof this._intlcon.releaseSavepoint !== 'function') {
+      throw new Error(
+        this.client.driver + ' does not support releaseSavepoint method',
+      );
+    }
     await this._intlcon.releaseSavepoint(savepoint);
     this.emit('release-savepoint');
   }
 
   async rollbackSavepoint(savepoint: string): Promise<void> {
     if (!this._intlcon)
-      throw new Error('Can not call rollbackSavepoint() on a released connection');
-    if (typeof this._intlcon.rollbackSavepoint !== 'function')
-      throw new Error(this.client.driver + ' does not support rollbackSavepoint method');
+      throw new Error(
+        'Can not call rollbackSavepoint() on a released connection',
+      );
+    if (typeof this._intlcon.rollbackSavepoint !== 'function') {
+      throw new Error(
+        this.client.driver + ' does not support rollbackSavepoint method',
+      );
+    }
     await this._intlcon.rollbackSavepoint(savepoint);
     this.emit('rollback-savepoint');
   }
@@ -269,60 +331,86 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(A
     await this._intlcon.test();
   }
 
-  private _prepareQueryRequest(query: string | classes.Query,
-                               options: QueryExecuteOptions = {}): QueryRequest {
-    if (!this._intlcon)
-      throw new Error('Session released');
+  private _prepareQueryRequest(
+    query: string | classes.Query,
+    options: QueryExecuteOptions = {},
+  ): QueryRequest {
+    if (!this._intlcon) throw new Error('Session released');
     const defaults = this.client.defaults;
 
     const request: QueryRequest = {
       dialect: this.client.dialect,
       sql: '',
-      autoCommit: this.inTransaction ? false :
-          coerceToBoolean(coalesce(options.autoCommit, this._options?.autoCommit, defaults.autoCommit), true),
+      autoCommit: this.inTransaction
+        ? false
+        : coerceToBoolean(
+            coalesce(
+              options.autoCommit,
+              this._options?.autoCommit,
+              defaults.autoCommit,
+            ),
+            true,
+          ),
       cursor: coerceToBoolean(coalesce(options.cursor, defaults.cursor), false),
-      objectRows: coerceToBoolean(coalesce(options.objectRows, defaults.objectRows), true),
-      ignoreNulls: coerceToBoolean(coalesce(options.ignoreNulls, defaults.ignoreNulls), false),
-      fetchRows: coerceToInt(coalesce(options.fetchRows, defaults.fetchRows), 100),
-      fieldNaming: coalesce(options.namingStrategy, defaults.fieldNaming) as FieldNaming,
+      objectRows: coerceToBoolean(
+        coalesce(options.objectRows, defaults.objectRows),
+        true,
+      ),
+      ignoreNulls: coerceToBoolean(
+        coalesce(options.ignoreNulls, defaults.ignoreNulls),
+        false,
+      ),
+      fetchRows: coerceToInt(
+        coalesce(options.fetchRows, defaults.fetchRows),
+        100,
+      ),
+      fieldNaming: coalesce(
+        options.namingStrategy,
+        defaults.fieldNaming,
+      ) as FieldNaming,
       transform: coalesce(options.transform, defaults.transform),
-      showSql: coerceToBoolean(coalesce(options.showSql, defaults.showSql), false),
-      prettyPrint: coerceToBoolean(coalesce(options.prettyPrint, defaults.prettyPrint), false),
+      showSql: coerceToBoolean(
+        coalesce(options.showSql, defaults.showSql),
+        false,
+      ),
+      prettyPrint: coerceToBoolean(
+        coalesce(options.prettyPrint, defaults.prettyPrint),
+        false,
+      ),
       action: coerceToString(options.action),
-      fetchAsString: options.fetchAsString
+      fetchAsString: options.fetchAsString,
     };
     request.ignoreNulls = request.ignoreNulls && request.objectRows;
 
     if (query instanceof classes.Query) {
       if (this._intlcon.onGenerateQuery)
         this._intlcon.onGenerateQuery(request, query);
-      const q = query
-          .generate({
-            dialect: request.dialect,
-            dialectVersion: request.dialectVersion,
-            params: options.params,
-            strictParams: true,
-            prettyPrint: request.prettyPrint
-          });
+      const q = query.generate({
+        dialect: request.dialect,
+        dialectVersion: request.dialectVersion,
+        params: options.params,
+        strictParams: true,
+        prettyPrint: request.prettyPrint,
+      });
       request.sql = q.sql;
       request.params = q.params;
       request.paramOptions = q.paramOptions;
-      if (q.returningFields)
-        request.returningFields = q.returningFields;
+      if (q.returningFields) request.returningFields = q.returningFields;
       if (query.listenerCount('execute'))
-        request.executeHooks = query.listeners('execute') as ExecuteHookFunction[];
+        request.executeHooks = query.listeners(
+          'execute',
+        ) as ExecuteHookFunction[];
       if (query.listenerCount('fetch'))
         request.fetchHooks = query.listeners('fetch') as FetchFunction[];
-    } else { // noinspection SuspiciousTypeOfGuard
+    } else {
+      // noinspection SuspiciousTypeOfGuard
       if (typeof query === 'string') {
         request.sql = query;
         request.params = options.params;
       }
     }
     // @ts-ignore
-    if (!request.sql)
-      throw new Error('No sql given');
+    if (!request.sql) throw new Error('No sql given');
     return request;
   }
-
 }

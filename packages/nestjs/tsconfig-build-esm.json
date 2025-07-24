@@ -1,16 +1,10 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": ["./tsconfig.json", "../../tsconfig-build.json"],
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "ES2020",
+    "moduleResolution": "Node",
     "rootDir": "src",
-    "outDir": "../../build/nestjs/esm",
-    "paths": {
-      "@sqb/builder": ["../../build/builder"],
-      "@sqb/connect": ["../../build/connect"]
-    },
-    "sourceMap": false,
-    "noEmit": false,
-    "declaration": true
-  },
-  "include": ["src"]
+    "outDir": "./build/esm",
+    "declarationDir": "./build/types",
+  }
 }

@@ -1,54 +1,71 @@
 {
   "name": "@sqb/sqlite-dialect",
   "description": "SQB serialization extension for SQLite database",
-  "version": "4.9.1",
+  "version": "4.19.6",
   "author": "Panates",
+  "license": "Apache-2.0",
+  "scripts": {
+    "compile": "tsc --noEmit",
+    "prebuild": "npm run lint && npm run clean",
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc -b tsconfig-build-cjs.json && cp ../../support/package.cjs.json ./build/cjs/package.json",
+    "build:esm": "tsc -b tsconfig-build-esm.json && cp ../../support/package.esm.json ./build/esm/package.json",
+    "postbuild": "cp README.md ./build && node ../../support/postbuild.cjs",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --max-warnings=0 --fix",
+    "format": "prettier . --write --log-level=warn",
+    "check": "madge --circular src/**",
+    "test": "mocha",
+    "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
+    "clean:src": "ts-cleanup -s src --all",
+    "clean:test": "ts-cleanup -s test --all",
+    "clean:build": "rimraf build",
+    "clean:cover": "rimraf coverage"
+  },
+  "dependencies": {
+    "tslib": "^2.8.1"
+  },
+  "peerDependencies": {
+    "@sqb/builder": "^4.19.6"
+  },
+  "devDependencies": {
+    "expect": "^30.0.5"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./esm/index.js"
+      },
+      "require": {
+        "types": "./types/index.d.cts",
+        "default": "./cjs/index.js"
+      },
+      "default": "./esm/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./cjs/index.js",
+  "module": "./esm/index.js",
+  "types": "./types/index.d.ts",
   "contributors": [
     "Eray Hanoglu <e.hanoglu@panates.com>",
     "Ilker Gurelli <i.gurelli@panates.com>"
   ],
-  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sqbjs/sqb.git",
+    "url": "https://github.com/panates/sqb.git",
     "directory": "packages/sqlite-dialect"
   },
-  "scripts": {
-    "compile": "tsc",
-    "prebuild": "npm run lint && npm run clean",
-    "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc -b tsconfig-build-cjs.json",
-    "build:esm": "tsc -b tsconfig-build-esm.json",
-    "postbuild": "cp README.md package.json ../../LICENSE ../../build/sqlite-dialect && cp ../../package.cjs.json ../../build/sqlite-dialect/cjs/package.json",
-    "lint": "eslint .",
-    "test": "jest",
-    "cover": "jest --collect-coverage",
-    "clean": "npm run clean:src | npm run clean:dist | npm run clean:cover",
-    "clean:src": "ts-cleanup -s src --all",
-    "clean:dist": "rimraf ../../build/sqlite-dialect",
-    "clean:cover": "rimraf ../../coverage/sqlite-dialect"
-  },
-  "peerDependencies": {
-    "@sqb/builder": "^4.9.1"
-  },
-  "type": "module",
-  "types": "esm/index.d.ts",
-  "exports": {
-    ".": {
-      "require": "./cjs/index.js",
-      "default": "./esm/index.js"
-    },
-    "./cjs": "./cjs/index.js",
-    "./esm": "./esm/index.js"
-  },
   "engines": {
-    "node": ">=16.0",
-    "npm": ">=7.0.0"
+    "node": ">=18.0"
   },
   "files": [
     "bin/",
     "cjs/",
     "esm/",
+    "types/",
     "LICENSE",
     "README.md"
   ],
@@ -61,5 +78,8 @@
     "dialect",
     "serializer",
     "database"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

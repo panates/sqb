@@ -1,0 +1,9 @@
+{
+  "extends": "@panates/tsconfig/build.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@sqb/*": ["./packages/*/build/types/index.js"]
+    }
+  }
+}
