@@ -260,7 +260,8 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
       error.query = query;
       error.queryOptions = options;
       error.request = request;
-      this.emit('error', e);
+      this.emit('error', error);
+      throw error;
     } finally {
       this.release();
     }
