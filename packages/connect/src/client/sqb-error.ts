@@ -3,7 +3,7 @@ import { QueryExecuteOptions, QueryRequest } from './types.js';
 
 export class SQBError extends Error {
   cause?: Error;
-  query?: string | Query;
+  declare query: string | Query;
   queryOptions?: QueryExecuteOptions;
   request?: QueryRequest;
 
