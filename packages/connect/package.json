@@ -1,7 +1,7 @@
 {
   "name": "@sqb/connect",
   "description": "Multi-dialect database connection framework written with TypeScript",
-  "version": "4.20.0",
+  "version": "4.20.1",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -45,7 +45,7 @@
     "postgrejs": "^2.22.4"
   },
   "peerDependencies": {
-    "@sqb/builder": "^4.20.0",
+    "@sqb/builder": "^4.20.1",
     "reflect-metadata": "^0.2.2"
   },
   "type": "module",
