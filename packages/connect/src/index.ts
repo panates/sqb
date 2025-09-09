@@ -5,6 +5,7 @@ export * from './client/cursor.js';
 export * from './client/extensions.js';
 export * from './client/sqb-client.js';
 export * from './client/sqb-connection.js';
+export * from './client/sqb-error.js';
 export * from './client/types.js';
 export * from './orm/backward.js';
 export * from './orm/base-entity.js';

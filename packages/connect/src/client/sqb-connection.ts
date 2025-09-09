@@ -21,6 +21,7 @@ import {
   wrapAdapterFields,
 } from './helpers.js';
 import { SqbClient } from './sqb-client.js';
+import { SQBError } from './sqb-error.js';
 import {
   ConnectionOptions,
   ExecuteHookFunction,
@@ -191,9 +192,10 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     );
     const intlcon = this._intlcon;
     this.retain();
+    let request: QueryRequest | undefined;
     try {
       const startTime = Date.now();
-      const request = this._prepareQueryRequest(query, options);
+      request = this._prepareQueryRequest(query, options);
       debug('[%s] execute | %o', this.sessionId, request);
       this.emit('execute', request);
 
@@ -253,6 +255,12 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
       if (response.rowsAffected) result.rowsAffected = response.rowsAffected;
 
       return result;
+    } catch (e: any) {
+      const error = new SQBError(e.message, e);
+      error.query = query;
+      error.queryOptions = options;
+      error.request = request;
+      this.emit('error', e);
     } finally {
       this.release();
     }
