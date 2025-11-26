@@ -1,4 +1,7 @@
 import '@sqb/oracle-dialect';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import path from 'node:path';
 import { Adapter, ClientConfiguration } from '@sqb/connect';
 import oracledb from 'oracledb';
 import { clientConfigurationToDriver } from './helpers.js';
@@ -14,6 +17,7 @@ export class OraAdapter implements Adapter {
   };
 
   async connect(config: ClientConfiguration): Promise<Adapter.Connection> {
+    if (!config.driverOptions?.direct) initOracleClient();
     const cfg = clientConfigurationToDriver(config);
     // Get oracle connection
     const connection = await oracledb.getConnection(cfg);
@@ -34,6 +38,27 @@ export class OraAdapter implements Adapter {
     } catch (e) {
       if (connection) await connection.close();
       throw e;
+    }
+  }
+}
+
+let oracleClientInitialized = false;
+function initOracleClient() {
+  if (oracleClientInitialized) return;
+  const libDirs = process.env.LD_LIBRARY_PATH || process.env.ORA_HOME;
+  if (libDirs) {
+    for (const libDir of libDirs.split(':')) {
+      if (
+        (os.type() === 'Linux' &&
+          fs.existsSync(path.join(libDir, 'libclntsh.so'))) ||
+        (os.type() === 'Darwin' &&
+          fs.existsSync(path.join(libDir, 'libclntsh.dylib'))) ||
+        (os.type() === 'Windows_NT' &&
+          fs.existsSync(path.join(libDir, 'oci.dll')))
+      ) {
+        oracledb.initOracleClient({ libDir });
+        oracleClientInitialized = true;
+      }
     }
   }
 }
