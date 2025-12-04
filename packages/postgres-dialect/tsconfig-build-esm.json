@@ -5,6 +5,6 @@
     "moduleResolution": "Node",
     "rootDir": "src",
     "outDir": "./build/esm",
-    "declarationDir": "./build/types",
+    "declarationDir": "./build/types"
   }
 }

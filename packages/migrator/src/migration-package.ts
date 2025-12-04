@@ -64,8 +64,10 @@ export function isCustomMigrationTask(x: any): x is CustomMigrationTask {
   return typeof x === 'object' && typeof x.fn === 'function';
 }
 
-export interface MigrationPackageConfig
-  extends PartialSome<StrictOmit<MigrationPackage, 'migrations'>, 'baseDir'> {
+export interface MigrationPackageConfig extends PartialSome<
+  StrictOmit<MigrationPackage, 'migrations'>,
+  'baseDir'
+> {
   migrations: (
     | string
     | MigrationConfig
@@ -74,8 +76,10 @@ export interface MigrationPackageConfig
   )[];
 }
 
-export interface MigrationConfig
-  extends StrictOmit<Migration, 'tasks' | 'baseDir'> {
+export interface MigrationConfig extends StrictOmit<
+  Migration,
+  'tasks' | 'baseDir'
+> {
   tasks: (
     | string
     | MigrationTask
