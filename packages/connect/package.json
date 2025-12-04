@@ -23,10 +23,11 @@
     "clean:cover": "rimraf coverage"
   },
   "dependencies": {
+    "@jsopen/objects": "^2.0.2",
     "debug": "^4.4.3",
     "doublylinked": "^2.5.6",
     "fast-tokenizer": "^1.7.0",
-    "lightning-pool": "^4.11.1",
+    "lightning-pool": "^4.12.0",
     "lodash": "^4.17.21",
     "power-tasks": "^1.11.1",
     "putil-isplainobject": "^1.1.5",
