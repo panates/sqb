@@ -1,7 +1,7 @@
 {
   "name": "@sqb/nestjs",
   "description": "Nestjs module for data connection using SQB",
-  "version": "4.20.3",
+  "version": "4.20.4",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -31,15 +31,15 @@
     "@nestjs/platform-express": "^11.1.9",
     "@nestjs/testing": "^11.1.9",
     "expect": "^30.2.0",
-    "postgrejs": "^2.22.7",
+    "postgrejs": "^2.22.9",
     "rxjs": "^7.8.1",
     "supertest": "^7.1.4"
   },
   "peerDependencies": {
     "@nestjs/common": ">=7.4.0",
     "@nestjs/core": ">=7.4.0",
-    "@sqb/builder": "^4.20.3",
-    "@sqb/connect": "^4.20.3",
+    "@sqb/builder": "^4.20.4",
+    "@sqb/connect": "^4.20.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": ">=6.6.0"
   },
