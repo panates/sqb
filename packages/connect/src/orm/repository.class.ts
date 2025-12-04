@@ -60,9 +60,7 @@ export namespace Repository {
   }
 
   export interface UpdateOptions
-    extends CommandOptions,
-      Projection,
-      Filtering {}
+    extends CommandOptions, Projection, Filtering {}
 
   export interface UpdateOnlyOptions extends CommandOptions, Filtering {}
 
