@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "expect": "^30.2.0",
-    "postgrejs": "^2.22.7"
+    "postgrejs": "^2.22.9"
   },
   "type": "module",
   "exports": {
