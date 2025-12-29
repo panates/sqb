@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
 import { SqbModule } from '@sqb/nestjs';
-import { dbConfig } from './config.js';
 import { PhotoModule } from './photo/photo.module.js';
+
+process.env.SQB_DIALECT = 'postgres';
+process.env.SQB_PASSWORD = 'postgres';
 
 @Module({
   imports: [
-    SqbModule.forRootAsync({
+    SqbModule.forRoot({
       name: 'db1',
-      useFactory: () => dbConfig.useValue!,
     }),
     PhotoModule,
   ],
 })
-export class AsyncOptionsFactoryModule {}
+export class EnvOptionsFactoryModule {}

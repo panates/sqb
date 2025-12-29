@@ -1,8 +1,11 @@
 import '@sqb/postgres';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import expect from 'expect';
 import { Server } from 'http';
 import request from 'supertest';
+import { SQB_CONNECTION_OPTIONS } from '../src/sqb.constants.js';
+import { SqbClientConnectionOptions } from '../src/sqb.interface.js';
 import { AsyncOptionsExistingModule } from './_support/photo-app/async-existing-options.module.js';
 
 describe('nestjs:Sqb-Nestjs (async-existing)', () => {
@@ -20,6 +23,12 @@ describe('nestjs:Sqb-Nestjs (async-existing)', () => {
   });
 
   afterEach(async () => app.close());
+
+  it(`should pass config to sqbClient correctly`, () => {
+    const options = app.get<SqbClientConnectionOptions>(SQB_CONNECTION_OPTIONS);
+    expect(options.dialect).toStrictEqual('postgres');
+    expect(options.password).toStrictEqual('postgres');
+  });
 
   it(`should return created entity`, () =>
     request(server)

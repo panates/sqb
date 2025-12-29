@@ -6,15 +6,15 @@ import { Server } from 'http';
 import request from 'supertest';
 import { SQB_CONNECTION_OPTIONS } from '../src/sqb.constants.js';
 import { SqbClientConnectionOptions } from '../src/sqb.interface.js';
-import { AsyncOptionsClassModule } from './_support/photo-app/async-class-options.module.js';
+import { EnvOptionsFactoryModule } from './_support/photo-app/env-options.module.js';
 
-describe('nestjs:Sqb-Nestjs (async-class)', () => {
+describe('nestjs:Sqb-Nestjs (env-options)', () => {
   let server: Server;
   let app: INestApplication;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [AsyncOptionsClassModule],
+      imports: [EnvOptionsFactoryModule],
     }).compile();
 
     app = module.createNestApplication();

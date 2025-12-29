@@ -11,8 +11,9 @@ module.exports = {
   ],
   extension: ['ts'],
   spec: [
-    './packages/builder/test/**/*.*spec.ts',
-    './packages/connect/test/**/*.*spec.ts',
+    './packages/*/test/**/*.*spec.ts',
+    // './packages/builder/test/**/*.*spec.ts',
+    // './packages/connect/test/**/*.*spec.ts',
   ],
   parallel: false,
   timeout: 30000,

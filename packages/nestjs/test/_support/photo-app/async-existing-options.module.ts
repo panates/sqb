@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
-import { SqbModule, SqbModuleOptions, SqbOptionsFactory } from '@sqb/nestjs';
+import {
+  SqbClientConnectionOptions,
+  SqbModule,
+  SqbOptionsFactory,
+} from '@sqb/nestjs';
 import { dbConfig } from './config.js';
 import { PhotoModule } from './photo/photo.module.js';
 
 class ConfigService implements SqbOptionsFactory {
-  createSqbOptions(): SqbModuleOptions {
-    return dbConfig;
+  createSqbOptions(): SqbClientConnectionOptions {
+    return dbConfig.useValue!;
   }
 }
 

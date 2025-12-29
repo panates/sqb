@@ -1,12 +1,8 @@
-import { Type } from '@nestjs/common';
+import { LoggerService, Type } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
 import { ClientConfiguration } from '@sqb/connect';
 
-export type SqbModuleOptions = {
-  /**
-   * Connection name
-   */
-  name?: string;
+export interface SqbClientConnectionOptions extends ClientConfiguration {
   /**
    * Number of times to retry connecting
    * Default: 10
@@ -38,18 +34,32 @@ export type SqbModuleOptions = {
    * Default: 10
    */
   shutdownWaitMs?: number;
-} & ClientConfiguration;
+}
+
+interface BaseModuleOptions {
+  envPrefix?: string;
+  logger?: LoggerService | string;
+  global?: boolean;
+  name?: string;
+}
+
+export interface SqbModuleOptions extends BaseModuleOptions {
+  useValue?: SqbClientConnectionOptions;
+}
 
 export interface SqbOptionsFactory {
   createSqbOptions(
     connectionName?: string,
-  ): Promise<SqbModuleOptions> | SqbModuleOptions;
+  ): Promise<SqbClientConnectionOptions> | SqbClientConnectionOptions;
 }
 
-export interface SqbModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+export interface SqbModuleAsyncOptions
+  extends BaseModuleOptions, Pick<ModuleMetadata, 'imports'> {
   name?: string;
   useExisting?: Type<SqbOptionsFactory>;
   useClass?: Type<SqbOptionsFactory>;
-  useFactory?: (...args: any[]) => Promise<SqbModuleOptions> | SqbModuleOptions;
+  useFactory?: (
+    ...args: any[]
+  ) => Promise<SqbClientConnectionOptions> | SqbClientConnectionOptions;
   inject?: any[];
 }
