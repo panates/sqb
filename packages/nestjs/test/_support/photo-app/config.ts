@@ -1,5 +1,9 @@
-export const dbConfig = {
+import { SqbModuleOptions } from '../../../src/sqb.interface.js';
+
+export const dbConfig: SqbModuleOptions = {
   name: 'db1',
-  dialect: 'postgres',
-  min: 0,
+  useValue: {
+    dialect: 'postgres',
+    password: 'postgres',
+  },
 };

@@ -1,8 +1,11 @@
 import '@sqb/postgres';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import expect from 'expect';
 import { Server } from 'http';
 import request from 'supertest';
+import { SQB_CONNECTION_OPTIONS } from '../src/sqb.constants.js';
+import { SqbClientConnectionOptions } from '../src/sqb.interface.js';
 import { ApplicationModule } from './_support/photo-app/app.module.js';
 
 describe('nestjs:Sqb-Nestjs', () => {
@@ -20,6 +23,12 @@ describe('nestjs:Sqb-Nestjs', () => {
   });
 
   afterEach(async () => app.close());
+
+  it(`should pass config to sqbClient correctly`, () => {
+    const options = app.get<SqbClientConnectionOptions>(SQB_CONNECTION_OPTIONS);
+    expect(options.dialect).toStrictEqual('postgres');
+    expect(options.password).toStrictEqual('postgres');
+  });
 
   it(`should return created entity`, () => {
     request(server).post('/photo').expect(201, {

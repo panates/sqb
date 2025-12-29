@@ -11,8 +11,14 @@ import { SqbClient } from '@sqb/connect';
 import * as crypto from 'crypto';
 import { defer } from 'rxjs';
 import * as rxjs from 'rxjs';
-import { SQB_MODULE_ID, SQB_MODULE_OPTIONS } from './sqb.constants.js';
+import { getSqbConfig } from './get-sqb-config.js';
+import {
+  SQB_CONNECTION_OPTIONS,
+  SQB_MODULE_ID,
+  SQB_MODULE_OPTIONS,
+} from './sqb.constants.js';
 import type {
+  SqbClientConnectionOptions,
   SqbModuleAsyncOptions,
   SqbModuleOptions,
   SqbOptionsFactory,
@@ -35,12 +41,21 @@ export class SqbCoreModule implements OnApplicationShutdown {
     };
     const connectionProvider = {
       provide: getSQBToken(options.name),
-      useFactory: () => this.createConnection(options),
+      inject: [SQB_CONNECTION_OPTIONS],
+      useFactory: (sqbConnectionOptions: SqbClientConnectionOptions) =>
+        this.createConnection(options, sqbConnectionOptions),
     };
 
     return {
       module: SqbCoreModule,
-      providers: [connectionProvider, optionsProvider],
+      providers: [
+        connectionProvider,
+        optionsProvider,
+        {
+          provide: SQB_CONNECTION_OPTIONS,
+          useValue: getSqbConfig(options.useValue || {}, options.envPrefix),
+        },
+      ],
       exports: [connectionProvider],
     };
   }
@@ -48,9 +63,11 @@ export class SqbCoreModule implements OnApplicationShutdown {
   static forRootAsync(options: SqbModuleAsyncOptions): DynamicModule {
     const connectionProvider = {
       provide: getSQBToken(options.name),
-      inject: [SQB_MODULE_OPTIONS],
-      useFactory: async (sqbOptions: SqbModuleOptions) =>
-        this.createConnection(sqbOptions),
+      inject: [SQB_MODULE_OPTIONS, SQB_CONNECTION_OPTIONS],
+      useFactory: async (
+        sqbOptions: SqbModuleOptions,
+        sqbConnectionOptions: SqbClientConnectionOptions,
+      ) => this.createConnection(sqbOptions, sqbConnectionOptions),
     };
 
     const asyncProviders = this.createAsyncProviders(options);
@@ -60,6 +77,10 @@ export class SqbCoreModule implements OnApplicationShutdown {
       providers: [
         ...asyncProviders,
         connectionProvider,
+        {
+          provide: SQB_MODULE_OPTIONS,
+          useValue: options,
+        },
         {
           provide: SQB_MODULE_ID,
           useValue: crypto.randomUUID(),
@@ -73,7 +94,10 @@ export class SqbCoreModule implements OnApplicationShutdown {
     const client = this.moduleRef.get<SqbClient>(
       getSQBToken(this.options.name),
     );
-    if (client) await client.close(this.options.shutdownWaitMs);
+    const op = this.moduleRef.get<SqbClientConnectionOptions>(
+      SQB_CONNECTION_OPTIONS,
+    );
+    if (client) await client.close(op.shutdownWaitMs);
   }
 
   private static createAsyncProviders(
@@ -102,55 +126,58 @@ export class SqbCoreModule implements OnApplicationShutdown {
   ): Provider {
     if (options.useFactory) {
       return {
-        provide: SQB_MODULE_OPTIONS,
+        provide: SQB_CONNECTION_OPTIONS,
         useFactory: options.useFactory,
         inject: options.inject || [],
       };
     }
+
     const useClass = options.useClass || options.useExisting;
     if (useClass) {
       return {
-        provide: SQB_MODULE_OPTIONS,
+        provide: SQB_CONNECTION_OPTIONS,
         useFactory: (optionsFactory: SqbOptionsFactory) =>
           optionsFactory.createSqbOptions(options.name),
         inject: [useClass],
       };
     }
+
     throw new Error(
       'Invalid configuration. Must provide useFactory, useClass or useExisting',
     );
   }
 
   private static async createConnection(
-    options: SqbModuleOptions,
+    moduleOptions: SqbModuleOptions,
+    sqbConnectionOptions: SqbClientConnectionOptions,
   ): Promise<SqbClient> {
-    const connectionToken = options.name;
+    const connectionToken = moduleOptions.name;
     // NestJS 8
     // @ts-ignore
     if (rxjs.lastValueFrom) {
       // @ts-ignore
       return await rxjs.lastValueFrom(
-        defer(async () => new SqbClient(options)).pipe(
+        defer(async () => new SqbClient(sqbConnectionOptions)).pipe(
           handleRetry(
             connectionToken,
-            options.retryAttempts,
-            options.retryDelay,
-            options.verboseRetryLog,
-            options.toRetry,
+            sqbConnectionOptions.retryAttempts,
+            sqbConnectionOptions.retryDelay,
+            sqbConnectionOptions.verboseRetryLog,
+            sqbConnectionOptions.toRetry,
           ),
         ),
       );
     }
     // NestJS 7
     // @ts-ignore
-    return await defer(async () => new SqbClient(options))
+    return await defer(async () => new SqbClient(sqbConnectionOptions))
       .pipe(
         handleRetry(
           connectionToken,
-          options.retryAttempts,
-          options.retryDelay,
-          options.verboseRetryLog,
-          options.toRetry,
+          sqbConnectionOptions.retryAttempts,
+          sqbConnectionOptions.retryDelay,
+          sqbConnectionOptions.verboseRetryLog,
+          sqbConnectionOptions.toRetry,
         ),
       )
       .toPromise();

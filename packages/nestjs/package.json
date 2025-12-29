@@ -23,6 +23,8 @@
     "clean:cover": "rimraf coverage"
   },
   "dependencies": {
+    "@jsopen/objects": "^2.0.2",
+    "putil-varhelpers": "^1.6.5",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
