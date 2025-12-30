@@ -1,14 +1,14 @@
 import { And, In, Param, Select } from '@sqb/builder';
-import { SqbConnection } from '../../client/sqb-connection.js';
+import type { SqbConnection } from '../../client/sqb-connection.js';
 import { AssociationNode } from '../model/association-node.js';
-import { ColumnFieldMetadata } from '../model/column-field-metadata.js';
-import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
+import type { ColumnFieldMetadata } from '../model/column-field-metadata.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { Repository } from '../repository.class.js';
+import type { Repository } from '../repository.class.js';
 import {
   isAssociationField,
   isColumnField,
   isEmbeddedField,
+  resolveEntityForEmbeddedField,
 } from '../util/orm.helper.js';
 import {
   FieldsProjection,
@@ -170,7 +170,7 @@ export class FindCommand {
       }
 
       if (isEmbeddedField(col)) {
-        const typ = await EmbeddedFieldMetadata.resolveType(col);
+        const typ = await resolveEntityForEmbeddedField(col);
         const subConverter = converter.addObjectProperty({
           name: col.name,
           type: typ.ctor,
@@ -287,7 +287,7 @@ export class FindCommand {
         while (a.length > 1) {
           const col = EntityMetadata.getField(_entityDef, a.shift() || '');
           if (isEmbeddedField(col)) {
-            _entityDef = await EmbeddedFieldMetadata.resolveType(col);
+            _entityDef = await resolveEntityForEmbeddedField(col);
             if (col.fieldNamePrefix) prefix += col.fieldNamePrefix;
             if (col.fieldNameSuffix) suffix = col.fieldNameSuffix + suffix;
           } else if (isAssociationField(col)) {

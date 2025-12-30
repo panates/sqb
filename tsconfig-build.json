@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@sqb/*": ["./packages/*/build/types/index.js"]
+      "@sqb/*": ["./packages/*/build"]
     }
   }
 }

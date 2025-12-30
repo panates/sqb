@@ -1,10 +1,13 @@
 import { And, Param, Update } from '@sqb/builder';
-import { SqbConnection } from '../../client/sqb-connection.js';
-import { ColumnFieldMetadata } from '../model/column-field-metadata.js';
-import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
+import type { SqbConnection } from '../../client/sqb-connection.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { Repository } from '../repository.class.js';
-import { isColumnField, isEmbeddedField } from '../util/orm.helper.js';
+import type { Repository } from '../repository.class.js';
+import {
+  checkEnumValue,
+  isColumnField,
+  isEmbeddedField,
+  resolveEntityForEmbeddedField,
+} from '../util/orm.helper.js';
 import { prepareFilter } from './command.helper.js';
 
 export type UpdateCommandArgs = {
@@ -92,7 +95,7 @@ export class UpdateCommand {
             `${entity.name}.${col.name} is required and can't be null`,
           );
         if (v === undefined) continue;
-        ColumnFieldMetadata.checkEnumValue(col, v);
+        checkEnumValue(col, v);
         const fieldName = prefix + col.fieldName + suffix;
         const k = ('I$_' + fieldName).substring(0, 30);
         ctx.queryValues[fieldName] = Param({
@@ -103,7 +106,7 @@ export class UpdateCommand {
         ctx.queryParams[k] = v;
         ctx.colCount++;
       } else if (v != null && isEmbeddedField(col)) {
-        const type = await EmbeddedFieldMetadata.resolveType(col);
+        const type = await resolveEntityForEmbeddedField(col);
         await this._prepareParams(
           ctx,
           type,

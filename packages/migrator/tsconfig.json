@@ -1,11 +1,24 @@
 {
   "extends": "../../tsconfig-base.json",
   "include": ["src"],
+  "exclude": ["build"],
   "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "module": "ES2020",
+    "moduleResolution": "Node",
+    "rootDir": "src",
+    "outDir": "./build",
     "baseUrl": "./",
     "paths": {
-      "@sqb/connect": ["../connect/src/index.ts"],
-      "@sqb/postgres": ["../postgres/src/index.ts"]
+      "@sqb/builder": ["../builder/src"],
+      "@sqb/connect": ["../connect/src"],
+      "@sqb/postgres": ["../postgres/src"]
     }
-  }
+  },
+  "references": [
+    { "path": "../builder" },
+    { "path": "../connect" },
+    { "path": "../postgres" }
+  ]
 }

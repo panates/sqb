@@ -3,16 +3,16 @@ import DoublyLinked from 'doublylinked';
 import { TaskQueue } from 'power-tasks';
 import { coerceToInt } from 'putil-varhelpers';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
-import { Adapter } from './adapter.js';
+import type { Adapter } from './adapter.js';
 import { CursorStream, CursorStreamOptions } from './cursor-stream.js';
-import { FieldInfoMap } from './field-info-map.js';
+import type { FieldInfoMap } from './field-info-map.js';
 import {
   callFetchHooks,
   normalizeRowsToArrayRows,
   normalizeRowsToObjectRows,
 } from './helpers.js';
-import { SqbConnection } from './sqb-connection.js';
-import { ObjectRow, QueryRequest } from './types.js';
+import type { SqbConnection } from './sqb-connection.js';
+import type { ObjectRow, QueryRequest } from './types.js';
 
 const debug = _debug('sqb:cursor');
 

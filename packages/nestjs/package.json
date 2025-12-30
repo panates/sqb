@@ -6,11 +6,9 @@
   "license": "Apache-2.0",
   "scripts": {
     "compile": "tsc --noEmit",
-    "prebuild": "npm run lint && npm run clean",
-    "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc -b tsconfig-build-cjs.json && cp ../../support/package.cjs.json ./build/cjs/package.json",
-    "build:esm": "tsc -b tsconfig-build-esm.json && cp ../../support/package.esm.json ./build/esm/package.json",
-    "postbuild": "cp README.md ./build && node ../../support/postbuild.cjs",
+    "prebuild": "npm run check && npm run lint && npm run clean",
+    "build": "tsc -b tsconfig-build.json",
+    "postbuild": "node ../../support/postbuild.cjs",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier . --write --log-level=warn",
@@ -19,8 +17,8 @@
     "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
     "clean:src": "ts-cleanup -s src --all",
     "clean:test": "ts-cleanup -s test --all",
-    "clean:build": "rimraf build",
-    "clean:cover": "rimraf coverage"
+    "clean:build": "rimraf build *.tsbuildinfo",
+    "clean:cover": "rimraf ../../coverage/nestjs"
   },
   "dependencies": {
     "@jsopen/objects": "^2.0.2",
@@ -30,8 +28,8 @@
   "devDependencies": {
     "@nestjs/common": "^11.1.2",
     "@nestjs/core": "^11.1.2",
-    "@nestjs/platform-express": "^11.1.9",
-    "@nestjs/testing": "^11.1.9",
+    "@nestjs/platform-express": "^11.1.11",
+    "@nestjs/testing": "^11.1.11",
     "expect": "^30.2.0",
     "postgrejs": "^2.22.9",
     "rxjs": "^7.8.1",
@@ -46,23 +44,18 @@
     "rxjs": ">=6.6.0"
   },
   "type": "module",
+  "module": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./types/index.d.ts",
-        "default": "./esm/index.js"
-      },
-      "require": {
-        "types": "./types/index.d.cts",
-        "default": "./cjs/index.js"
-      },
-      "default": "./esm/index.js"
+      "types": "./index.d.ts",
+      "default": "./index.js"
     },
     "./package.json": "./package.json"
   },
-  "main": "./cjs/index.js",
-  "module": "./esm/index.js",
-  "types": "./types/index.d.ts",
+  "engines": {
+    "node": ">=20.0"
+  },
   "contributors": [
     "Eray Hanoglu <e.hanoglu@panates.com>",
     "Ilker Gurelli <i.gurelli@panates.com>"
@@ -72,17 +65,6 @@
     "url": "https://github.com/panates/sqb.git",
     "directory": "packages/nestjs"
   },
-  "engines": {
-    "node": ">=18.0"
-  },
-  "files": [
-    "bin/",
-    "cjs/",
-    "esm/",
-    "types/",
-    "LICENSE",
-    "README.md"
-  ],
   "keywords": [
     "sqb",
     "nestjs",

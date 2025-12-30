@@ -8,16 +8,16 @@ import {
   isEmbeddedField,
 } from '../util/orm.helper.js';
 import { Association } from './association.js';
-import {
+import type {
   AssociationFieldMetadata,
   AssociationFieldOptions,
 } from './association-field-metadata.js';
 import { AssociationNode } from './association-node.js';
-import {
+import type {
   ColumnFieldMetadata,
   ColumnFieldOptions,
 } from './column-field-metadata.js';
-import {
+import type {
   EmbeddedFieldMetadata,
   EmbeddedFieldOptions,
 } from './embedded-field-metadata.js';
@@ -317,7 +317,13 @@ export namespace EntityMetadata {
       }
     }
 
-    prop = ColumnFieldMetadata.create(entity, name, options);
+    prop = {
+      fieldName: name,
+      ...options,
+      kind: 'column',
+      entity,
+      name,
+    } satisfies ColumnFieldMetadata;
     entity.fields[name.toLowerCase()] = prop;
     return prop;
   }
@@ -331,7 +337,13 @@ export namespace EntityMetadata {
     delete (entity as any)._fieldNames;
     let prop = EntityMetadata.getField(entity, name);
     if (isEmbeddedField(prop)) options = { ...prop, ...options };
-    prop = EmbeddedFieldMetadata.create(entity, name, type, options);
+    prop = {
+      ...options,
+      kind: 'object',
+      entity,
+      name,
+      type,
+    } satisfies EmbeddedFieldMetadata;
     entity.fields[name.toLowerCase()] = prop;
     return prop;
   }
@@ -343,12 +355,13 @@ export namespace EntityMetadata {
     options?: AssociationFieldOptions,
   ): AssociationFieldMetadata {
     delete (entity as any)._fieldNames;
-    const prop = AssociationFieldMetadata.create(
+    const prop = {
+      ...options,
+      kind: 'association',
       entity,
-      propertyKey,
+      name: propertyKey,
       association,
-      options,
-    );
+    } satisfies AssociationFieldMetadata;
     let l: AssociationNode | undefined = association;
     let i = 1;
     while (l) {

@@ -2,8 +2,8 @@ import { LogicalOperator } from '@sqb/builder';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
 import { PartialDTO, PatchDTO, RequiredSome, StrictOmit, Type } from 'ts-gems';
 import { FieldInfoMap } from '../client/field-info-map.js';
-import { SqbClient } from '../client/sqb-client.js';
-import { SqbConnection } from '../client/sqb-connection.js';
+import type { SqbClient } from '../client/sqb-client.js';
+import type { SqbConnection } from '../client/sqb-connection.js';
 import { QueryRequest, TransactionFunction } from '../client/types.js';
 import { CountCommand } from './commands/count.command.js';
 import { CreateCommand } from './commands/create.command.js';
@@ -369,6 +369,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     opts?: Repository.CommandOptions,
   ): Promise<any> {
     let connection = opts?.connection;
+    const { SqbConnection } = await import('../client/sqb-connection.js');
     if (!connection && this._executor instanceof SqbConnection)
       connection = this._executor;
     if (connection) {

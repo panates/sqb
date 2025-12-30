@@ -1,9 +1,12 @@
 import { Insert, Param } from '@sqb/builder';
-import { SqbConnection } from '../../client/sqb-connection.js';
-import { ColumnFieldMetadata } from '../model/column-field-metadata.js';
-import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
+import type { SqbConnection } from '../../client/sqb-connection.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { isColumnField, isEmbeddedField } from '../util/orm.helper.js';
+import {
+  checkEnumValue,
+  isColumnField,
+  isEmbeddedField,
+  resolveEntityForEmbeddedField,
+} from '../util/orm.helper.js';
 
 export type CreateCommandArgs = {
   entity: EntityMetadata;
@@ -101,7 +104,7 @@ export class CreateCommand {
           }
           continue;
         }
-        ColumnFieldMetadata.checkEnumValue(col, v);
+        checkEnumValue(col, v);
         const fieldName = prefix + col.fieldName + suffix;
         const k = ('I$_' + fieldName).substring(0, 30);
         ctx.queryValues[fieldName] = Param({
@@ -112,7 +115,7 @@ export class CreateCommand {
         ctx.queryParams[k] = v;
         ctx.colCount++;
       } else if (v != null && isEmbeddedField(col)) {
-        const type = await EmbeddedFieldMetadata.resolveType(col);
+        const type = await resolveEntityForEmbeddedField(col);
         await this._prepareParams(
           ctx,
           type,

@@ -1,12 +1,12 @@
 import { SerializationType } from './enums.js';
 import type { DeleteQuery } from './query/delete-query.js';
 import type { InsertQuery } from './query/insert-query.js';
-import { Query } from './query/query.js';
+import type { Query } from './query/query.js';
 import type { SelectQuery } from './query/select-query.js';
 import type { UpdateQuery } from './query/update-query.js';
-import { Serializable } from './serializable.js';
+import type { Serializable } from './serializable.js';
 import type { CaseStatement } from './sql-objects/case-statement.js';
-import { CountStatement } from './sql-objects/count-statement.js';
+import type { CountStatement } from './sql-objects/count-statement.js';
 import type { FieldExpression } from './sql-objects/field-expression.js';
 import type { GroupColumn } from './sql-objects/group-column.js';
 import type { JoinStatement } from './sql-objects/join-statement.js';
@@ -19,11 +19,15 @@ import type { ReturningColumn } from './sql-objects/returning-column.js';
 import type { TableName } from './sql-objects/table-name.js';
 
 export function isSerializable(value: any): value is Serializable {
-  return value instanceof Serializable;
+  return typeof value === 'object' && typeof value._serialize === 'function';
 }
 
-export function isQuery(value: any): value is Serializable {
-  return value instanceof Query;
+export function isQuery(value: any): value is Query {
+  return (
+    isSerializable(value) &&
+    typeof (value as any).generate === 'function' &&
+    typeof (value as any).values === 'function'
+  );
 }
 
 export function isRawStatement(value: any): value is RawStatement {

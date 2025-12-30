@@ -1,8 +1,8 @@
 import { camelCase } from 'putil-varhelpers';
-import { AssociationSettings, TypeThunk } from '../orm.type.js';
+import type { AssociationSettings, TypeThunk } from '../orm.type.js';
 import { resolveEntityMeta } from '../util/orm.helper.js';
-import { ColumnFieldMetadata } from './column-field-metadata.js';
-import { EntityMetadata } from './entity-metadata.js';
+import type { ColumnFieldMetadata } from './column-field-metadata.js';
+import type { EntityMetadata } from './entity-metadata.js';
 
 export class Association {
   private _resolved?: boolean;
@@ -75,6 +75,7 @@ export class Association {
   }
 
   protected async _resolveKeys(): Promise<void> {
+    const { EntityMetadata } = await import('../model/entity-metadata.js');
     if (this._resolved) return;
     const source = await this.resolveSource();
     const target = await this.resolveTarget();
