@@ -16,12 +16,12 @@ import {
   SelectQuery,
 } from '@sqb/builder';
 import { AssociationNode } from '../model/association-node.js';
-import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import {
   isAssociationField,
   isColumnField,
   isEmbeddedField,
+  resolveEntityForEmbeddedField,
 } from '../util/orm.helper.js';
 
 export interface JoinInfo {
@@ -208,7 +208,7 @@ export async function prepareFilter(
                 `Invalid column (${item._left}) defined in filter`,
               );
             if (isEmbeddedField(col)) {
-              _curEntity = await EmbeddedFieldMetadata.resolveType(col);
+              _curEntity = await resolveEntityForEmbeddedField(col);
               _curPrefix = _curPrefix + (col.fieldNamePrefix || '');
               _curSuffix = (col.fieldNameSuffix || '') + _curSuffix;
               continue;

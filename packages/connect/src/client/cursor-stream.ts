@@ -1,6 +1,6 @@
 import _debug from 'debug';
 import { Readable } from 'stream';
-import { Cursor } from './cursor.js';
+import type { Cursor } from './cursor.js';
 
 export interface CursorStreamOptions {
   objectMode?: boolean;

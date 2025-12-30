@@ -1,11 +1,19 @@
 {
   "extends": "../../tsconfig-base.json",
   "include": ["src"],
+  "exclude": ["build"],
   "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "module": "ES2020",
+    "moduleResolution": "Node",
+    "rootDir": "src",
+    "outDir": "./build",
     "baseUrl": "./",
     "paths": {
-      "@sqb/builder": ["../builder/src/index.ts"],
-      "@sqb/connect": ["../connect/src/index.ts"]
+      "@sqb/builder": ["../builder/src"],
+      "@sqb/connect": ["../connect/src"]
     }
-  }
+  },
+  "references": [{ "path": "../builder" }, { "path": "../connect" }]
 }

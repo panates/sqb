@@ -1,7 +1,7 @@
 import { And, Delete, LogicalOperator } from '@sqb/builder';
-import { SqbConnection } from '../../client/sqb-connection.js';
+import type { SqbConnection } from '../../client/sqb-connection.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { Repository } from '../repository.class.js';
+import type { Repository } from '../repository.class.js';
 import { prepareFilter } from './command.helper.js';
 
 export type DestroyCommandArgs = {

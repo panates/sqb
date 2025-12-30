@@ -1,10 +1,10 @@
 import { Type } from 'ts-gems';
-import { AssociationFieldMetadata } from '../model/association-field-metadata.js';
+import type { AssociationFieldMetadata } from '../model/association-field-metadata.js';
 import type { ColumnFieldMetadata } from '../model/column-field-metadata.js';
-import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
+import type { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
 import type { EntityMetadata } from '../model/entity-metadata.js';
 import { ENTITY_METADATA_KEY } from '../orm.const.js';
-import type { TypeResolver, TypeThunk } from '../orm.type.js';
+import type { FieldValue, TypeResolver, TypeThunk } from '../orm.type.js';
 
 export function isClass(fn: any): fn is Type {
   return typeof fn === 'function' && /^\s*class/.test(fn.toString());
@@ -37,4 +37,23 @@ export async function resolveEntityMeta(
 ): Promise<EntityMetadata | undefined> {
   const ctor = await resolveEntity(ctorThunk);
   return ctor && Reflect.getMetadata(ENTITY_METADATA_KEY, ctor);
+}
+
+export async function resolveEntityForEmbeddedField(
+  meta: EmbeddedFieldMetadata,
+): Promise<EntityMetadata> {
+  const typ = await resolveEntityMeta(meta.type);
+  if (typ) {
+    return typ;
+  }
+  throw new Error(`Can't resolve type of ${meta.entity.name}.${meta.name}`);
+}
+
+export function checkEnumValue(col: ColumnFieldMetadata, v: FieldValue) {
+  if (v === undefined || !col.enum || (v == null && !col.notNull)) return;
+  const enumKeys = Array.isArray(col.enum) ? col.enum : Object.keys(col.enum);
+  if (!enumKeys.includes(v))
+    throw new Error(
+      `${col.entity.name}.${col.name} value must be one of (${enumKeys})`,
+    );
 }

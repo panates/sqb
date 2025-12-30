@@ -9,10 +9,10 @@ import {
   coerceToString,
 } from 'putil-varhelpers';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
-import { Type } from 'ts-gems';
+import type { Type } from 'ts-gems';
 import { EntityMetadata } from '../orm/model/entity-metadata.js';
 import { Repository } from '../orm/repository.class.js';
-import { Adapter } from './adapter.js';
+import type { Adapter } from './adapter.js';
 import { Cursor } from './cursor.js';
 import {
   callFetchHooks,
@@ -20,9 +20,9 @@ import {
   normalizeRowsToObjectRows,
   wrapAdapterFields,
 } from './helpers.js';
-import { SqbClient } from './sqb-client.js';
+import type { SqbClient } from './sqb-client.js';
 import { SQBError } from './sqb-error.js';
-import {
+import type {
   ConnectionOptions,
   ExecuteHookFunction,
   FetchFunction,

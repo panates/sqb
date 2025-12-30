@@ -1,11 +1,11 @@
 import { JoinType, SerializationType } from '../enums.js';
-import { SelectQuery } from '../query/select-query.js';
+import type { SelectQuery } from '../query/select-query.js';
 import { Serializable } from '../serializable.js';
-import { SerializeContext } from '../serialize-context.js';
+import type { SerializeContext } from '../serialize-context.js';
 import { isRawStatement, isSelectQuery, isTableName } from '../typeguards.js';
-import { LogicalOperator } from './operators/logical-operator.js';
+import type { LogicalOperator } from './operators/logical-operator.js';
 import { OpAnd } from './operators/op-and.js';
-import { RawStatement } from './raw-statement.js';
+import type { RawStatement } from './raw-statement.js';
 import { TableName } from './table-name.js';
 
 export class JoinStatement extends Serializable {

@@ -15,25 +15,6 @@ export interface EmbeddedFieldMetadata extends FieldMetadata {
 }
 
 export namespace EmbeddedFieldMetadata {
-  export function create(
-    entity: EntityMetadata,
-    name: string,
-    type: TypeThunk,
-    options?: EmbeddedFieldOptions,
-  ): EmbeddedFieldMetadata {
-    const result: EmbeddedFieldMetadata = {
-      kind: 'object',
-      entity,
-      name,
-      type,
-    };
-    if (options?.fieldNamePrefix)
-      result.fieldNamePrefix = options.fieldNamePrefix;
-    if (options?.fieldNameSuffix)
-      result.fieldNameSuffix = options.fieldNameSuffix;
-    return result;
-  }
-
   export async function resolveType(
     meta: EmbeddedFieldMetadata,
   ): Promise<EntityMetadata> {

@@ -11,7 +11,7 @@ function postBuild() {
   const buildDir = path.join(projectRoot, 'build');
 
   json.type = 'module';
-  if (isApp) json.private = true;
+  if (isApp || !json.publishConfig) json.private = true;
   else delete json.private;
   delete json.scripts;
   delete json.devDependencies;
@@ -21,12 +21,6 @@ function postBuild() {
     JSON.stringify(json, undefined, 2),
     'utf-8',
   );
-  if (fs.existsSync(path.resolve(buildDir, 'types/index.d.ts'))) {
-    fs.copyFileSync(
-      path.resolve(buildDir, 'types/index.d.ts'),
-      path.resolve(buildDir, 'types/index.d.cts'),
-    );
-  }
   if (fs.existsSync(path.resolve(projectRoot, 'Dockerfile'))) {
     fs.copyFileSync(
       path.resolve(projectRoot, 'Dockerfile'),
