@@ -41,6 +41,7 @@ interface BaseModuleOptions {
   logger?: LoggerService | string;
   global?: boolean;
   name?: string;
+  lazyConnect?: boolean;
 }
 
 export interface SqbModuleOptions extends BaseModuleOptions {

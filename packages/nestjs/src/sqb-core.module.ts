@@ -2,6 +2,7 @@ import {
   DynamicModule,
   Global,
   Inject,
+  Logger,
   Module,
   OnApplicationShutdown,
   Provider,
@@ -32,6 +33,7 @@ export class SqbCoreModule implements OnApplicationShutdown {
     @Inject(SQB_MODULE_OPTIONS)
     private readonly options: SqbModuleOptions,
     private readonly moduleRef: ModuleRef,
+    private logger?: Logger,
   ) {}
 
   static forRoot(options: SqbModuleOptions = {}): DynamicModule {
@@ -54,6 +56,13 @@ export class SqbCoreModule implements OnApplicationShutdown {
         {
           provide: SQB_CONNECTION_OPTIONS,
           useValue: getSqbConfig(options.useValue || {}, options.envPrefix),
+        },
+        {
+          provide: Logger,
+          useValue:
+            typeof options.logger === 'string'
+              ? new Logger(options.logger)
+              : options.logger,
         },
       ],
       exports: [connectionProvider],
@@ -85,9 +94,34 @@ export class SqbCoreModule implements OnApplicationShutdown {
           provide: SQB_MODULE_ID,
           useValue: crypto.randomUUID(),
         },
+        {
+          provide: Logger,
+          useValue:
+            typeof options.logger === 'string'
+              ? new Logger(options.logger)
+              : options.logger,
+        },
       ],
       exports: [connectionProvider],
     };
+  }
+
+  onApplicationBootstrap() {
+    const client = this.moduleRef.get<SqbClient>(
+      getSQBToken(this.options.name),
+    );
+    const op = this.moduleRef.get<SqbClientConnectionOptions>(
+      SQB_CONNECTION_OPTIONS,
+    );
+    if (this.options.lazyConnect) return;
+    this.logger?.log(
+      `Connecting to database [${op.database}] at ${op.host}:${op.port} using ${op.dialect} dialect`,
+    );
+    Logger.flush();
+    return client.test().catch(e => {
+      this.logger?.error(`${op.dialect} connection failed: ` + e.message);
+      throw e;
+    });
   }
 
   async onApplicationShutdown() {
