@@ -1,7 +1,7 @@
 import '@sqb/postgres';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import expect from 'expect';
+import { expect } from 'expect';
 import { Server } from 'http';
 import request from 'supertest';
 import { SQB_CONNECTION_OPTIONS } from '../src/sqb.constants.js';

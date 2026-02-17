@@ -6,7 +6,7 @@ import { PhotoModule } from './photo/photo.module.js';
 @Module({
   imports: [
     SqbModule.forRootAsync({
-      name: 'db1',
+      token: 'db1',
       useFactory: () => dbConfig.useValue!,
     }),
     PhotoModule,
