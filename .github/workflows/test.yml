@@ -60,12 +60,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 'Setup Environment'
         uses: panates/ghac-setup-node@v1
         with:
-          node-version: '20.18.1'
+          node-version: '22'
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Install rman
