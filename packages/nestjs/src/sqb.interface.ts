@@ -1,4 +1,4 @@
-import { InjectionToken, LoggerService, Type } from '@nestjs/common';
+import { InjectionToken, LoggerService } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
 import { ClientConfiguration } from '@sqb/connect';
 
@@ -25,12 +25,6 @@ interface BaseModuleOptions {
 
 export interface SqbModuleOptions extends BaseModuleOptions {
   useValue?: SqbClientConnectionOptions;
-}
-
-export interface SqbOptionsFactory {
-  createSqbOptions(
-    connectionName?: string,
-  ): Promise<SqbClientConnectionOptions> | SqbClientConnectionOptions;
 }
 
 export interface SqbModuleAsyncOptions
