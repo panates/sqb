@@ -5,6 +5,7 @@ describe('connect:Model / Parse', () => {
   it(`should @Parse() decorator set "parse" property of metadata`, () => {
     const fn = v => '>' + v;
 
+    @Entity()
     class MyEntity {
       @Parse(fn)
       declare id: string;
@@ -23,6 +24,7 @@ describe('connect:Model / Serialize', () => {
   it(`should @Serialize() decorator set "parse" property of metadata`, () => {
     const fn = v => '>' + v;
 
+    @Entity()
     class MyEntity {
       @Serialize(fn)
       declare id: string;

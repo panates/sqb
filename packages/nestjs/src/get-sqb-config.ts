@@ -1,7 +1,7 @@
 import process from 'node:process';
 import { clone } from '@jsopen/objects';
 import { toBoolean, toInt } from 'putil-varhelpers';
-import { SqbClientConnectionOptions } from './sqb.interface.js';
+import type { SqbClientConnectionOptions } from './sqb.interface.js';
 
 export function getSqbConfig(
   moduleOptions: SqbClientConnectionOptions,

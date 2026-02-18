@@ -1,4 +1,4 @@
-import { Adapter, ArrayRowset, ObjectRowset } from '@sqb/connect';
+import type { Adapter, ArrayRowset, ObjectRowset } from '@sqb/connect';
 import { expect } from 'expect';
 import {
   applyNamingStrategy,

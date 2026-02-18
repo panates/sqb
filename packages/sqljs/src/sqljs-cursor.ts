@@ -1,4 +1,4 @@
-import { Adapter, RowType } from '@sqb/connect';
+import type { Adapter, RowType } from '@sqb/connect';
 
 export class SqljsCursor implements Adapter.Cursor {
   private _stmt?: any;

@@ -7,6 +7,7 @@ import {
 } from '@sqb/connect';
 import { expect } from 'expect';
 
+@Entity()
 class Country {
   @PrimaryKey()
   @Column()
@@ -143,6 +144,7 @@ describe('connect:Model / Association', () => {
   });
 
   it(`should determine keyColumn if there is no foreign-key`, async () => {
+    @Entity()
     class Customer2 {
       @Column()
       @ForeignKey(Country)
@@ -157,6 +159,7 @@ describe('connect:Model / Association', () => {
   });
 
   it(`should determine targetColumn from target primary index`, async () => {
+    @Entity()
     class Customer2 {
       @Column()
       @ForeignKey(Country)

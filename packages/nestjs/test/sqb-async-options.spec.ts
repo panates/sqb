@@ -1,11 +1,11 @@
 import '@sqb/postgres';
-import { INestApplication } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import expect from 'expect';
+import { expect } from 'expect';
 import { Server } from 'http';
 import request from 'supertest';
 import { SQB_CONNECTION_OPTIONS } from '../src/sqb.constants.js';
-import { SqbClientConnectionOptions } from '../src/sqb.interface.js';
+import type { SqbClientConnectionOptions } from '../src/sqb.interface.js';
 import { AsyncOptionsFactoryModule } from './_support/photo-app/async-options.module.js';
 
 describe('nestjs:Sqb-Nestjs (async-options)', () => {

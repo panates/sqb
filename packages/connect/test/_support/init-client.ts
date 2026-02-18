@@ -1,5 +1,5 @@
 import '@sqb/postgres';
-import { ClientConfiguration, SqbClient } from '@sqb/connect';
+import { type ClientConfiguration, SqbClient } from '@sqb/connect';
 import { createTestSchema } from '../../../postgres/test/_support/create-db.js';
 
 export async function initClient(

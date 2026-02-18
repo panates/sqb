@@ -1,5 +1,5 @@
-import { ClientConfiguration } from '@sqb/connect';
-import { ConnectionAttributes } from 'oracledb';
+import type { ClientConfiguration } from '@sqb/connect';
+import type { ConnectionAttributes } from 'oracledb';
 import url from 'url';
 
 export function clientConfigurationToDriver(

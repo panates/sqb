@@ -2,7 +2,7 @@ import { expect } from 'expect';
 import {
   Select,
   SerializationType,
-  SerializerExtension,
+  type SerializerExtension,
   SerializerRegistry,
 } from '../src/index.js';
 

@@ -1,4 +1,4 @@
-import { Adapter, QueryRequest } from '@sqb/connect';
+import type { Adapter, QueryRequest } from '@sqb/connect';
 import { Database, Statement } from 'sql.js';
 import { SqljsCursor } from './sqljs-cursor.js';
 

@@ -8,7 +8,7 @@ process.env.SQB_PASSWORD = 'postgres';
 @Module({
   imports: [
     SqbModule.forRoot({
-      name: 'db1',
+      token: 'db1',
     }),
     PhotoModule,
   ],

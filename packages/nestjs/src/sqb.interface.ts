@@ -1,66 +1,36 @@
-import { LoggerService, Type } from '@nestjs/common';
-import { ModuleMetadata } from '@nestjs/common/interfaces';
-import { ClientConfiguration } from '@sqb/connect';
+import type { InjectionToken, LoggerService } from '@nestjs/common';
+import type { ModuleMetadata } from '@nestjs/common/interfaces';
+import type { ClientConfiguration } from '@sqb/connect';
 
 export interface SqbClientConnectionOptions extends ClientConfiguration {
-  /**
-   * Number of times to retry connecting
-   * Default: 10
-   */
-  retryAttempts?: number;
-  /**
-   * Delay between connection retry attempts (ms)
-   * Default: 3000
-   */
-  retryDelay?: number;
-  /**
-   * Function that determines whether the module should
-   * attempt to connect upon failure.
-   *
-   * @param err error that was thrown
-   * @returns whether to retry connection or not
-   */
-  toRetry?: (err: any) => boolean;
-  /**
-   * If `true`, connection will not be closed on application shutdown.
-   */
-  keepConnectionAlive?: boolean;
-  /**
-   * If `true`, will show verbose error messages on each connection retry.
-   */
-  verboseRetryLog?: boolean;
   /**
    * Number of ms to wait closing connection on shutdown
    * Default: 10
    */
   shutdownWaitMs?: number;
+
+  /**
+   * If `true`, will not connect to database on application start
+   * Default: `false`
+   */
+  lazyConnect?: boolean;
 }
 
 interface BaseModuleOptions {
+  token?: InjectionToken;
   envPrefix?: string;
   logger?: LoggerService | string;
   global?: boolean;
-  name?: string;
-  lazyConnect?: boolean;
 }
 
 export interface SqbModuleOptions extends BaseModuleOptions {
   useValue?: SqbClientConnectionOptions;
 }
 
-export interface SqbOptionsFactory {
-  createSqbOptions(
-    connectionName?: string,
-  ): Promise<SqbClientConnectionOptions> | SqbClientConnectionOptions;
-}
-
 export interface SqbModuleAsyncOptions
-  extends BaseModuleOptions, Pick<ModuleMetadata, 'imports'> {
-  name?: string;
-  useExisting?: Type<SqbOptionsFactory>;
-  useClass?: Type<SqbOptionsFactory>;
+  extends BaseModuleOptions, Partial<Pick<ModuleMetadata, 'imports'>> {
+  inject?: any[];
   useFactory?: (
     ...args: any[]
   ) => Promise<SqbClientConnectionOptions> | SqbClientConnectionOptions;
-  inject?: any[];
 }
