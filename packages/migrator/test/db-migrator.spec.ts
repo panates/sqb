@@ -1,7 +1,7 @@
-import { ClientConfiguration } from '@sqb/connect';
+import type { ClientConfiguration } from '@sqb/connect';
 import assert from 'assert';
 import { Connection } from 'postgrejs';
-import { DbMigrator, DbMigratorOptions } from '../src/index.js';
+import { DbMigrator, type DbMigratorOptions } from '../src/index.js';
 import { Test1MigrationPackage } from './_support/test1-migrations.js';
 import { Test2MigrationPackage } from './_support/test2-migrations.js';
 

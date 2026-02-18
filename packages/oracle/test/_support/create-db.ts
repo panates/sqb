@@ -1,4 +1,4 @@
-import { ClientConfiguration } from '@sqb/connect';
+import type { ClientConfiguration } from '@sqb/connect';
 import oracledb from 'oracledb';
 import { getInsertSQLsForTestData } from '../../../connect/test/_shared/adapter-tests.js';
 import { clientConfigurationToDriver } from '../../src/helpers.js';

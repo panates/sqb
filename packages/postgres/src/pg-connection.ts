@@ -1,4 +1,4 @@
-import { Adapter, DataType, QueryRequest } from '@sqb/connect';
+import { type Adapter, DataType, type QueryRequest } from '@sqb/connect';
 import {
   BindParam,
   Connection,

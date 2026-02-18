@@ -2,7 +2,7 @@ import '@sqb/oracle-dialect';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import path from 'node:path';
-import { Adapter, ClientConfiguration } from '@sqb/connect';
+import type { Adapter, ClientConfiguration } from '@sqb/connect';
 import oracledb from 'oracledb';
 import { clientConfigurationToDriver } from './helpers.js';
 import { OraConnection } from './ora-connection.js';

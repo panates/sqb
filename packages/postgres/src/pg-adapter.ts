@@ -1,5 +1,5 @@
 import '@sqb/postgres-dialect';
-import { Adapter, ClientConfiguration, DataType } from '@sqb/connect';
+import { type Adapter, type ClientConfiguration, DataType } from '@sqb/connect';
 import { Connection, ConnectionConfiguration } from 'postgrejs';
 import { PgConnection } from './pg-connection.js';
 

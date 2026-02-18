@@ -1,4 +1,4 @@
-import { SerializerExtension } from './types.js';
+import type { SerializerExtension } from './types.js';
 
 export class SerializerRegistry {
   protected static serializers: SerializerExtension[] = [];

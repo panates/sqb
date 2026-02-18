@@ -12,10 +12,10 @@ import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
 import { Maybe, Type } from 'ts-gems';
 import { EntityMetadata } from '../orm/model/entity-metadata.js';
 import { Repository } from '../orm/repository.class.js';
-import { Adapter } from './adapter.js';
+import type { Adapter } from './adapter.js';
 import { AdapterRegistry } from './extensions.js';
 import { SqbConnection } from './sqb-connection.js';
-import {
+import type {
   ClientConfiguration,
   ClientDefaults,
   ConnectionOptions,

@@ -1,8 +1,8 @@
 import { camelCase, pascalCase } from 'putil-varhelpers';
 import { Maybe } from 'ts-gems';
-import { Adapter } from './adapter.js';
+import type { Adapter } from './adapter.js';
 import { FieldInfoMap } from './field-info-map.js';
-import {
+import type {
   ArrayRow,
   ArrayRowset,
   FieldInfo,

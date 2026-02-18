@@ -1,4 +1,4 @@
-import { Adapter, QueryRequest } from '@sqb/connect';
+import type { Adapter, QueryRequest } from '@sqb/connect';
 import assert from 'assert';
 import oracledb from 'oracledb';
 import { OraCursor } from './ora-cursor.js';

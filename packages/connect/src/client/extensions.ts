@@ -1,5 +1,5 @@
-import { SerializerExtension } from '@sqb/builder';
-import { Adapter } from './adapter.js';
+import type { SerializerExtension } from '@sqb/builder';
+import type { Adapter } from './adapter.js';
 
 export class AdapterRegistry {
   protected static adapters: Adapter[] = [];

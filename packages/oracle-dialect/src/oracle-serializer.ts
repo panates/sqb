@@ -3,7 +3,7 @@ import {
   OperatorType,
   SerializationType,
   SerializeContext,
-  SerializerExtension,
+  type SerializerExtension,
 } from '@sqb/builder';
 
 const reservedWords = ['comment', 'dual'];

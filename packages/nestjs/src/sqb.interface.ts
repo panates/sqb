@@ -1,6 +1,6 @@
-import { InjectionToken, LoggerService } from '@nestjs/common';
-import { ModuleMetadata } from '@nestjs/common/interfaces';
-import { ClientConfiguration } from '@sqb/connect';
+import type { InjectionToken, LoggerService } from '@nestjs/common';
+import type { ModuleMetadata } from '@nestjs/common/interfaces';
+import type { ClientConfiguration } from '@sqb/connect';
 
 export interface SqbClientConnectionOptions extends ClientConfiguration {
   /**

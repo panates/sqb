@@ -1,9 +1,9 @@
 import { DataType, Insert, Param, Query, Select, Update } from '@sqb/builder';
 import {
-  Adapter,
+  type Adapter,
   AdapterRegistry,
-  ClientConfiguration,
-  QueryRequest,
+  type ClientConfiguration,
+  type QueryRequest,
 } from '@sqb/connect';
 import { getDirname } from 'cross-dirname';
 import { expect } from 'expect';

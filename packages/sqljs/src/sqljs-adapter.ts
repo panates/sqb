@@ -1,5 +1,5 @@
 import '@sqb/sqlite-dialect';
-import { Adapter, ClientConfiguration } from '@sqb/connect';
+import type { Adapter, ClientConfiguration } from '@sqb/connect';
 import fs from 'fs';
 import path from 'path';
 import promisify from 'putil-promisify';

@@ -1,10 +1,10 @@
 import { classes } from '@sqb/builder';
 import { Maybe } from 'ts-gems';
 import {
-  ClientConfiguration,
+  type ClientConfiguration,
   DataType,
-  QueryRequest,
-  RowType,
+  type QueryRequest,
+  type RowType,
 } from './types.js';
 
 export interface Adapter {

@@ -1,4 +1,4 @@
-import { ClientConfiguration } from '@sqb/connect';
+import type { ClientConfiguration } from '@sqb/connect';
 import { AsyncEventEmitter } from 'strict-typed-events';
 import { PgMigrationAdapter } from './adapters/pg-migration-adapter.js';
 import { MigrationAdapter } from './migration-adapter.js';

@@ -5,6 +5,7 @@ import { Column, Entity, EntityMetadata, Link, PrimaryKey } from '@sqb/connect';
 import { expect } from 'expect';
 import { isAssociationField } from '../../../src/orm/util/orm.helper.js';
 
+@Entity()
 class Country {
   @PrimaryKey()
   @Column()
