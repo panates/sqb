@@ -7,6 +7,14 @@ import oracledb from 'oracledb';
 import { clientConfigurationToDriver } from './helpers.js';
 import { OraConnection } from './ora-connection.js';
 
+export interface OraClientConfiguration extends ClientConfiguration {
+  driverOptions?: {
+    direct?: boolean;
+    /** Format from date-fns. https://date-fns.org/ */
+    dateParamFormat?: string;
+  };
+}
+
 export class OraAdapter implements Adapter {
   driver = 'oracledb';
   dialect = 'oracle';
@@ -16,7 +24,7 @@ export class OraAdapter implements Adapter {
     // fetchAsString: [DataType.DATE, DataType.TIMESTAMP, DataType.TIMESTAMPTZ]
   };
 
-  async connect(config: ClientConfiguration): Promise<Adapter.Connection> {
+  async connect(config: OraClientConfiguration): Promise<Adapter.Connection> {
     if (!config.driverOptions?.direct) initOracleClient();
     const cfg = clientConfigurationToDriver(config);
     // Get oracle connection

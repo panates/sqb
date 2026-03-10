@@ -1,5 +1,6 @@
 import type { Adapter, QueryRequest } from '@sqb/connect';
 import assert from 'assert';
+import * as dateFns from 'date-fns';
 import oracledb from 'oracledb';
 import { OraCursor } from './ora-cursor.js';
 
@@ -59,17 +60,24 @@ const fetchTypeMap = {
   [oracledb.DB_TYPE_VARCHAR.name]: 'string',
 };
 
+export interface OraConnectionOptions {
+  dateParamFormat?: string;
+}
+
 export class OraConnection implements Adapter.Connection {
   private intlcon?: oracledb.Connection;
   public serverVersion: string;
   private _inTransaction = false;
+  dateParamFormat?: string;
 
   constructor(
     conn: oracledb.Connection,
     public sessionId: string,
+    options: OraConnectionOptions = {},
   ) {
     this.intlcon = conn;
     this.serverVersion = '' + conn.oracleServerVersion;
+    this.dateParamFormat = options.dateParamFormat;
   }
 
   async close() {
@@ -151,6 +159,25 @@ export class OraConnection implements Adapter.Connection {
     else oraOptions.maxRows = request.fetchRows;
 
     const out: Adapter.Response = {};
+    const params = request.params;
+    if (this.dateParamFormat) {
+      const wrapDate = (v: any) => {
+        if (v instanceof Date) return dateFns.format(v, this.dateParamFormat!);
+        if (v.value instanceof Date)
+          v.value = dateFns.format(v.value, this.dateParamFormat!);
+        return v;
+      };
+      if (params && typeof params === 'object') {
+        if (Array.isArray(params)) {
+          params.forEach((v, i) => {
+            params[i] = wrapDate(v);
+          });
+        } else
+          Object.keys(params).forEach(k => {
+            params[k] = wrapDate(params[k]);
+          });
+      }
+    }
 
     this.intlcon.action = request.action || '';
     let response = await this.intlcon.execute<any>(
