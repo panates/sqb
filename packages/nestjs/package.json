@@ -21,7 +21,7 @@
     "clean:cover": "rimraf ../../coverage/nestjs"
   },
   "dependencies": {
-    "@jsopen/objects": "^2.1.1",
+    "@jsopen/objects": "^2.2.0",
     "ansi-colors": "^4.1.3",
     "putil-varhelpers": "^1.7.0",
     "tslib": "^2.8.1"
@@ -29,8 +29,8 @@
   "devDependencies": {
     "@nestjs/common": "^11.1.2",
     "@nestjs/core": "^11.1.2",
-    "@nestjs/platform-express": "^11.1.14",
-    "@nestjs/testing": "^11.1.14",
+    "@nestjs/platform-express": "^11.1.16",
+    "@nestjs/testing": "^11.1.16",
     "expect": "^30.2.0",
     "postgrejs": "^2.22.9",
     "rxjs": "^7.8.1",
