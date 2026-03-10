@@ -5,6 +5,7 @@ import {
   SerializeContext,
   type SerializerExtension,
 } from '@sqb/builder';
+import { toDateString } from 'valgen';
 
 const reservedWords = ['comment', 'dual'];
 
@@ -42,6 +43,8 @@ export class OracleSerializer implements SerializerExtension {
         return this._serializeStringAGG(ctx, o, defFn);
       case SerializationType.SEQUENCE_GETTER_STATEMENT:
         return this._serializeSequenceGetter(ctx, o, defFn);
+      case SerializationType.EXTERNAL_PARAMETER:
+        return this._serializeParameter(ctx, o, defFn);
       default:
         break;
     }
@@ -220,5 +223,19 @@ export class OracleSerializer implements SerializerExtension {
 
   private _serializeReturning(): string {
     return '';
+  }
+
+  private _serializeParameter(
+    ctx: SerializeContext,
+    o: any,
+    defFn: DefaultSerializeFunction,
+  ): string {
+    const v = ctx.params?.[o.name];
+    if (v instanceof Date) {
+      ctx.preparedParams = ctx.preparedParams || {};
+      ctx.preparedParams[o.name] = toDateString(v).replace('T', ' ');
+      return `TO_DATE(:${o.name}, 'yyyy-mm-dd hh24:mi:ss.SSSSS')`;
+    }
+    return defFn(ctx, o);
   }
 }

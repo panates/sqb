@@ -100,28 +100,6 @@ export class OraConnection implements Adapter.Connection {
     else oraOptions.maxRows = request.fetchRows;
 
     const out: Adapter.Response = {};
-    const params = request.params;
-    const wrapDate = (v: any) => {
-      if (v instanceof Date)
-        return {
-          type: oracledb.DB_TYPE_DATE,
-          dir: oracledb.BIND_IN,
-          value: v,
-        };
-      if (v.value instanceof Date) v.type = oracledb.DB_TYPE_DATE;
-      return v;
-    };
-    if (params && typeof params === 'object') {
-      if (Array.isArray(params)) {
-        params.forEach((v, i) => {
-          params[i] = wrapDate(v);
-        });
-      } else
-        Object.keys(params).forEach(k => {
-          params[k] = wrapDate(params[k]);
-        });
-    }
-
     this.intlcon.action = request.action || '';
     let response = await this.intlcon.execute<any>(
       request.sql,
