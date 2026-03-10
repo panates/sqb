@@ -1,4 +1,3 @@
-import { omit } from '@jsopen/objects';
 import type { ClientConfiguration } from '@sqb/connect';
 import type { ConnectionAttributes } from 'oracledb';
 import url from 'url';
@@ -9,7 +8,7 @@ export function clientConfigurationToDriver(
   const cfg: ConnectionAttributes = {
     user: config.user,
     password: config.password,
-    ...omit(config.driverOptions, ['dateParamFormat']),
+    ...config.driverOptions,
   };
 
   if (config.host) {

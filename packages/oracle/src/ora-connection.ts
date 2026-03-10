@@ -1,83 +1,20 @@
 import type { Adapter, QueryRequest } from '@sqb/connect';
 import assert from 'assert';
-import * as dateFns from 'date-fns';
 import oracledb from 'oracledb';
+import { fetchTypeMap } from './constants.js';
 import { OraCursor } from './ora-cursor.js';
-
-export const dataTypeNames = {
-  [oracledb.DB_TYPE_BFILE.name]: 'BFILE',
-  [oracledb.DB_TYPE_BINARY_DOUBLE.name]: 'BINARY_DOUBLE',
-  [oracledb.DB_TYPE_BINARY_FLOAT.name]: 'BINARY_FLOAT',
-  [oracledb.DB_TYPE_BINARY_INTEGER.name]: 'BINARY_INTEGER',
-  [oracledb.DB_TYPE_BLOB.name]: 'BLOB',
-  [oracledb.DB_TYPE_BOOLEAN.name]: 'BOOLEAN',
-  [oracledb.DB_TYPE_CHAR.name]: 'CHAR',
-  [oracledb.DB_TYPE_CLOB.name]: 'CLOB',
-  [oracledb.DB_TYPE_CURSOR.name]: 'CURSOR',
-  [oracledb.DB_TYPE_DATE.name]: 'DATE',
-  [oracledb.DB_TYPE_INTERVAL_DS.name]: 'INTERVAL_DS',
-  [oracledb.DB_TYPE_INTERVAL_YM.name]: 'INTERVAL_YM',
-  [oracledb.DB_TYPE_LONG.name]: 'LONG',
-  [oracledb.DB_TYPE_LONG_RAW.name]: 'LONG_RAW',
-  [oracledb.DB_TYPE_NCHAR.name]: 'NCHAR',
-  [oracledb.DB_TYPE_NCLOB.name]: 'NCLOB',
-  [oracledb.DB_TYPE_NUMBER.name]: 'NUMBER',
-  [oracledb.DB_TYPE_NVARCHAR.name]: 'NVARCHAR',
-  [oracledb.DB_TYPE_OBJECT.name]: 'OBJECT',
-  [oracledb.DB_TYPE_RAW.name]: 'RAW',
-  [oracledb.DB_TYPE_ROWID.name]: 'ROWID',
-  [oracledb.DB_TYPE_TIMESTAMP.name]: 'TIMESTAMP',
-  [oracledb.DB_TYPE_TIMESTAMP_LTZ.name]: 'TIMESTAMP_LTZ',
-  [oracledb.DB_TYPE_TIMESTAMP_TZ.name]: 'TIMESTAMP_TZ',
-  [oracledb.DB_TYPE_VARCHAR.name]: 'VARCHAR',
-};
-
-const fetchTypeMap = {
-  [oracledb.DB_TYPE_BFILE.name]: 'object',
-  [oracledb.DB_TYPE_BINARY_DOUBLE.name]: 'number',
-  [oracledb.DB_TYPE_BINARY_FLOAT.name]: 'number',
-  [oracledb.DB_TYPE_BINARY_INTEGER.name]: 'number',
-  [oracledb.DB_TYPE_BLOB.name]: 'object',
-  [oracledb.DB_TYPE_BOOLEAN.name]: 'boolean',
-  [oracledb.DB_TYPE_CHAR.name]: 'string',
-  [oracledb.DB_TYPE_CLOB.name]: 'object',
-  [oracledb.DB_TYPE_CURSOR.name]: 'object',
-  [oracledb.DB_TYPE_DATE.name]: 'Date',
-  [oracledb.DB_TYPE_INTERVAL_DS.name]: 'string',
-  [oracledb.DB_TYPE_INTERVAL_YM.name]: 'string',
-  [oracledb.DB_TYPE_LONG.name]: 'number',
-  [oracledb.DB_TYPE_LONG_RAW.name]: 'Buffer',
-  [oracledb.DB_TYPE_NCHAR.name]: 'string',
-  [oracledb.DB_TYPE_NCLOB.name]: 'object',
-  [oracledb.DB_TYPE_NUMBER.name]: 'number',
-  [oracledb.DB_TYPE_NVARCHAR.name]: 'string',
-  [oracledb.DB_TYPE_OBJECT.name]: 'object',
-  [oracledb.DB_TYPE_RAW.name]: 'Buffer',
-  [oracledb.DB_TYPE_ROWID.name]: 'number',
-  [oracledb.DB_TYPE_TIMESTAMP.name]: 'Date',
-  [oracledb.DB_TYPE_TIMESTAMP_LTZ.name]: 'Date',
-  [oracledb.DB_TYPE_TIMESTAMP_TZ.name]: 'Date',
-  [oracledb.DB_TYPE_VARCHAR.name]: 'string',
-};
-
-export interface OraConnectionOptions {
-  dateParamFormat?: string;
-}
 
 export class OraConnection implements Adapter.Connection {
   private intlcon?: oracledb.Connection;
   public serverVersion: string;
   private _inTransaction = false;
-  dateParamFormat?: string;
 
   constructor(
     conn: oracledb.Connection,
     public sessionId: string,
-    options: OraConnectionOptions = {},
   ) {
     this.intlcon = conn;
     this.serverVersion = '' + conn.oracleServerVersion;
-    this.dateParamFormat = options.dateParamFormat;
   }
 
   async close() {
@@ -160,23 +97,25 @@ export class OraConnection implements Adapter.Connection {
 
     const out: Adapter.Response = {};
     const params = request.params;
-    if (this.dateParamFormat) {
-      const wrapDate = (v: any) => {
-        if (v instanceof Date) return dateFns.format(v, this.dateParamFormat!);
-        if (v.value instanceof Date)
-          v.value = dateFns.format(v.value, this.dateParamFormat!);
-        return v;
-      };
-      if (params && typeof params === 'object') {
-        if (Array.isArray(params)) {
-          params.forEach((v, i) => {
-            params[i] = wrapDate(v);
-          });
-        } else
-          Object.keys(params).forEach(k => {
-            params[k] = wrapDate(params[k]);
-          });
-      }
+    const wrapDate = (v: any) => {
+      if (v instanceof Date)
+        return {
+          type: oracledb.DB_TYPE_DATE,
+          dir: oracledb.BIND_IN,
+          value: v,
+        };
+      if (v.value instanceof Date) v.type = oracledb.DB_TYPE_DATE;
+      return v;
+    };
+    if (params && typeof params === 'object') {
+      if (Array.isArray(params)) {
+        params.forEach((v, i) => {
+          params[i] = wrapDate(v);
+        });
+      } else
+        Object.keys(params).forEach(k => {
+          params[k] = wrapDate(params[k]);
+        });
     }
 
     this.intlcon.action = request.action || '';

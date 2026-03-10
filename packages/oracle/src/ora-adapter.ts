@@ -10,8 +10,6 @@ import { OraConnection } from './ora-connection.js';
 export interface OraClientConfiguration extends ClientConfiguration {
   driverOptions?: {
     direct?: boolean;
-    /** Format from date-fns. https://date-fns.org/ */
-    dateParamFormat?: string;
   };
 }
 
