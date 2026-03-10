@@ -77,6 +77,10 @@ export class OraConnection implements Adapter.Connection {
     );
   }
 
+  getInTransaction(): boolean {
+    return this._inTransaction;
+  }
+
   onGenerateQuery(prepared: QueryRequest): void {
     prepared.dialect = 'oracle';
     prepared.dialectVersion = this.serverVersion;
