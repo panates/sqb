@@ -21,7 +21,6 @@
     "clean:cover": "rimraf ../../coverage/oracle"
   },
   "dependencies": {
-    "valgen": "^5.19.5",
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
