@@ -19,7 +19,7 @@ export abstract class Query extends Serializable {
    * Generates Sql script
    */
   generate(options?: GenerateOptions): GenerateResult {
-    const ctx = new SerializeContext(options);
+    const ctx = new SerializeContext(this, options);
     if (this._params) ctx.params = { ...ctx.params, ...this._params };
     ctx.serializeHooks = this.listeners('serialize');
 
