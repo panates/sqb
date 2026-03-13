@@ -32,8 +32,39 @@ export namespace Repository {
   export interface CommandOptions {
     connection?: SqbConnection;
     prettyPrint?: boolean;
-    comment?: string;
-    commentDialect?: string[];
+    comment?:
+      | string
+      | string[]
+      | {
+          comment: string;
+          dialect?: string[];
+        }
+      | {
+          comment: string;
+          dialect?: string[];
+        }[];
+    indexHint?:
+      | string
+      | string[]
+      | {
+          index: string[];
+          dialect?: string[];
+        }
+      | {
+          index: string[];
+          dialect?: string[];
+        }[];
+    noIndexHint?:
+      | string
+      | string[]
+      | {
+          index: string[];
+          dialect?: string[];
+        }
+      | {
+          index: string[];
+          dialect?: string[];
+        }[];
   }
 
   export interface CreateOptions extends CommandOptions, Projection {}

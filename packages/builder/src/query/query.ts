@@ -7,9 +7,20 @@ import { GenerateOptions, GenerateResult } from '../types.js';
 
 export declare interface Query extends EventEmitter {}
 
+export interface QueryCommentArgs {
+  comment: string;
+  dialect?: string[];
+}
+
+export interface QueryIndexHintArgs {
+  index: string[];
+  dialect?: string[];
+}
+
 export abstract class Query extends Serializable {
-  protected _comment?: string;
-  protected _commentDialect?: string[];
+  protected _comment: QueryCommentArgs[] = [];
+  protected _indexHint: QueryIndexHintArgs[] = [];
+  protected _noIndexHint: QueryIndexHintArgs[] = [];
   protected _params?: Record<string, any>;
 
   constructor() {
@@ -28,14 +39,19 @@ export abstract class Query extends Serializable {
     /* generate output */
     let sql = this._serialize(ctx);
     sql = flattenText(sql, { noWrap: !ctx.prettyPrint });
-    if (
-      this._comment &&
-      (!ctx.dialect ||
-        !this._commentDialect ||
-        this._commentDialect.includes(ctx.dialect))
-    ) {
-      const lines = '-- ' + this._comment.split('\n').join('\n-- ') + '\n';
-      sql = lines + sql;
+    if (this._comment.length) {
+      const comment = this._comment
+        .filter(
+          x =>
+            !ctx.dialect ||
+            !x.dialect?.length ||
+            x.dialect.includes(ctx.dialect),
+        )
+        .map(x => x.comment.replace(/\n/g, '\n  '))
+        .join('\n');
+      if (comment) {
+        sql = `/*${comment}*/\n${sql}`;
+      }
     }
     return {
       sql,
@@ -52,9 +68,53 @@ export abstract class Query extends Serializable {
     return this;
   }
 
-  comment(text: string, dialect?: string[]): this {
-    this._comment = text;
-    this._commentDialect = dialect;
+  comment(args: QueryCommentArgs): this;
+  comment(text: string, dialect?: string[]): this;
+  comment(arg0: any, dialect?: string[]): this {
+    if (typeof arg0 === 'string')
+      this._comment.push({
+        comment: arg0,
+        dialect: Array.isArray(dialect) ? dialect : undefined,
+      });
+    else if (typeof arg0 === 'object' && typeof arg0.comment === 'string')
+      this._comment.push({
+        comment: arg0.comment,
+        dialect: Array.isArray(arg0.dialect) ? arg0.dialect : undefined,
+      });
+    return this;
+  }
+
+  indexHint(args: QueryIndexHintArgs): this;
+  indexHint(index: string | string[], dialect?: string[]): this;
+  indexHint(arg0: any, dialect?: string[]): this {
+    if (typeof arg0 === 'object' && !Array.isArray(arg0))
+      this._indexHint.push({
+        index: Array.isArray(arg0.index) ? arg0.index : [arg0.index],
+        dialect: Array.isArray(arg0.dialect) ? arg0.dialect : undefined,
+      });
+    else {
+      this._indexHint.push({
+        index: Array.isArray(arg0) ? arg0 : [arg0],
+        dialect: Array.isArray(dialect) ? dialect : undefined,
+      });
+    }
+    return this;
+  }
+
+  noIndexHint(args: QueryIndexHintArgs): this;
+  noIndexHint(index: string | string[], dialect?: string[]): this;
+  noIndexHint(arg0: any, dialect?: string[]): this {
+    if (typeof arg0 === 'object' && !Array.isArray(arg0))
+      this._noIndexHint.push({
+        index: Array.isArray(arg0.index) ? arg0.index : [arg0.index],
+        dialect: Array.isArray(arg0.dialect) ? arg0.dialect : undefined,
+      });
+    else {
+      this._noIndexHint.push({
+        index: Array.isArray(arg0) ? arg0 : [arg0],
+        dialect: Array.isArray(dialect) ? dialect : undefined,
+      });
+    }
     return this;
   }
 }

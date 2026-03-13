@@ -23,7 +23,11 @@ export class CountCommand {
       await prepareFilter(entity, filter, where, 'T');
     }
     const query = Select(Count()).from(entity.tableName + ' T');
-    if (args.comment) query.comment(args.comment, args.commentDialect);
+    if (args.comment) {
+      if (Array.isArray(args.comment))
+        args.comment.forEach(c => query.comment(c));
+      else query.comment(args.comment as any);
+    }
     if (where) query.where(where);
     // Execute query
     const resp = await connection.execute(query, {
