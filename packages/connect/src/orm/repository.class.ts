@@ -32,6 +32,8 @@ export namespace Repository {
   export interface CommandOptions {
     connection?: SqbConnection;
     prettyPrint?: boolean;
+    comment?: string;
+    commentDialect?: string[];
   }
 
   export interface CreateOptions extends CommandOptions, Projection {}

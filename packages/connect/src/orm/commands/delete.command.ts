@@ -24,6 +24,7 @@ export class DeleteCommand {
       await prepareFilter(entity, filter, where);
     }
     const query = Delete(entity.tableName + ' T');
+    if (args.comment) query.comment(args.comment, args.commentDialect);
     if (where) query.where(...where._items);
     // Execute query
     const resp = await connection.execute(query, {

@@ -55,6 +55,7 @@ export class UpdateCommand {
     const query = Update(tableName + ' as T', ctx.queryValues).where(
       ...ctx.queryFilter,
     );
+    if (args.comment) query.comment(args.comment, args.commentDialect);
     const qr = await args.connection.execute(query, {
       params: args.params ? [...args.params, ctx.queryParams] : ctx.queryParams,
       objectRows: false,

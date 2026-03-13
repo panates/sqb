@@ -230,11 +230,16 @@ export class OracleSerializer implements SerializerExtension {
     o: any,
     defFn: DefaultSerializeFunction,
   ): string {
-    const v = ctx.params?.[o.name];
-    if (v instanceof Date) {
-      ctx.preparedParams = ctx.preparedParams || {};
-      ctx.preparedParams[o.name] = toDateString(v).replace('T', ' ');
-      return `TO_DATE(:${o.name}, 'yyyy-mm-dd hh24:mi:ss.SSSSS')`;
+    if (
+      ctx.rootQuery._type === SerializationType.SELECT_QUERY ||
+      ctx.rootQuery._type === SerializationType.DELETE_QUERY
+    ) {
+      const v = ctx.params?.[o.name];
+      if (v instanceof Date) {
+        ctx.preparedParams = ctx.preparedParams || {};
+        ctx.preparedParams[o.name] = toDateString(v).replace('T', ' ');
+        return `TO_DATE(:${o.name}, 'yyyy-mm-dd hh24:mi:ss.SSSSS')`;
+      }
     }
     return defFn(ctx, o);
   }

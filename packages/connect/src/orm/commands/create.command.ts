@@ -1,6 +1,7 @@
 import { Insert, Param } from '@sqb/builder';
 import type { SqbConnection } from '../../client/sqb-connection.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
+import { Repository } from '../repository.class.js';
 import {
   checkEnumValue,
   isColumnField,
@@ -13,7 +14,7 @@ export type CreateCommandArgs = {
   connection: SqbConnection;
   values: any;
   returning?: boolean;
-};
+} & Repository.CreateOptions;
 
 type CreateCommandContext = {
   entity: EntityMetadata;
@@ -50,6 +51,7 @@ export class CreateCommand {
       throw new Error('No field given to create new entity instance');
 
     const query = Insert(tableName, ctx.queryValues);
+    if (args.comment) query.comment(args.comment, args.commentDialect);
     if (args.returning) {
       const primaryIndexColumns = EntityMetadata.getPrimaryIndexColumns(entity);
       if (primaryIndexColumns.length)

@@ -336,6 +336,8 @@ export class FindCommand {
       | 'params'
       | 'onTransformRow'
       | 'prettyPrint'
+      | 'comment'
+      | 'commentDialect'
     >,
   ): Promise<any[]> {
     // Generate select query
@@ -347,6 +349,8 @@ export class FindCommand {
     const query = Select(...columnSqls).from(
       this.mainEntity.tableName + ' as ' + this.mainAlias,
     );
+
+    if (args.comment) query.comment(args.comment, args.commentDialect);
 
     if (args.distinct) query.distinct();
 

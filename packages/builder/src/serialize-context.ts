@@ -1,5 +1,6 @@
 import { SerializationType } from './enums.js';
 import { SerializerRegistry } from './extensions.js';
+import type { Query } from './query/query.js';
 import { Serializable } from './serializable.js';
 import { isLogicalOperator, isQuery, isSerializable } from './typeguards.js';
 import {
@@ -79,7 +80,10 @@ export class SerializeContext implements GenerateOptions {
   returningFields?: { field: string; alias?: string }[];
   strictParamGenId?: number;
 
-  constructor(opts?: GenerateOptions) {
+  constructor(
+    readonly rootQuery: Query,
+    opts?: GenerateOptions,
+  ) {
     if (opts) Object.assign(this, opts);
   }
 
