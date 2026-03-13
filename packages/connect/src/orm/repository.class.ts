@@ -1,4 +1,5 @@
 import { LogicalOperator } from '@sqb/builder';
+import { OptimizerHintArgs } from '@sqb/builder/build/sql-objects/table-name';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
 import { PartialDTO, PatchDTO, RequiredSome, StrictOmit, Type } from 'ts-gems';
 import { FieldInfoMap } from '../client/field-info-map.js';
@@ -43,28 +44,7 @@ export namespace Repository {
           comment: string;
           dialect?: string[];
         }[];
-    indexHint?:
-      | string
-      | string[]
-      | {
-          index: string[];
-          dialect?: string[];
-        }
-      | {
-          index: string[];
-          dialect?: string[];
-        }[];
-    noIndexHint?:
-      | string
-      | string[]
-      | {
-          index: string[];
-          dialect?: string[];
-        }
-      | {
-          index: string[];
-          dialect?: string[];
-        }[];
+    optimizerHint?: string | string[] | OptimizerHintArgs | OptimizerHintArgs[];
   }
 
   export interface CreateOptions extends CommandOptions, Projection {}

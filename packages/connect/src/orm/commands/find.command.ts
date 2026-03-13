@@ -1,4 +1,4 @@
-import { And, In, Param, Select } from '@sqb/builder';
+import { And, In, Param, Select, TableName } from '@sqb/builder';
 import type { SqbConnection } from '../../client/sqb-connection.js';
 import { AssociationNode } from '../model/association-node.js';
 import type { ColumnFieldMetadata } from '../model/column-field-metadata.js';
@@ -337,8 +337,7 @@ export class FindCommand {
       | 'onTransformRow'
       | 'prettyPrint'
       | 'comment'
-      | 'indexHint'
-      | 'noIndexHint'
+      | 'optimizerHint'
     >,
   ): Promise<any[]> {
     // Generate select query
@@ -348,25 +347,17 @@ export class FindCommand {
     if (!columnSqls.length) columnSqls.push('1');
 
     const query = Select(...columnSqls).from(
-      this.mainEntity.tableName + ' as ' + this.mainAlias,
+      TableName({
+        table: this.mainEntity.tableName!,
+        alias: this.mainAlias,
+        optimizerHint: args.optimizerHint,
+      }),
     );
 
     if (args.comment) {
       if (Array.isArray(args.comment))
         args.comment.forEach(c => query.comment(c));
       else query.comment(args.comment as any);
-    }
-
-    if (args.indexHint) {
-      if (Array.isArray(args.indexHint))
-        args.indexHint.forEach(c => query.indexHint(c));
-      else query.indexHint(args.indexHint as any);
-    }
-
-    if (args.noIndexHint) {
-      if (Array.isArray(args.noIndexHint))
-        args.noIndexHint.forEach(c => query.noIndexHint(c));
-      else query.noIndexHint(args.noIndexHint as any);
     }
 
     if (args.distinct) query.distinct();

@@ -55,21 +55,18 @@ export class OracleSerializer implements SerializerExtension {
     o: any,
     defFn: DefaultSerializeFunction,
   ) {
-    const indexHint = o.indexHint
-      ?.map(x =>
-        x.index?.length ? `/*+ INDEX(t ${x.index.join(',')})*/` : undefined,
-      )
-      .filter(x => x)
-      .join('\n');
-    if (indexHint) o.columns = indexHint + '\n\t' + o.columns;
-
-    const noIndexHint = o.noIndexHint
-      ?.map(x =>
-        x.index?.length ? `/*+ NO_INDEX(t ${x.index.join(',')})*/` : undefined,
-      )
-      .filter(x => x)
-      .join('\n');
-    if (noIndexHint) o.columns = noIndexHint + '\n\t' + o.columns;
+    if (o.query._tables) {
+      let optimizerHint = '';
+      for (const t of o.query._tables) {
+        if (t._type === SerializationType.TABLE_NAME) {
+          if (!t.optimizerHint?.length) continue;
+          const s = t.optimizerHint?.map(x => x.hint).join('\n');
+          optimizerHint +=
+            '/*+ ' + s.replace(/:table/gi, t.alias || t.table) + ' */';
+        }
+      }
+      o.optimizerHint = optimizerHint;
+    }
 
     let out = defFn(ctx, o);
     const limit = o.limit || 0;
@@ -107,10 +104,10 @@ export class OracleSerializer implements SerializerExtension {
 
   private _serializeFrom(
     ctx: SerializeContext,
-    o: any,
+    arr: any,
     defFn: DefaultSerializeFunction,
   ): string {
-    return defFn(ctx, o) || 'from dual';
+    return defFn(ctx, arr) || 'from dual';
   }
 
   private _serializeComparison(

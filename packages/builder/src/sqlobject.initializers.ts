@@ -18,6 +18,10 @@ import { ParamExpression } from './sql-objects/param-expression.js';
 import { RawStatement } from './sql-objects/raw-statement.js';
 import { SequenceGetterStatement } from './sql-objects/sequence-getter-statement.js';
 import { StringAGGStatement } from './sql-objects/string-agg-statement.js';
+import {
+  TableName as TableNameClass,
+  TableNameArgs,
+} from './sql-objects/table-name.js';
 import { UpperStatement } from './sql-objects/upper-statement.js';
 
 export function Raw(text: string): RawStatement {
@@ -34,11 +38,16 @@ export function Insert(tableName: string | RawStatement, input): InsertQuery {
   return new InsertQuery(tableName, input);
 }
 
-export function Update(tableName: string | RawStatement, input): UpdateQuery {
+export function Update(
+  tableName: string | TableNameClass | RawStatement,
+  input,
+): UpdateQuery {
   return new UpdateQuery(tableName, input);
 }
 
-export function Delete(tableName: string | RawStatement): DeleteQuery {
+export function Delete(
+  tableName: string | TableNameClass | RawStatement,
+): DeleteQuery {
   return new DeleteQuery(tableName);
 }
 
@@ -48,6 +57,10 @@ export function Union(...queries: Query[]): UnionQuery {
 
 export function UnionAll(...queries: Query[]): UnionQuery {
   return new UnionQuery(queries, 'all');
+}
+
+export function TableName(tableName: string | TableNameArgs) {
+  return new TableNameClass(tableName);
 }
 
 export function Join(

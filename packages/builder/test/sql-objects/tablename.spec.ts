@@ -1,11 +1,35 @@
 import { expect } from 'expect';
 import { Select } from '../../src/index.js';
+import { TableName } from '../../src/sql-objects/table-name.js';
 
 describe('builder:serialize "TableName"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,
   };
+
+  it('should init with string', () => {
+    let tableName = new TableName('table1');
+    expect(tableName.table).toStrictEqual('table1');
+    tableName = new TableName('table1 t');
+    expect(tableName.table).toStrictEqual('table1');
+    expect(tableName.alias).toStrictEqual('t');
+    tableName = new TableName('sch.table1 t');
+    expect(tableName.schema).toStrictEqual('sch');
+    expect(tableName.table).toStrictEqual('table1');
+    expect(tableName.alias).toStrictEqual('t');
+  });
+
+  it('should init with object', () => {
+    const tableName = new TableName({
+      table: 'table1',
+      alias: 't1',
+      schema: 'sch',
+    });
+    expect(tableName.schema).toStrictEqual('sch');
+    expect(tableName.table).toStrictEqual('table1');
+    expect(tableName.alias).toStrictEqual('t1');
+  });
 
   it('should serialize (table)', () => {
     const query = Select().from('table1');
