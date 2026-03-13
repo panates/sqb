@@ -235,4 +235,18 @@ describe('builder:serialize "SelectQuery"', () => {
       query.generate();
     }).toThrow('Alias required for sub-select in "from"');
   });
+
+  it('should serialize comment', () => {
+    const query = Select().comment('This is a comment');
+    const result = query.generate(options);
+    expect(result.sql).toStrictEqual('-- This is a comment\nselect *');
+  });
+
+  it('should serialize multiline comment', () => {
+    const query = Select().comment('This is a comment\nline 2\nline 3');
+    const result = query.generate(options);
+    expect(result.sql).toStrictEqual(
+      '-- This is a comment\n-- line 2\n-- line 3\nselect *',
+    );
+  });
 });
