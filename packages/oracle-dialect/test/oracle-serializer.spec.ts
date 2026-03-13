@@ -116,6 +116,24 @@ describe('oracle-dialect:OracleSerializer', () => {
       );
       expect(result.params).toStrictEqual({});
     });
+
+    it('should serialize index hint', () => {
+      const query = Select().from('table1').indexHint('IDX_ID');
+      const result = query.generate({ dialect: 'oracle' });
+
+      expect(result.sql).toStrictEqual(
+        'select /*+ INDEX(t IDX_ID)*/ * from table1',
+      );
+    });
+
+    it('should serialize no-index hint', () => {
+      const query = Select().from('table1').noIndexHint('IDX_ID');
+      const result = query.generate({ dialect: 'oracle' });
+
+      expect(result.sql).toStrictEqual(
+        'select /*+ NO_INDEX(t IDX_ID)*/ * from table1',
+      );
+    });
   });
 
   describe('oracle-dialect:Oracle version < 12', () => {

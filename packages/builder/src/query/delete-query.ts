@@ -45,6 +45,14 @@ export class DeleteQuery extends Query {
     const o = {
       table: this._table._serialize(ctx),
       where: this._serializeWhere(ctx),
+      indexHint: this._indexHint.filter(
+        x =>
+          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
+      ),
+      noIndexHint: this._noIndexHint.filter(
+        x =>
+          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
+      ),
     };
     return ctx.serialize(this._type, o, () => this.__defaultSerialize(ctx, o));
   }

@@ -50,6 +50,14 @@ export class InsertQuery extends ReturningQuery {
       columns: this.__serializeColumns(ctx),
       values: this.__serializeValues(ctx),
       returning: this.__serializeReturning(ctx),
+      indexHint: this._indexHint.filter(
+        x =>
+          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
+      ),
+      noIndexHint: this._noIndexHint.filter(
+        x =>
+          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
+      ),
     };
 
     let out =

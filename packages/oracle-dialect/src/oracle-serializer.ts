@@ -55,6 +55,22 @@ export class OracleSerializer implements SerializerExtension {
     o: any,
     defFn: DefaultSerializeFunction,
   ) {
+    const indexHint = o.indexHint
+      ?.map(x =>
+        x.index?.length ? `/*+ INDEX(t ${x.index.join(',')})*/` : undefined,
+      )
+      .filter(x => x)
+      .join('\n');
+    if (indexHint) o.columns = indexHint + '\n\t' + o.columns;
+
+    const noIndexHint = o.noIndexHint
+      ?.map(x =>
+        x.index?.length ? `/*+ NO_INDEX(t ${x.index.join(',')})*/` : undefined,
+      )
+      .filter(x => x)
+      .join('\n');
+    if (noIndexHint) o.columns = noIndexHint + '\n\t' + o.columns;
+
     let out = defFn(ctx, o);
     const limit = o.limit || 0;
     const offset = Math.max(o.offset || 0, 0);

@@ -166,6 +166,14 @@ export class SelectQuery extends Query {
       orderBy: this.__serializeOrderColumns(ctx),
       limit: this._limit,
       offset: this._offset,
+      indexHint: this._indexHint.filter(
+        x =>
+          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
+      ),
+      noIndexHint: this._noIndexHint.filter(
+        x =>
+          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
+      ),
     };
 
     return ctx.serialize(this._type, o, () => {

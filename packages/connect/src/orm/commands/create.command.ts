@@ -51,7 +51,11 @@ export class CreateCommand {
       throw new Error('No field given to create new entity instance');
 
     const query = Insert(tableName, ctx.queryValues);
-    if (args.comment) query.comment(args.comment, args.commentDialect);
+    if (args.comment) {
+      if (Array.isArray(args.comment))
+        args.comment.forEach(c => query.comment(c));
+      else query.comment(args.comment as any);
+    }
     if (args.returning) {
       const primaryIndexColumns = EntityMetadata.getPrimaryIndexColumns(entity);
       if (primaryIndexColumns.length)

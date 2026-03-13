@@ -58,6 +58,14 @@ export class UpdateQuery extends ReturningQuery {
       values: this.__serializeValues(ctx),
       where: this.__serializeWhere(ctx),
       returning: this.__serializeReturning(ctx),
+      indexHint: this._indexHint.filter(
+        x =>
+          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
+      ),
+      noIndexHint: this._noIndexHint.filter(
+        x =>
+          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
+      ),
     };
     let out = 'update ' + o.table + ' set \n\t' + o.values + '\b';
     if (o.where) out += '\n' + o.where;
