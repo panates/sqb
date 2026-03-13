@@ -55,7 +55,22 @@ export class UpdateCommand {
     const query = Update(tableName + ' as T', ctx.queryValues).where(
       ...ctx.queryFilter,
     );
-    if (args.comment) query.comment(args.comment, args.commentDialect);
+    if (args.comment) {
+      if (Array.isArray(args.comment))
+        args.comment.forEach(c => query.comment(c));
+      else query.comment(args.comment as any);
+    }
+    if (args.indexHint) {
+      if (Array.isArray(args.indexHint))
+        args.indexHint.forEach(c => query.indexHint(c));
+      else query.indexHint(args.indexHint as any);
+    }
+
+    if (args.noIndexHint) {
+      if (Array.isArray(args.noIndexHint))
+        args.noIndexHint.forEach(c => query.noIndexHint(c));
+      else query.noIndexHint(args.noIndexHint as any);
+    }
     const qr = await args.connection.execute(query, {
       params: args.params ? [...args.params, ctx.queryParams] : ctx.queryParams,
       objectRows: false,
