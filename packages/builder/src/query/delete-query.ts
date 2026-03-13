@@ -11,18 +11,26 @@ export class DeleteQuery extends Query {
   _table: TableName | RawStatement;
   _where?: LogicalOperator;
 
-  constructor(tableName: string | RawStatement) {
+  constructor(tableName: string | TableName | RawStatement) {
     super();
     if (
-      !tableName ||
-      !(typeof tableName === 'string' || isRawStatement(tableName))
+      !(
+        tableName &&
+        (tableName instanceof TableName ||
+          typeof tableName === 'string' ||
+          isRawStatement(tableName))
+      )
     ) {
       throw new TypeError(
         'String or Raw instance required as first argument (tableName) for UpdateQuery',
       );
     }
     this._table =
-      typeof tableName === 'string' ? new TableName(tableName) : tableName;
+      tableName instanceof TableName
+        ? tableName
+        : typeof tableName === 'string'
+          ? new TableName(tableName)
+          : tableName;
   }
 
   get _type(): SerializationType {
@@ -45,14 +53,6 @@ export class DeleteQuery extends Query {
     const o = {
       table: this._table._serialize(ctx),
       where: this._serializeWhere(ctx),
-      indexHint: this._indexHint.filter(
-        x =>
-          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
-      ),
-      noIndexHint: this._noIndexHint.filter(
-        x =>
-          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
-      ),
     };
     return ctx.serialize(this._type, o, () => this.__defaultSerialize(ctx, o));
   }

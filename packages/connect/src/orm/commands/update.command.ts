@@ -1,4 +1,4 @@
-import { And, Param, Update } from '@sqb/builder';
+import { And, Param, TableName, Update } from '@sqb/builder';
 import type { SqbConnection } from '../../client/sqb-connection.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import type { Repository } from '../repository.class.js';
@@ -52,24 +52,18 @@ export class UpdateCommand {
     if (!ctx.colCount) return 0;
 
     if (args.filter) await this._prepareFilter(ctx, args.filter);
-    const query = Update(tableName + ' as T', ctx.queryValues).where(
-      ...ctx.queryFilter,
-    );
+    const query = Update(
+      TableName({
+        table: tableName,
+        alias: 'T',
+        optimizerHint: args.optimizerHint,
+      }),
+      ctx.queryValues,
+    ).where(...ctx.queryFilter);
     if (args.comment) {
       if (Array.isArray(args.comment))
         args.comment.forEach(c => query.comment(c));
       else query.comment(args.comment as any);
-    }
-    if (args.indexHint) {
-      if (Array.isArray(args.indexHint))
-        args.indexHint.forEach(c => query.indexHint(c));
-      else query.indexHint(args.indexHint as any);
-    }
-
-    if (args.noIndexHint) {
-      if (Array.isArray(args.noIndexHint))
-        args.noIndexHint.forEach(c => query.noIndexHint(c));
-      else query.noIndexHint(args.noIndexHint as any);
     }
     const qr = await args.connection.execute(query, {
       params: args.params ? [...args.params, ctx.queryParams] : ctx.queryParams,

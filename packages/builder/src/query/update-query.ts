@@ -13,11 +13,15 @@ export class UpdateQuery extends ReturningQuery {
   _input: any;
   _where?: LogicalOperator;
 
-  constructor(tableName: string | RawStatement, input: any) {
+  constructor(tableName: string | TableName | RawStatement, input: any) {
     super();
     if (
-      !tableName ||
-      !(typeof tableName === 'string' || isRawStatement(tableName))
+      !(
+        tableName &&
+        (tableName instanceof TableName ||
+          typeof tableName === 'string' ||
+          isRawStatement(tableName))
+      )
     ) {
       throw new TypeError(
         'String or Raw instance required as first argument (tableName) for UpdateQuery',
@@ -32,7 +36,11 @@ export class UpdateQuery extends ReturningQuery {
       );
     }
     this._table =
-      typeof tableName === 'string' ? new TableName(tableName) : tableName;
+      tableName instanceof TableName
+        ? tableName
+        : typeof tableName === 'string'
+          ? new TableName(tableName)
+          : tableName;
     this._input = input;
   }
 
@@ -58,14 +66,6 @@ export class UpdateQuery extends ReturningQuery {
       values: this.__serializeValues(ctx),
       where: this.__serializeWhere(ctx),
       returning: this.__serializeReturning(ctx),
-      indexHint: this._indexHint.filter(
-        x =>
-          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
-      ),
-      noIndexHint: this._noIndexHint.filter(
-        x =>
-          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
-      ),
     };
     let out = 'update ' + o.table + ' set \n\t' + o.values + '\b';
     if (o.where) out += '\n' + o.where;

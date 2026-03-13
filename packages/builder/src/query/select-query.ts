@@ -56,11 +56,19 @@ export class SelectQuery extends Query {
   /**
    * Defines "from" part of  query.
    */
-  from(...table: (string | RawStatement | SelectQuery | UnionQuery)[]): this {
+  from(
+    ...table: (string | TableName | RawStatement | SelectQuery | UnionQuery)[]
+  ): this {
     this._tables = [];
     for (const arg of table) {
       if (!arg) continue;
-      this._tables.push(typeof arg === 'string' ? new TableName(arg) : arg);
+      this._tables.push(
+        arg instanceof TableName
+          ? arg
+          : typeof arg === 'string'
+            ? new TableName(arg)
+            : arg,
+      );
     }
     return this;
   }
@@ -158,6 +166,7 @@ export class SelectQuery extends Query {
    */
   _serialize(ctx: SerializeContext): string {
     const o = {
+      query: this,
       columns: this.__serializeSelectColumns(ctx),
       from: this.__serializeFrom(ctx),
       join: this.__serializeJoins(ctx),
@@ -166,19 +175,13 @@ export class SelectQuery extends Query {
       orderBy: this.__serializeOrderColumns(ctx),
       limit: this._limit,
       offset: this._offset,
-      indexHint: this._indexHint.filter(
-        x =>
-          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
-      ),
-      noIndexHint: this._noIndexHint.filter(
-        x =>
-          !ctx.dialect || !x.dialect?.length || x.dialect.includes(ctx.dialect),
-      ),
+      optimizerHint: '',
     };
 
     return ctx.serialize(this._type, o, () => {
       let out = 'select';
       if (this._distinct) out += ' distinct';
+      if (o.optimizerHint) out += ' ' + o.optimizerHint;
       // columns part
       /* istanbul ignore else */
       if (o.columns) {
@@ -240,7 +243,7 @@ export class SelectQuery extends Query {
    *
    */
   protected __serializeFrom(ctx: SerializeContext): string {
-    const arr: string[] = [];
+    const arr: { text: string; source: any }[] = [];
     if (this._tables) {
       for (const t of this._tables) {
         const s = t._serialize(ctx);
@@ -249,13 +252,20 @@ export class SelectQuery extends Query {
           if (t instanceof SelectQuery) {
             if (!t._alias)
               throw new TypeError('Alias required for sub-select in "from"');
-            arr.push('\n\t(' + s + ') ' + t._alias);
-          } else arr.push(s);
+            arr.push({
+              source: t,
+              text: '\n\t(' + s + ') ' + t._alias,
+            });
+          } else
+            arr.push({
+              source: t,
+              text: s,
+            });
         }
       }
     }
     return ctx.serialize(SerializationType.SELECT_QUERY_FROM, arr, () => {
-      const s = arr.join(',');
+      const s = arr.map(x => x.text).join(',');
       return s ? 'from' + (s.substring(0, 1) !== '\n' ? ' ' : '') + s : '';
     });
   }

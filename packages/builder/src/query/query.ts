@@ -19,8 +19,6 @@ export interface QueryIndexHintArgs {
 
 export abstract class Query extends Serializable {
   protected _comment: QueryCommentArgs[] = [];
-  protected _indexHint: QueryIndexHintArgs[] = [];
-  protected _noIndexHint: QueryIndexHintArgs[] = [];
   protected _params?: Record<string, any>;
 
   constructor() {
@@ -81,40 +79,6 @@ export abstract class Query extends Serializable {
         comment: arg0.comment,
         dialect: Array.isArray(arg0.dialect) ? arg0.dialect : undefined,
       });
-    return this;
-  }
-
-  indexHint(args: QueryIndexHintArgs): this;
-  indexHint(index: string | string[], dialect?: string[]): this;
-  indexHint(arg0: any, dialect?: string[]): this {
-    if (typeof arg0 === 'object' && !Array.isArray(arg0))
-      this._indexHint.push({
-        index: Array.isArray(arg0.index) ? arg0.index : [arg0.index],
-        dialect: Array.isArray(arg0.dialect) ? arg0.dialect : undefined,
-      });
-    else {
-      this._indexHint.push({
-        index: Array.isArray(arg0) ? arg0 : [arg0],
-        dialect: Array.isArray(dialect) ? dialect : undefined,
-      });
-    }
-    return this;
-  }
-
-  noIndexHint(args: QueryIndexHintArgs): this;
-  noIndexHint(index: string | string[], dialect?: string[]): this;
-  noIndexHint(arg0: any, dialect?: string[]): this {
-    if (typeof arg0 === 'object' && !Array.isArray(arg0))
-      this._noIndexHint.push({
-        index: Array.isArray(arg0.index) ? arg0.index : [arg0.index],
-        dialect: Array.isArray(arg0.dialect) ? arg0.dialect : undefined,
-      });
-    else {
-      this._noIndexHint.push({
-        index: Array.isArray(arg0) ? arg0 : [arg0],
-        dialect: Array.isArray(dialect) ? dialect : undefined,
-      });
-    }
     return this;
   }
 }

@@ -1,4 +1,4 @@
-import { And, Count, LogicalOperator, Select } from '@sqb/builder';
+import { And, Count, LogicalOperator, Select, TableName } from '@sqb/builder';
 import type { SqbConnection } from '../../client/sqb-connection.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import type { Repository } from '../repository.class.js';
@@ -22,22 +22,17 @@ export class CountCommand {
       where = And();
       await prepareFilter(entity, filter, where, 'T');
     }
-    const query = Select(Count()).from(entity.tableName + ' T');
+    const query = Select(Count()).from(
+      TableName({
+        table: entity.tableName!,
+        alias: 'T',
+        optimizerHint: args.optimizerHint,
+      }),
+    );
     if (args.comment) {
       if (Array.isArray(args.comment))
         args.comment.forEach(c => query.comment(c));
       else query.comment(args.comment as any);
-    }
-    if (args.indexHint) {
-      if (Array.isArray(args.indexHint))
-        args.indexHint.forEach(c => query.indexHint(c));
-      else query.indexHint(args.indexHint as any);
-    }
-
-    if (args.noIndexHint) {
-      if (Array.isArray(args.noIndexHint))
-        args.noIndexHint.forEach(c => query.noIndexHint(c));
-      else query.noIndexHint(args.noIndexHint as any);
     }
     if (where) query.where(where);
     // Execute query
