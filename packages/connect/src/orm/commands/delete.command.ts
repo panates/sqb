@@ -29,6 +29,17 @@ export class DeleteCommand {
         args.comment.forEach(c => query.comment(c));
       else query.comment(args.comment as any);
     }
+    if (args.indexHint) {
+      if (Array.isArray(args.indexHint))
+        args.indexHint.forEach(c => query.indexHint(c));
+      else query.indexHint(args.indexHint as any);
+    }
+
+    if (args.noIndexHint) {
+      if (Array.isArray(args.noIndexHint))
+        args.noIndexHint.forEach(c => query.noIndexHint(c));
+      else query.noIndexHint(args.noIndexHint as any);
+    }
     if (where) query.where(...where._items);
     // Execute query
     const resp = await connection.execute(query, {
