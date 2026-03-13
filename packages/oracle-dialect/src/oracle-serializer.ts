@@ -61,7 +61,8 @@ export class OracleSerializer implements SerializerExtension {
         if (t._type === SerializationType.TABLE_NAME) {
           if (!t.optimizerHint?.length) continue;
           const s = t.optimizerHint?.map(x => x.hint).join('\n');
-          optimizerHint += '/*+ ' + s + ' */';
+          optimizerHint +=
+            '/*+ ' + s.replace(/:table/gi, t.alias || t.table) + ' */';
         }
       }
       o.optimizerHint = optimizerHint;

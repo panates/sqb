@@ -122,8 +122,9 @@ describe('oracle-dialect:OracleSerializer', () => {
       const query = Select().from(
         TableName({
           table: 'table1',
+          alias: 't',
           optimizerHint: {
-            hint: 'INDEX(t IDX_ID)',
+            hint: 'INDEX(:table IDX_ID)',
             dialect: ['oracle'],
           },
         }),
@@ -131,7 +132,7 @@ describe('oracle-dialect:OracleSerializer', () => {
       const result = query.generate({ dialect: 'oracle' });
 
       expect(result.sql).toStrictEqual(
-        'select /*+ INDEX(t IDX_ID) */ * from table1',
+        'select /*+ INDEX(t IDX_ID) */ * from table1 t',
       );
     });
   });
