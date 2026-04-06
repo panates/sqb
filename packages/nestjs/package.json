@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@nestjs/common": "^11.1.2",
-    "@nestjs/core": "^11.1.2",
+    "@nestjs/core": "^11.1.18",
     "@nestjs/platform-express": "^11.1.16",
     "@nestjs/testing": "^11.1.16",
     "expect": "^30.3.0",
