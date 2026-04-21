@@ -3,7 +3,7 @@ import { SerializeContext } from '../serialize-context.js';
 import { BaseField } from './base-field.js';
 
 const TABLE_COLUMN_PATTERN =
-  /^((?:[a-zA-Z_][\w$_]*\.){0,2}) *([0-9a-zA-Z_][\w$_]*|\*) *(?:as)? *([a-zA-Z_][\w$_]*)?$/;
+  /^ *((?:[a-zA-Z_][\w$_]*\.){0,2}) *([0-9a-zA-Z_][\w$_]*|\*) *(?:as)? *([a-zA-Z_][\w$_]*)?$/;
 
 export class FieldExpression extends BaseField {
   _alias?: string;
@@ -29,14 +29,14 @@ export class FieldExpression extends BaseField {
     const m = expression?.match(TABLE_COLUMN_PATTERN);
     if (!m)
       throw new TypeError(`"${expression}" does not match table column format`);
-    this._field = m[2];
+    this._field = m[2]?.trim();
     if (m[1]) {
       const a = m[1].split(/\./g);
       a.pop();
-      this._table = a.pop();
-      this._schema = a.pop();
+      this._table = a.pop()?.trim();
+      this._schema = a.pop()?.trim();
     }
-    this._alias = this._field !== '*' ? m[3] : '';
+    this._alias = this._field !== '*' ? m[3]?.trim() : '';
   }
 
   get _type(): SerializationType {
