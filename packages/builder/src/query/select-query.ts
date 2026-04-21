@@ -1,3 +1,4 @@
+import { splitString } from 'fast-tokenizer';
 import { coerceToInt } from 'putil-varhelpers';
 import { SerializationType } from '../enums.js';
 import { printArray } from '../helpers.js';
@@ -45,10 +46,20 @@ export class SelectQuery extends Query {
     for (const arg of column) {
       if (!arg) continue;
       if (Array.isArray(arg)) self.addColumn(...arg);
-      else
-        this._columns.push(
-          isSerializable(arg) ? arg : new FieldExpression(arg),
-        );
+      else {
+        if (typeof arg === 'string') {
+          const items = splitString(arg, {
+            brackets: true,
+            delimiters: ',',
+            quotes: true,
+            keepQuotes: true,
+            keepBrackets: true,
+          });
+          items.forEach(item => {
+            this._columns!.push(new FieldExpression(item));
+          });
+        } else this._columns.push(arg);
+      }
     }
     return this;
   }
