@@ -45,7 +45,7 @@ export class OraCursor implements Adapter.Cursor {
     return new Promise((resolve, reject) => {
       if (!this._resultSet) return resolve(undefined);
       const resultSet = this._resultSet;
-      resultSet.getRows(nRows, (err, rows) => {
+      resultSet.getRows(nRows, (err, rows?) => {
         if (err) return reject(err);
         if (!(rows && rows.length)) return resolve(undefined);
         /* remove row$number fields */

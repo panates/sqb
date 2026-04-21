@@ -1,7 +1,7 @@
 {
   "name": "@sqb/migrator",
   "description": "Database migrator for SQB",
-  "version": "4.26.0",
+  "version": "4.26.1",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -24,17 +24,17 @@
     "cross-dirname": "^0.1.0",
     "fast-glob": "^3.3.3",
     "strict-typed-events": "^2.8.0",
-    "ts-gems": "^3.11.3",
+    "ts-gems": "^3.11.6",
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^4.26.0",
-    "@sqb/connect": "^4.26.0",
-    "@sqb/postgres": "^4.26.0"
+    "@sqb/builder": "^4.26.1",
+    "@sqb/connect": "^4.26.1",
+    "@sqb/postgres": "^4.26.1"
   },
   "devDependencies": {
     "expect": "^30.3.0",
-    "postgrejs": "^2.22.9"
+    "postgrejs": "^2.23.0"
   },
   "type": "module",
   "module": "./index.js",

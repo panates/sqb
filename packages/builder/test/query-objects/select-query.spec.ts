@@ -39,10 +39,8 @@ describe('builder:serialize "SelectQuery"', () => {
 
   it('should serialize simple query', () => {
     const query = Select(
-      'field1',
-      'field2',
-      'field3',
-      'field4',
+      'field1 f1, field2',
+      'field3, field4 f4',
       'field5',
       'field6',
       'field7',
@@ -61,8 +59,8 @@ describe('builder:serialize "SelectQuery"', () => {
     });
     expect(result.sql).toStrictEqual(
       'select\n' +
-        '  field1, field2, field3, field4, field5, field6, field7, field8,\n' +
-        '  field9, field10, field11, field12, field13, field14, field15,\n' +
+        '  field1 as f1, field2, field3, field4 as f4, field5, field6, field7,\n' +
+        '  field8, field9, field10, field11, field12, field13, field14, field15,\n' +
         '  field16\n' +
         'from table1',
     );
