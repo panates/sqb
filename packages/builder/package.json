@@ -30,7 +30,7 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.12",
+    "@types/debug": "^4.1.13",
     "expect": "^30.3.0"
   },
   "type": "module",
