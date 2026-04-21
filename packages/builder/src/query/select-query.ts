@@ -12,7 +12,7 @@ import { OpAnd } from '../sql-objects/operators/op-and.js';
 import { OrderColumn } from '../sql-objects/order-column.js';
 import { RawStatement } from '../sql-objects/raw-statement.js';
 import { TableName } from '../sql-objects/table-name.js';
-import { isJoinStatement, isSerializable } from '../typeguards.js';
+import { isJoinStatement } from '../typeguards.js';
 import { Query } from './query.js';
 import type { UnionQuery } from './union-query.js';
 

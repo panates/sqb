@@ -141,7 +141,7 @@ describe('connect:Repository.findMany() (OneToMany)', () => {
       expect(r[0].code).toBeDefined();
       expect(r[0].customers).toBeDefined();
 
-      r = r = await repo.findMany({
+      r = await repo.findMany({
         projection: ['code', 'customers.id'],
         maxSubQueries: 0,
       });
@@ -255,7 +255,7 @@ describe('connect:Repository.findMany() (OneToMany)', () => {
       expect(r[0].code).toBeDefined();
       expect(r[0].customers).toBeDefined();
 
-      r = r = await repo.findMany({
+      r = await repo.findMany({
         projection: ['code', 'customers.id'],
         maxSubQueries: 0,
       });
