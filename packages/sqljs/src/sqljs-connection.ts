@@ -1,5 +1,5 @@
 import type { Adapter, QueryRequest } from '@sqb/connect';
-import { Database, Statement } from 'sql.js';
+import type { Database, Statement } from 'sql.js';
 import { SqljsCursor } from './sqljs-cursor.js';
 
 export class SqljsConnection implements Adapter.Connection {

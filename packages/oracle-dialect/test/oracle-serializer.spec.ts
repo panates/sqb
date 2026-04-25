@@ -2,9 +2,9 @@ import {
   Eq,
   Param,
   Select,
-  SequenceNext,
+  Sequence,
   SerializerRegistry,
-  StringAGG,
+  StringAgg,
   TableName,
 } from '@sqb/builder';
 import { expect } from 'expect';
@@ -59,7 +59,7 @@ describe('oracle-dialect:OracleSerializer', () => {
     });
 
     it('should serialize GenId"', () => {
-      const query = Select(SequenceNext('test'));
+      const query = Select(Sequence('test', true));
       const result = query.generate({ dialect: 'oracle' });
       expect(result.sql).toStrictEqual('select test.nextval from dual');
     });
@@ -85,7 +85,7 @@ describe('oracle-dialect:OracleSerializer', () => {
     });
 
     it('should serialize string-agg function to listagg', () => {
-      const query = Select(StringAGG('abc')).from('table1');
+      const query = Select(StringAgg('abc')).from('table1');
       const result = query.generate({ dialect: 'oracle' });
       expect(result.sql).toStrictEqual(
         `select listagg(abc,',') within group (order by null) from table1`,

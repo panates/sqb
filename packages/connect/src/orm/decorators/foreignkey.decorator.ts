@@ -1,5 +1,5 @@
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { TypeThunk } from '../orm.type.js';
+import type { TypeThunk } from '../orm.type.js';
 
 export function ForeignKey(
   type: TypeThunk,

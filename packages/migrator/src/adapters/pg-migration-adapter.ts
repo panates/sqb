@@ -1,16 +1,16 @@
 import { PgAdapter } from '@sqb/postgres';
 import path from 'path';
 import { Connection, stringifyValueForSQL } from 'postgrejs';
-import { StrictOmit } from 'ts-gems';
+import type { StrictOmit } from 'ts-gems';
 import type { DbMigratorOptions } from '../db-migrator.js';
 import { MigrationAdapter } from '../migration-adapter.js';
 import {
   isCustomMigrationTask,
   isInsertDataMigrationTask,
   isSqlScriptMigrationTask,
-  Migration,
+  type Migration,
   MigrationPackage,
-  MigrationTask,
+  type MigrationTask,
 } from '../migration-package.js';
 import { MigrationStatus } from '../types.js';
 

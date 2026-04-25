@@ -1,4 +1,4 @@
-import { classes } from '@sqb/builder';
+import { Query } from '@sqb/builder';
 import assert from 'assert';
 import _debug from 'debug';
 import { TaskQueue } from 'power-tasks';
@@ -132,7 +132,7 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
   }
 
   async execute(
-    query: string | classes.Query,
+    query: string | Query,
     options?: QueryExecuteOptions,
   ): Promise<any> {
     if (!this._intlcon)
@@ -183,7 +183,7 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
    * Executes a query
    */
   protected async _execute(
-    query: string | classes.Query,
+    query: string | Query,
     options?: QueryExecuteOptions,
   ): Promise<any> {
     assert.ok(
@@ -341,7 +341,7 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
   }
 
   private _prepareQueryRequest(
-    query: string | classes.Query,
+    query: string | Query,
     options: QueryExecuteOptions = {},
   ): QueryRequest {
     if (!this._intlcon) throw new Error('Session released');
@@ -391,7 +391,7 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     };
     request.ignoreNulls = request.ignoreNulls && request.objectRows;
 
-    if (query instanceof classes.Query) {
+    if (query instanceof Query) {
       if (this._intlcon.onGenerateQuery)
         this._intlcon.onGenerateQuery(request, query);
       const q = query.generate({

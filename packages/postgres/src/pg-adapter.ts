@@ -1,6 +1,6 @@
 import '@sqb/postgres-dialect';
 import { type Adapter, type ClientConfiguration, DataType } from '@sqb/connect';
-import { Connection, ConnectionConfiguration } from 'postgrejs';
+import { Connection, type ConnectionConfiguration } from 'postgrejs';
 import { PgConnection } from './pg-connection.js';
 
 export class PgAdapter implements Adapter {

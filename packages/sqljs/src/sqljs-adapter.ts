@@ -3,7 +3,7 @@ import type { Adapter, ClientConfiguration } from '@sqb/connect';
 import fs from 'fs';
 import path from 'path';
 import promisify from 'putil-promisify';
-import initSqlJs, { Database } from 'sql.js';
+import initSqlJs, { type Database } from 'sql.js';
 import { SqljsConnection } from './sqljs-connection.js';
 
 type CachedDatabase = Database & { _refCount: number };

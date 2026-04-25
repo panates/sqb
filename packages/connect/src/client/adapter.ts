@@ -1,5 +1,5 @@
-import { classes } from '@sqb/builder';
-import { Maybe } from 'ts-gems';
+import { Query } from '@sqb/builder';
+import type { Maybe } from 'ts-gems';
 import {
   type ClientConfiguration,
   DataType,
@@ -33,7 +33,7 @@ export namespace Adapter {
     rollback: () => Promise<void>;
     setSchema?: (schema: string) => Promise<void>;
     getSchema?: () => Promise<string>;
-    onGenerateQuery?: (request: QueryRequest, query: classes.Query) => void;
+    onGenerateQuery?: (request: QueryRequest, query: Query) => void;
     getInTransaction?: () => boolean;
   }
 

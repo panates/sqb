@@ -4,7 +4,7 @@ import { TaskQueue } from 'power-tasks';
 import { coerceToInt } from 'putil-varhelpers';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
 import type { Adapter } from './adapter.js';
-import { CursorStream, CursorStreamOptions } from './cursor-stream.js';
+import { CursorStream, type CursorStreamOptions } from './cursor-stream.js';
 import type { FieldInfoMap } from './field-info-map.js';
 import {
   callFetchHooks,

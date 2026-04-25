@@ -1,5 +1,5 @@
 import { DataType } from '@sqb/builder';
-import { FieldMetadata } from '../model/field-metadata.js';
+import type { FieldMetadata } from '../model/field-metadata.js';
 import { isColumnField } from './orm.helper.js';
 
 export function serializeColumn(col: FieldMetadata, v: any): any {

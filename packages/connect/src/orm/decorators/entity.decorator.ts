@@ -1,13 +1,13 @@
-import { Maybe, Type } from 'ts-gems';
-import { AssociationFieldMetadata } from '../model/association-field-metadata.js';
-import { ColumnFieldMetadata } from '../model/column-field-metadata.js';
+import type { Maybe, Type } from 'ts-gems';
+import type { AssociationFieldMetadata } from '../model/association-field-metadata.js';
+import type { ColumnFieldMetadata } from '../model/column-field-metadata.js';
 import { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';
 import {
-  AnyFieldMetadata,
+  type AnyFieldMetadata,
   EntityMetadata,
-  EntityOptions,
+  type EntityOptions,
 } from '../model/entity-metadata.js';
-import { IndexMetadata } from '../model/index-metadata.js';
+import type { IndexMetadata } from '../model/index-metadata.js';
 import { applyMixins } from '../util/apply-mixins.js';
 
 export function Entity(options?: EntityOptions | string): ClassDecorator {

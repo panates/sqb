@@ -1,5 +1,5 @@
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { IndexMetadata } from '../model/index-metadata.js';
+import type { IndexMetadata } from '../model/index-metadata.js';
 import { Column } from './column.decorator.js';
 
 export function PrimaryKey(

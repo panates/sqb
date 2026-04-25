@@ -1,15 +1,15 @@
-import { classes } from '@sqb/builder';
+import type { Query } from '@sqb/builder';
 import _debug from 'debug';
 import {
   createPool,
   Pool as LightningPool,
-  PoolConfiguration,
-  PoolFactory,
+  type PoolConfiguration,
+  type PoolFactory,
   PoolState,
 } from 'lightning-pool';
 import { coerceToBoolean, coerceToInt } from 'putil-varhelpers';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
-import { Maybe, Type } from 'ts-gems';
+import type { Maybe, Type } from 'ts-gems';
 import { EntityMetadata } from '../orm/model/entity-metadata.js';
 import { Repository } from '../orm/repository.class.js';
 import type { Adapter } from './adapter.js';
@@ -183,7 +183,7 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(
    * Executes a query or callback with a new acquired connection.
    */
   async execute(
-    query: string | classes.Query,
+    query: string | Query,
     options?: QueryExecuteOptions,
   ): Promise<QueryResult> {
     debug('execute');

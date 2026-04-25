@@ -1,4 +1,4 @@
-import { Type } from 'ts-gems';
+import type { Type } from 'ts-gems';
 import type { AssociationFieldMetadata } from '../model/association-field-metadata.js';
 import type { ColumnFieldMetadata } from '../model/column-field-metadata.js';
 import type { EmbeddedFieldMetadata } from '../model/embedded-field-metadata.js';

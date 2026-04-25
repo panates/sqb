@@ -1,5 +1,5 @@
 import { Query } from '@sqb/builder';
-import { QueryExecuteOptions, QueryRequest } from './types.js';
+import type { QueryExecuteOptions, QueryRequest } from './types.js';
 
 export class SQBError extends Error {
   cause?: Error;

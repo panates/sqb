@@ -1,7 +1,7 @@
 import glob from 'fast-glob';
 import fs from 'fs/promises';
 import path from 'path';
-import { PartialSome, StrictOmit } from 'ts-gems';
+import type { PartialSome, StrictOmit } from 'ts-gems';
 import type { MigrationAdapter } from './migration-adapter.js';
 import { getCallingFilename } from './utils/get-calling-filename.js';
 

@@ -3,9 +3,9 @@ import {
   BindParam,
   Connection,
   DataTypeOIDs,
-  FieldInfo,
-  OID,
-  QueryOptions,
+  type FieldInfo,
+  type OID,
+  type QueryOptions,
 } from 'postgrejs';
 
 const SqbDataTypToOIDMap = {

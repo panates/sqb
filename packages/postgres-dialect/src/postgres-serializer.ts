@@ -1,5 +1,5 @@
 import {
-  DefaultSerializeFunction,
+  type DefaultSerializeFunction,
   OperatorType,
   SerializationType,
   SerializeContext,

@@ -1,5 +1,5 @@
 import type { InjectionToken, LoggerService } from '@nestjs/common';
-import type { ModuleMetadata } from '@nestjs/common/interfaces';
+import type { ModuleMetadata } from '@nestjs/common/interfaces/index.js';
 import type { ClientConfiguration } from '@sqb/connect';
 
 export interface SqbClientConnectionOptions extends ClientConfiguration {

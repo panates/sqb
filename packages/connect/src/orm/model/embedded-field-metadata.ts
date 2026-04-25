@@ -1,7 +1,7 @@
-import { TypeThunk } from '../orm.type.js';
+import type { TypeThunk } from '../orm.type.js';
 import { resolveEntityMeta } from '../util/orm.helper.js';
 import type { EntityMetadata } from './entity-metadata.js';
-import { FieldMetadata } from './field-metadata.js';
+import type { FieldMetadata } from './field-metadata.js';
 
 export type EmbeddedFieldOptions = Partial<
   Omit<EmbeddedFieldMetadata, 'entity' | 'name' | 'kind' | 'type'>

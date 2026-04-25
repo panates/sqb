@@ -1,8 +1,8 @@
-import { Type } from 'ts-gems';
-import { AssociationFieldOptions } from '../model/association-field-metadata.js';
+import type { Type } from 'ts-gems';
+import type { AssociationFieldOptions } from '../model/association-field-metadata.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import { LinkChain } from '../model/link-chain.js';
-import { TypeThunk } from '../orm.type.js';
+import type { TypeThunk } from '../orm.type.js';
 
 type LinkArgs<T> = {
   sourceKey?: string;

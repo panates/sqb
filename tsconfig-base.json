@@ -1,12 +1,10 @@
 {
   "extends": "@panates/tsconfig/node.json",
   "compilerOptions": {
-    "types": ["node"],
+    "composite": true,
+    "incremental": true,
     "sourceMap": true,
-    "moduleResolution": "nodenext",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "module": "NodeNext",
-    "target": "ESNext"
-  }
+    "emitDecoratorMetadata": true
+  },
 }

@@ -1,5 +1,5 @@
 import { DataType } from '@sqb/builder';
-import { ColumnFieldOptions } from '../model/column-field-metadata.js';
+import type { ColumnFieldOptions } from '../model/column-field-metadata.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import { DECORATOR_FACTORY } from '../orm.const.js';
 

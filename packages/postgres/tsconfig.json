@@ -3,17 +3,17 @@
   "include": ["src"],
   "exclude": ["build"],
   "compilerOptions": {
-    "composite": true,
-    "incremental": true,
-    "module": "ES2020",
-    "moduleResolution": "Node",
     "rootDir": "src",
     "outDir": "./build",
-    "baseUrl": "./",
     "paths": {
-      "@sqb/builder": ["../builder/src"],
-      "@sqb/connect": ["../connect/src"]
+      "@sqb/builder": ["../builder/src/index.js"],
+      "@sqb/connect": ["../connect/src/index.js"],
+      "@sqb/postgres-dialect": ["../postgres-dialect/src/index.js"]
     }
   },
-  "references": [{ "path": "../builder" }, { "path": "../connect" }]
+  "references": [
+    { "path": "../builder" },
+    { "path": "../connect" },
+    { "path": "../postgres-dialect" }
+  ]
 }
