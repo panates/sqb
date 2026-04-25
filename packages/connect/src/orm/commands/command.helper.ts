@@ -6,14 +6,13 @@ import {
   InnerJoin,
   isCompOperator,
   isLogicalOperator,
-  JoinStatement,
+  type Join,
   LeftOuterJoin,
   LogicalOperator,
-  op,
   OperatorType,
+  Or,
   Raw,
   Select,
-  SelectQuery,
 } from '@sqb/builder';
 import { AssociationNode } from '../model/association-node.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
@@ -30,7 +29,7 @@ export interface JoinInfo {
   targetEntity: EntityMetadata;
   joinAlias: string;
   parentAlias: string;
-  join: JoinStatement;
+  join: Join;
 }
 
 export async function joinAssociationGetFirst(
@@ -160,7 +159,7 @@ export async function prepareFilter(
         let _curAlias = tableAlias;
         let _curPrefix = '';
         let _curSuffix = '';
-        let subSelect: SelectQuery | undefined;
+        let subSelect: Select | undefined;
         let currentOp = trgOp;
         let i = 0;
 
@@ -241,7 +240,7 @@ export async function prepareFilter(
               );
               currentOp.add(Exists(subSelect));
               if (currentOp._operatorType !== OperatorType.and) {
-                currentOp = op.or();
+                currentOp = Or();
                 subSelect.where(currentOp);
               } else currentOp = subSelect._where as LogicalOperator;
               if (col.association.conditions) {

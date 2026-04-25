@@ -1,5 +1,5 @@
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { IndexMetadata } from '../model/index-metadata.js';
+import type { IndexMetadata } from '../model/index-metadata.js';
 
 export function Index(
   fields: string | string[],

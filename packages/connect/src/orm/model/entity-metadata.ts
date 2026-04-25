@@ -1,7 +1,7 @@
 import { DataType } from '@sqb/builder';
-import { Maybe, Type } from 'ts-gems';
+import type { Maybe, Type } from 'ts-gems';
 import { ENTITY_METADATA_KEY } from '../orm.const.js';
-import { Ctor, TypeThunk } from '../orm.type.js';
+import type { Ctor, TypeThunk } from '../orm.type.js';
 import {
   isAssociationField,
   isColumnField,
@@ -21,7 +21,7 @@ import type {
   EmbeddedFieldMetadata,
   EmbeddedFieldOptions,
 } from './embedded-field-metadata.js';
-import { IndexMetadata } from './index-metadata.js';
+import type { IndexMetadata } from './index-metadata.js';
 
 export type AnyFieldMetadata =
   | ColumnFieldMetadata

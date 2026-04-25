@@ -1,7 +1,7 @@
 import { expect } from 'expect';
 import { Select } from '../../src/index.js';
 
-describe('builder:serialize "OrderColumn"', () => {
+describe('builder:serialize "OrderColumnClass"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,

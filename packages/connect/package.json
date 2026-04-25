@@ -1,7 +1,7 @@
 {
   "name": "@sqb/connect",
   "description": "Multi-dialect database connection framework written with TypeScript",
-  "version": "4.26.1",
+  "version": "5.0.0",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -12,7 +12,7 @@
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier . --write --log-level=warn",
-    "check": "madge --circular src/**",
+    "check": "dpdm -T --no-warning --no-tree ./src/index.ts",
     "test": "mocha",
     "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
     "clean:src": "ts-cleanup -s src --all",
@@ -44,7 +44,7 @@
     "postgrejs": "^2.23.0"
   },
   "peerDependencies": {
-    "@sqb/builder": "^4.26.1",
+    "@sqb/builder": "^5.0.0",
     "reflect-metadata": "^0.2.2"
   },
   "type": "module",

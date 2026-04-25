@@ -1,13 +1,13 @@
 import assert from 'node:assert';
 import {
-  DynamicModule,
+  type DynamicModule,
   Global,
   Inject,
   Logger,
   Module,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
-  Provider,
+  type OnApplicationBootstrap,
+  type OnApplicationShutdown,
+  type Provider,
 } from '@nestjs/common';
 import { SqbClient } from '@sqb/connect';
 import colors from 'ansi-colors';

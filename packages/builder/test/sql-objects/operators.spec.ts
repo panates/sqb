@@ -6,7 +6,7 @@ import {
   Exists,
   Gt,
   Gte,
-  Ilike,
+  ILike,
   In,
   Is,
   IsNot,
@@ -505,7 +505,7 @@ describe('builder:serialize "Operators"', () => {
    */
   describe('builder:like operator', () => {
     it('should initialize', () => {
-      const op = Like('id', 1);
+      const op = Like('id', '1');
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
       expect(op._operatorType).toStrictEqual(OperatorType.like);
     });
@@ -552,7 +552,7 @@ describe('builder:serialize "Operators"', () => {
    */
   describe('builder:notLike operator', () => {
     it('should initialize', () => {
-      const op = NotLike('id', 1);
+      const op = NotLike('id', '1');
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
       expect(op._operatorType).toStrictEqual(OperatorType.notLike);
     });
@@ -601,7 +601,7 @@ describe('builder:serialize "Operators"', () => {
    */
   describe('builder:ilike operator', () => {
     it('should initialize', () => {
-      const op = Ilike('id', 1);
+      const op = ILike('id', '1');
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
       expect(op._operatorType).toStrictEqual(OperatorType.iLike);
     });
@@ -609,7 +609,7 @@ describe('builder:serialize "Operators"', () => {
     it('should serialize', () => {
       const query = Select()
         .from('table1')
-        .where(Ilike('name', "John's"), Ilike('id', '10'));
+        .where(ILike('name', "John's"), ILike('id', '10'));
       const result = query.generate(options);
       expect(result.sql).toStrictEqual(
         "select * from table1 where name ilike 'John''s' and id ilike '10'",
@@ -619,7 +619,7 @@ describe('builder:serialize "Operators"', () => {
     it('should serialize params', () => {
       const query = Select()
         .from('table1')
-        .where(Ilike('name', Param('name')));
+        .where(ILike('name', Param('name')));
       const result = query.generate(
         Object.assign(
           {
@@ -650,7 +650,7 @@ describe('builder:serialize "Operators"', () => {
    */
   describe('builder:notILike operator', () => {
     it('should initialize', () => {
-      const op = NotILike('id', 1);
+      const op = NotILike('id', '1');
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
       expect(op._operatorType).toStrictEqual(OperatorType.notILike);
     });
@@ -699,7 +699,7 @@ describe('builder:serialize "Operators"', () => {
    */
   describe('builder:in operator', () => {
     it('should initialize', () => {
-      const op = In('id', 1);
+      const op = In('id', [1]);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
       expect(op._operatorType).toStrictEqual(OperatorType.in);
     });
@@ -707,7 +707,7 @@ describe('builder:serialize "Operators"', () => {
     it('should serialize', () => {
       const query = Select()
         .from('table1')
-        .where(Or(In('id', 1), In('id', [4, 5, 6])));
+        .where(Or(In('id', [1]), In('id', [4, 5, 6])));
       const result = query.generate(options);
       expect(result.sql).toStrictEqual(
         'select * from table1 where (id in (1) or id in (4,5,6))',
@@ -756,7 +756,7 @@ describe('builder:serialize "Operators"', () => {
    */
   describe('builder:notIn operator', () => {
     it('should initialize', () => {
-      const op = NotIn('id', 1);
+      const op = NotIn('id', [1]);
       expect(op._type).toStrictEqual(SerializationType.COMPARISON_EXPRESSION);
       expect(op._operatorType).toStrictEqual(OperatorType.notIn);
     });
@@ -764,7 +764,7 @@ describe('builder:serialize "Operators"', () => {
     it('should serialize', () => {
       const query = Select()
         .from('table1')
-        .where(Or(NotIn('id', 1), NotIn('id', [4, 5, 6])));
+        .where(Or(NotIn('id', [1]), NotIn('id', [4, 5, 6])));
       const result = query.generate(options);
       expect(result.sql).toStrictEqual(
         'select * from table1 where (id not in (1) or id not in (4,5,6))',

@@ -1,11 +1,16 @@
-import { LogicalOperator } from '@sqb/builder';
-import { OptimizerHintArgs } from '@sqb/builder/build/sql-objects/table-name';
+import { LogicalOperator, type TableName } from '@sqb/builder';
 import { AsyncEventEmitter, TypedEventEmitterClass } from 'strict-typed-events';
-import { PartialDTO, PatchDTO, RequiredSome, StrictOmit, Type } from 'ts-gems';
+import type {
+  PartialDTO,
+  PatchDTO,
+  RequiredSome,
+  StrictOmit,
+  Type,
+} from 'ts-gems';
 import { FieldInfoMap } from '../client/field-info-map.js';
 import type { SqbClient } from '../client/sqb-client.js';
 import type { SqbConnection } from '../client/sqb-connection.js';
-import { QueryRequest, TransactionFunction } from '../client/types.js';
+import type { QueryRequest, TransactionFunction } from '../client/types.js';
 import { CountCommand } from './commands/count.command.js';
 import { CreateCommand } from './commands/create.command.js';
 import { DeleteCommand } from './commands/delete.command.js';
@@ -44,7 +49,11 @@ export namespace Repository {
           comment: string;
           dialect?: string[];
         }[];
-    optimizerHint?: string | string[] | OptimizerHintArgs | OptimizerHintArgs[];
+    optimizerHint?:
+      | string
+      | string[]
+      | TableName.OptimizerHint
+      | TableName.OptimizerHint[];
   }
 
   export interface CreateOptions extends CommandOptions, Projection {}

@@ -1,4 +1,4 @@
-import { FieldInfo } from './types.js';
+import type { FieldInfo } from './types.js';
 
 export class FieldInfoMap {
   private _obj!: Record<string, FieldInfo>;

@@ -1,7 +1,7 @@
 {
   "name": "@sqb/postgres",
   "description": "SQB serialization extension for PostgreSQL database",
-  "version": "4.26.1",
+  "version": "5.0.0",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -12,7 +12,7 @@
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --max-warnings=0 --fix",
     "format": "prettier . --write --log-level=warn",
-    "check": "madge --circular src/**",
+    "check": "dpdm -T --no-warning --no-tree ./src/index.ts",
     "test": "mocha",
     "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
     "clean:src": "ts-cleanup -s src --all",
@@ -29,9 +29,9 @@
     "postgrejs": "^2.22.2"
   },
   "peerDependencies": {
-    "@sqb/builder": "^4.26.1",
-    "@sqb/connect": "^4.26.1",
-    "@sqb/postgres-dialect": "^4.26.1",
+    "@sqb/builder": "^5.0.0",
+    "@sqb/connect": "^5.0.0",
+    "@sqb/postgres-dialect": "^5.0.0",
     "postgrejs": ">=2.15.1 <3.0.0"
   },
   "type": "module",

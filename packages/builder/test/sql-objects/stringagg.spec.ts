@@ -3,7 +3,7 @@ import {
   Field,
   Select,
   SerializationType,
-  StringAGG,
+  StringAgg,
 } from '../../src/index.js';
 
 describe('builder:serialize "StringAGG"', () => {
@@ -13,25 +13,25 @@ describe('builder:serialize "StringAGG"', () => {
   };
 
   it('should initialize StringAGG', () => {
-    expect(StringAGG('A')._type).toStrictEqual(
+    expect(StringAgg('A')._type).toStrictEqual(
       SerializationType.STRINGAGG_STATEMENT,
     );
   });
 
   it('should serialize values', () => {
-    const query = Select(StringAGG('ABC')).from('table1');
+    const query = Select(StringAgg('ABC')).from('table1');
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(`select string_agg(ABC,',') from table1`);
   });
 
   it('should serialize Field names', () => {
-    const query = Select(StringAGG(Field('a'))).from('table1');
+    const query = Select(StringAgg(Field('a'))).from('table1');
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(`select string_agg(a,',') from table1`);
   });
 
   it('should serialize sub query', () => {
-    const query = Select(StringAGG(Select().from('table2'))).from('table1');
+    const query = Select(StringAgg(Select().from('table2'))).from('table1');
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
       `select string_agg((select * from table2),',') from table1`,
@@ -39,7 +39,7 @@ describe('builder:serialize "StringAGG"', () => {
   });
 
   it('should serialize alias', () => {
-    const query = Select(StringAGG(Field('a')).as('col1')).from('table1');
+    const query = Select(StringAgg(Field('a')).as('col1')).from('table1');
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
       `select string_agg(a,',') col1 from table1`,
@@ -47,14 +47,14 @@ describe('builder:serialize "StringAGG"', () => {
   });
 
   it('should serialize delimiter', () => {
-    const query = Select(StringAGG(Field('a')).delimiter('&')).from('table1');
+    const query = Select(StringAgg(Field('a')).delimiter('&')).from('table1');
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(`select string_agg(a,'&') from table1`);
   });
 
   it('should serialize order by', () => {
     const query = Select(
-      StringAGG(Field('a')).delimiter('&').orderBy('a', 'b'),
+      StringAgg(Field('a')).delimiter('&').orderBy('a', 'b'),
     ).from('table1');
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(

@@ -6,7 +6,7 @@ import type {
   EnumValue,
   FieldValue,
 } from '../orm.type.js';
-import { FieldMetadata } from './field-metadata.js';
+import type { FieldMetadata } from './field-metadata.js';
 
 export type ColumnFieldOptions = Partial<
   Omit<ColumnFieldMetadata, 'entity' | 'name' | 'kind'>

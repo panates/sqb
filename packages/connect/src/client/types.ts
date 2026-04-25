@@ -1,6 +1,6 @@
-import { DataType, ParamOptions } from '@sqb/builder';
+import { DataType, type ParamOptions } from '@sqb/builder';
 import type { PoolConfiguration } from 'lightning-pool';
-import { Maybe } from 'ts-gems';
+import type { Maybe } from 'ts-gems';
 import type { Adapter } from './adapter.js';
 import type { Cursor } from './cursor.js';
 import type { FieldInfoMap } from './field-info-map.js';

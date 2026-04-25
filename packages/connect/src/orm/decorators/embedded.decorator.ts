@@ -1,6 +1,6 @@
-import { EmbeddedFieldOptions } from '../model/embedded-field-metadata.js';
+import type { EmbeddedFieldOptions } from '../model/embedded-field-metadata.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { TypeThunk } from '../orm.type.js';
+import type { TypeThunk } from '../orm.type.js';
 
 export function Embedded(
   type?: TypeThunk,

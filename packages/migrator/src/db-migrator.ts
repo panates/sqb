@@ -4,8 +4,8 @@ import { PgMigrationAdapter } from './adapters/pg-migration-adapter.js';
 import { MigrationAdapter } from './migration-adapter.js';
 import {
   MigrationPackage,
-  MigrationPackageConfig,
-  MigrationTask,
+  type MigrationPackageConfig,
+  type MigrationTask,
 } from './migration-package.js';
 import { MigrationStatus } from './types.js';
 

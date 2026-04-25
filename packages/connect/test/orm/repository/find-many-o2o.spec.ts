@@ -1,4 +1,4 @@
-import { Eq, op } from '@sqb/builder';
+import { Eq, Or } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
 import { expect } from 'expect';
 import { Customer } from '../../_support/customer.entity.js';
@@ -124,9 +124,9 @@ describe('connect:Repository.findMany() (OneToOne)', () => {
       await repo.findMany({
         projection: ['id'],
         filter: [
-          op.or(
-            op.eq('country.continent.name', 'America'),
-            op.eq('country.continent.name', 'Europe'),
+          Or(
+            Eq('country.continent.name', 'America'),
+            Eq('country.continent.name', 'Europe'),
           ),
         ],
         prettyPrint: true,

@@ -1,9 +1,9 @@
 import { SerializationType } from './enums.js';
 import { SerializerRegistry } from './extensions.js';
-import type { Query } from './query/query.js';
 import { Serializable } from './serializable.js';
-import { isLogicalOperator, isQuery, isSerializable } from './typeguards.js';
-import {
+import { Query } from './sql/index.js';
+import { isLogicalOperator, isQuery, isSerializable } from './type-guards.js';
+import type {
   DefaultSerializeFunction,
   GenerateOptions,
   ParamOptions,

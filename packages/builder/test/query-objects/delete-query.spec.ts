@@ -7,7 +7,7 @@ describe('builder:Serialize delete query', () => {
     prettyPrint: false,
   };
 
-  it('should initialize DeleteQuery', () => {
+  it('should initialize Delete', () => {
     const q = Delete('table1');
     expect(q && q._type).toStrictEqual(SerializationType.DELETE_QUERY);
   });

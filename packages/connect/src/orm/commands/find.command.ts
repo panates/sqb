@@ -16,7 +16,7 @@ import {
 } from '../util/parse-fields-projection.js';
 import {
   joinAssociationGetLast,
-  JoinInfo,
+  type JoinInfo,
   prepareFilter,
 } from './command.helper.js';
 import { RowConverter } from './row-converter.js';

@@ -1,5 +1,5 @@
 import { EntityMetadata } from '../model/entity-metadata.js';
-import { ColumnTransformFunction } from '../orm.type.js';
+import type { ColumnTransformFunction } from '../orm.type.js';
 
 export function Parse(fn: ColumnTransformFunction): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol): void => {

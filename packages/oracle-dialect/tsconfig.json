@@ -3,15 +3,10 @@
   "include": ["src"],
   "exclude": ["build"],
   "compilerOptions": {
-    "composite": true,
-    "incremental": true,
-    "module": "ES2020",
-    "moduleResolution": "Node",
     "rootDir": "src",
     "outDir": "./build",
-    "baseUrl": "./",
     "paths": {
-      "@sqb/builder": ["../builder/src"]
+      "@sqb/builder": ["../builder/src/index.js"]
     }
   },
   "references": [{ "path": "../builder" }]

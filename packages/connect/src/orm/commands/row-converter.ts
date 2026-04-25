@@ -1,8 +1,8 @@
 import { DataType } from '@sqb/builder';
-import { Type } from 'ts-gems';
+import type { Type } from 'ts-gems';
 import type { FieldInfoMap } from '../../client/field-info-map.js';
 import type { SqbConnection } from '../../client/sqb-connection.js';
-import { ColumnTransformFunction } from '../orm.type.js';
+import type { ColumnTransformFunction } from '../orm.type.js';
 import type { Repository } from '../repository.class.js';
 import type { FindCommand } from './find.command.js';
 
