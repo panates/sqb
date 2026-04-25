@@ -9,7 +9,7 @@ import {
 } from '../../src/index.js';
 import { TestSerializer } from '../_support/test_serializer.js';
 
-describe('builder:serialize "SelectQuery"', () => {
+describe('builder:serialize "Select"', () => {
   const options = {
     dialect: 'test',
     prettyPrint: false,
@@ -20,7 +20,7 @@ describe('builder:serialize "SelectQuery"', () => {
   before(() => SerializerRegistry.register(testSerializer));
   after(() => SerializerRegistry.unRegister(testSerializer));
 
-  it('should initialize SelectQuery', () => {
+  it('should initialize Select', () => {
     const q = Select();
     expect(q._type).toStrictEqual(SerializationType.SELECT_QUERY);
   });

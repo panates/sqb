@@ -1,10 +1,10 @@
-import { expect } from 'expect';
 import {
   Select,
   SerializationType,
   type SerializerExtension,
   SerializerRegistry,
-} from '../src/index.js';
+} from '@sqb/builder';
+import { expect } from 'expect';
 
 describe('builder:Serializer Extensions', () => {
   it('should register serialization extension', () => {

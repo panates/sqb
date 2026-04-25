@@ -22,11 +22,11 @@ describe('builder:serialize "Join"', () => {
   };
 
   it('should initialize Join', () => {
-    expect(Join('table1')._type).toStrictEqual(SerializationType.JOIN);
+    expect(InnerJoin('table1')._type).toStrictEqual(SerializationType.JOIN);
   });
 
   it('should serialize (join)', () => {
-    const query = Select().from('table1 t1').join(Join('table2 t2').on());
+    const query = Select().from('table1 t1').join(InnerJoin('table2 t2').on());
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
       'select * from table1 t1 inner join table2 t2',
@@ -100,7 +100,7 @@ describe('builder:serialize "Join"', () => {
   it('should serialize conditions', () => {
     const query = Select()
       .from('table1 t1')
-      .join(Join('table2 t2').on(Eq('t2.id', Raw('t1.id'))));
+      .join(InnerJoin('table2 t2').on(Eq('t2.id', Raw('t1.id'))));
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
       'select * from table1 t1 inner join table2 t2 on t2.id = t1.id',
@@ -110,7 +110,7 @@ describe('builder:serialize "Join"', () => {
   it('should serialize sub-select as table', () => {
     const query = Select()
       .from('table1 t1')
-      .join(Join(Select().from('table2').as('t2')));
+      .join(InnerJoin(Select().from('table2').as('t2')));
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
       'select * from table1 t1 inner join (select * from table2) t2',
@@ -121,7 +121,7 @@ describe('builder:serialize "Join"', () => {
     const query = Select()
       .from('table1 t1')
       .join(
-        Join(
+        InnerJoin(
           Select('field1', 'field2', 'field3', 'field4', 'field5')
             .from('table2')
             .as('t2'),
@@ -139,7 +139,7 @@ describe('builder:serialize "Join"', () => {
   it('should serialize Raw as table', () => {
     const query = Select()
       .from('table1 t1')
-      .join(Join(Raw('table2 t2')));
+      .join(InnerJoin(Raw('table2 t2')));
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
       'select * from table1 t1 inner join table2 t2',
@@ -157,7 +157,7 @@ describe('builder:serialize "Join"', () => {
     expect(() => {
       const query = Select()
         .from('table1 t1')
-        .join(Join(Select().from('table2')));
+        .join(InnerJoin(Select().from('table2')));
       query.generate();
     }).toThrow('Alias required for sub-select in Join');
   });

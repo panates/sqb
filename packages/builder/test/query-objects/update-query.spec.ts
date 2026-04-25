@@ -14,7 +14,7 @@ describe('builder:Serialize update query', () => {
     prettyPrint: false,
   };
 
-  it('should initialize UpdateQuery', () => {
+  it('should initialize Update', () => {
     const q = Update('table1', { id: 1 });
     expect(q && q._type).toStrictEqual(SerializationType.UPDATE_QUERY);
   });

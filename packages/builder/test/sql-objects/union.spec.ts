@@ -1,5 +1,5 @@
 import { expect } from 'expect';
-import { Select, SerializationType, Union, UnionAll } from '../../src/index.js';
+import { Select, SerializationType, Union } from '../../src/index.js';
 
 describe('builder:serialize "Union"', () => {
   const options = {
@@ -10,13 +10,13 @@ describe('builder:serialize "Union"', () => {
   const query2 = Select('id', 'name').from('table2');
 
   it('should initialize Union', () => {
-    expect(Union(query1, query2)._type).toStrictEqual(
+    expect(Union([query1, query2], 'all')._type).toStrictEqual(
       SerializationType.UNION_QUERY,
     );
   });
 
   it('should serialize UNION query', () => {
-    const query = Union(query1, query2);
+    const query = Union([query1, query2]);
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
       `select id, name from table1 UNION select id, name from table2`,
@@ -24,7 +24,7 @@ describe('builder:serialize "Union"', () => {
   });
 
   it('should serialize UNION ALL query', () => {
-    const query = UnionAll(query1, query2);
+    const query = Union([query1, query2], 'all');
     const result = query.generate(options);
     expect(result.sql).toStrictEqual(
       `select id, name from table1 UNION ALL select id, name from table2`,

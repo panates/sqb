@@ -13,7 +13,7 @@ describe('builder:Serialize insert query', () => {
     prettyPrint: false,
   };
 
-  it('should initialize InsertQuery', () => {
+  it('should initialize Insert', () => {
     const q = Insert('table1', { id: 1 });
     expect(q && q._type).toStrictEqual(SerializationType.INSERT_QUERY);
   });
