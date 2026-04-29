@@ -1,8 +1,8 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
-class SequenceClass extends Serializable {
+class SequenceClass extends SqlElement {
   _expression!: string;
   _next!: boolean;
   _alias?: string;
@@ -65,7 +65,7 @@ export const Sequence = function (
   next?: boolean,
 ) {
   if (!(this instanceof Sequence)) return new Sequence(expression, next);
-  Serializable.call(this);
+  SqlElement.call(this);
   this._expression = expression;
   this._next = !!next;
 } as SequenceCtor;

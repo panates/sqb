@@ -1,13 +1,13 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { And } from '../operators/and.js';
 import { LogicalOperator } from '../operators/logical-operator.js';
 import { Operator } from '../operators/operator.js';
 import { Raw } from './raw.js';
 
-class CaseClass extends Serializable {
-  _expressions!: { condition: Serializable; value: any }[];
+class CaseClass extends SqlElement {
+  _expressions!: { condition: SqlElement; value: any }[];
   _elseValue: any;
   _condition?: LogicalOperator;
   _alias?: string;
@@ -100,7 +100,7 @@ interface CaseCtor {
 
 export const Case = function (this: Case) {
   if (!(this instanceof Case)) return new Case();
-  Serializable.call(this);
+  SqlElement.call(this);
   this._expressions = [];
 } as CaseCtor;
 

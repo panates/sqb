@@ -1,5 +1,5 @@
 import { JoinType, SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import type { SerializeContext } from '../../serialize-context.js';
 import { isRaw, isSelect, isTableName } from '../../type-guards.js';
 import { And } from '../operators/and.js';
@@ -8,7 +8,7 @@ import type { Select } from '../select.js';
 import type { Raw } from './raw.js';
 import { TableName } from './table-name.js';
 
-class JoinClass extends Serializable {
+class JoinClass extends SqlElement {
   _joinType!: JoinType;
   _table!: TableName | Select | Raw;
   _conditions: LogicalOperator = new And();
@@ -17,7 +17,7 @@ class JoinClass extends Serializable {
     return SerializationType.JOIN;
   }
 
-  on(...conditions: Serializable[]): this {
+  on(...conditions: SqlElement[]): this {
     this._conditions.add(...conditions);
     return this;
   }
@@ -98,7 +98,7 @@ export const Join = function (
   table: string | TableName | Select | Raw,
 ) {
   if (!(this instanceof Join)) return new Join(joinType, table);
-  Serializable.call(this);
+  SqlElement.call(this);
   // noinspection SuspiciousTypeOfGuard
   if (
     !(

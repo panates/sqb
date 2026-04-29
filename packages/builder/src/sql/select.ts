@@ -2,7 +2,7 @@ import { splitString } from 'fast-tokenizer';
 import { coerceToInt } from 'putil-varhelpers';
 import { SerializationType } from '../enums.js';
 import { printArray } from '../helpers.js';
-import { Serializable } from '../serializable.js';
+import { SqlElement } from '../serializable.js';
 import { SerializeContext } from '../serialize-context.js';
 import { isJoin } from '../type-guards.js';
 import { Field } from './elements/field.js';
@@ -17,12 +17,12 @@ import { Query } from './query.js';
 import type { Union } from './union.js';
 
 class SelectClass extends Query {
-  _tables?: Serializable[];
-  _columns?: Serializable[];
+  _tables?: SqlElement[];
+  _columns?: SqlElement[];
   _joins?: Join[];
   _where?: LogicalOperator;
-  _groupBy?: (GroupColumn | Serializable)[];
-  _orderBy?: (OrderColumn | Serializable)[];
+  _groupBy?: (GroupColumn | SqlElement)[];
+  _orderBy?: (OrderColumn | SqlElement)[];
   _limit?: number;
   _offset?: number;
   _alias?: string;
@@ -35,7 +35,7 @@ class SelectClass extends Query {
   /**
    * Adds columns to query.
    */
-  addColumn(...column: (string | string[] | Serializable)[]): this {
+  addColumn(...column: (string | string[] | SqlElement)[]): this {
     const self = this;
     this._columns = this._columns || [];
     for (const arg of column) {
@@ -93,7 +93,7 @@ class SelectClass extends Query {
   /**
    * Defines "where" part of query
    */
-  where(...condition: (Serializable | Object)[]): this {
+  where(...condition: (SqlElement | Object)[]): this {
     this._where = this._where || new And();
     this._where.add(...condition);
     return this;
@@ -102,7 +102,7 @@ class SelectClass extends Query {
   /**
    * Defines "where" part of query
    */
-  groupBy(...field: (string | Serializable)[]): this {
+  groupBy(...field: (string | SqlElement)[]): this {
     this._groupBy = this._groupBy || [];
     for (const arg of field) {
       if (!arg) continue;
@@ -114,7 +114,7 @@ class SelectClass extends Query {
   /**
    * Defines "order by" part of query.
    */
-  orderBy(...field: (string | Serializable)[]): this {
+  orderBy(...field: (string | SqlElement)[]): this {
     this._orderBy = this._orderBy || [];
     for (const arg of field) {
       if (!arg) continue;
@@ -338,14 +338,14 @@ class SelectClass extends Query {
 }
 
 interface SelectCtor {
-  new (...column: (string | string[] | Serializable)[]): Select;
-  (...column: (string | string[] | Serializable)[]): Select;
+  new (...column: (string | string[] | SqlElement)[]): Select;
+  (...column: (string | string[] | SqlElement)[]): Select;
   prototype: Select;
 }
 
 export const Select = function (
   this: Select,
-  ...column: (string | string[] | Serializable)[]
+  ...column: (string | string[] | SqlElement)[]
 ) {
   if (!(this instanceof Select)) return new Select(...column);
   Query.call(this);

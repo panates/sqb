@@ -1,20 +1,16 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { CompOperator } from './comp-operator.js';
 
 class GtClass extends CompOperator {}
 
 interface GtCtor {
-  new (left: string | Serializable, right?: any): Gt;
-  (left: string | Serializable, right?: any): Gt;
+  new (left: string | SqlElement, right?: any): Gt;
+  (left: string | SqlElement, right?: any): Gt;
   prototype: Gt;
 }
 
-export const Gt = function (
-  this: Gt,
-  left: string | Serializable,
-  right?: any,
-) {
+export const Gt = function (this: Gt, left: string | SqlElement, right?: any) {
   if (!(this instanceof Gt)) return new Gt(left, right);
   CompOperator.call(this, left, right);
   this._operatorType = OperatorType.gt;

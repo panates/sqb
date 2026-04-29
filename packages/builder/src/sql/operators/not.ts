@@ -1,10 +1,10 @@
 import { OperatorType, SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { Operator } from '../operators/operator.js';
 
 class NotClass extends Operator {
-  declare _expression: Serializable;
+  declare _expression: SqlElement;
 
   get _type(): SerializationType {
     return SerializationType.NEGATIVE_EXPRESSION;
@@ -19,12 +19,12 @@ class NotClass extends Operator {
 }
 
 interface NotCtor {
-  new (expression: Serializable): Not;
-  (expression: Serializable): Not;
+  new (expression: SqlElement): Not;
+  (expression: SqlElement): Not;
   prototype: Not;
 }
 
-export const Not = function (this: Not, expression: Serializable) {
+export const Not = function (this: Not, expression: SqlElement) {
   if (!(this instanceof Not)) return new Not(expression);
   Operator.call(this);
   this._operatorType = OperatorType.not;

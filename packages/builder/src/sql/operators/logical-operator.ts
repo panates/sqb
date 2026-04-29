@@ -1,7 +1,7 @@
 import isPlainObject from 'putil-isplainobject';
 import { SerializationType } from '../../enums.js';
 import { printArray } from '../../helpers.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import {
   isCompOperator,
@@ -15,7 +15,7 @@ import { Operator } from './operator.js';
 const COMPARE_LEFT_PATTERN = /^([\w\\.$]+(?:\[])?) *(.*)$/;
 
 export interface LogicalOperator extends Operator {
-  _items: Serializable[];
+  _items: SqlElement[];
 
   add(...expressions: (LogicalOperator | any)[]): this;
   _serialize(ctx: SerializeContext): string;
@@ -27,9 +27,9 @@ interface LogicalOperatorCtor {
   prototype: LogicalOperator;
 }
 
-function wrapObject(obj: any): Serializable[] {
+function wrapObject(obj: any): SqlElement[] {
   const registeredOperators = (LogicalOperator as any).Operators;
-  const result: Serializable[] = [];
+  const result: SqlElement[] = [];
   for (const n of Object.getOwnPropertyNames(obj)) {
     let fn: Function;
     const v = obj[n];

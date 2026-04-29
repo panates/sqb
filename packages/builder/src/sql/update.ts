@@ -1,6 +1,6 @@
 import { SerializationType } from '../enums.js';
 import { printArray } from '../helpers.js';
-import { Serializable } from '../serializable.js';
+import { SqlElement } from '../serializable.js';
 import { SerializeContext } from '../serialize-context.js';
 import { isRaw } from '../type-guards.js';
 import { Raw } from './elements/raw.js';
@@ -112,7 +112,7 @@ export const Update = function (
     !input ||
     !(
       (typeof input === 'object' && !Array.isArray(input)) ||
-      (input instanceof Serializable &&
+      (input instanceof SqlElement &&
         (input._type === SerializationType.SELECT_QUERY ||
           input._type === SerializationType.RAW))
     )

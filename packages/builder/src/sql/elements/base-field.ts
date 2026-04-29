@@ -1,7 +1,7 @@
 import { DataType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 
-export interface BaseField extends Serializable {
+export interface BaseField extends SqlElement {
   _dataType?: DataType;
   _isArray?: boolean;
   _isDataSet?: boolean;
@@ -22,9 +22,9 @@ export const BaseField = function (this: BaseField) {
   if (this.constructor === BaseField) {
     throw new TypeError('BaseField is abstract and cannot be instantiated');
   }
-  Serializable.call(this);
+  SqlElement.call(this);
   this._field = '';
 } as BaseFieldCtor;
 
-BaseField.prototype = Object.create(Serializable.prototype);
+BaseField.prototype = Object.create(SqlElement.prototype);
 BaseField.prototype.constructor = BaseField;

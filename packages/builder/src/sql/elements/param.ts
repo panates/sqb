@@ -1,9 +1,9 @@
 import { DataType, SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import type { ParamOptions } from '../../types.js';
 
-class ParamClass extends Serializable {
+class ParamClass extends SqlElement {
   _name!: string;
   _dataType?: DataType;
   _isArray?: boolean;
@@ -71,7 +71,7 @@ export const Param = function (this: Param, ...varArgs: any[]) {
     if (varArgs.length > 2) args.isArray = varArgs[2];
   }
   if (!(this instanceof Param)) return new Param(args);
-  Serializable.call(this);
+  SqlElement.call(this);
   this._name = args.name;
   this._dataType = args.dataType;
   this._isArray = args.isArray;

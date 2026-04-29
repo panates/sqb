@@ -1,8 +1,8 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
-class CoalesceClass extends Serializable {
+class CoalesceClass extends SqlElement {
   _expressions!: any[];
   _alias?: string;
 
@@ -55,7 +55,7 @@ interface CoalesceCtor {
 
 export const Coalesce = function (this: Coalesce, ...expressions: any[]) {
   if (!(this instanceof Coalesce)) return new Coalesce(...expressions);
-  Serializable.call(this);
+  SqlElement.call(this);
   this._expressions = expressions;
 } as CoalesceCtor;
 

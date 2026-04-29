@@ -1,19 +1,19 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { Like } from './like.js';
 
 class NotLikeClass extends Like {}
 
 interface NotLikeCtor {
-  new (left: string | Serializable, right?: string | Serializable): NotLike;
-  (left: string | Serializable, right?: string | Serializable): NotLike;
+  new (left: string | SqlElement, right?: string | SqlElement): NotLike;
+  (left: string | SqlElement, right?: string | SqlElement): NotLike;
   prototype: NotLike;
 }
 
 export const NotLike = function (
   this: NotLike,
-  left: string | Serializable,
-  right?: string | Serializable,
+  left: string | SqlElement,
+  right?: string | SqlElement,
 ) {
   if (!(this instanceof NotLike)) return new NotLike(left, right);
   Like.call(this, left, right);

@@ -1,13 +1,13 @@
 import { EventEmitter } from 'events';
 import flattenText from 'putil-flattentext';
 import merge from 'putil-merge';
-import { Serializable } from '../serializable.js';
+import { SqlElement } from '../serializable.js';
 import { SerializeContext } from '../serialize-context.js';
 import type { GenerateOptions, GenerateResult } from '../types.js';
 
 declare interface QueryClass extends EventEmitter {}
 
-class QueryClass extends Serializable {
+class QueryClass extends SqlElement {
   declare protected _comment: Query.Comment[];
   declare protected _params?: Record<string, any>;
 
@@ -79,7 +79,7 @@ export const Query = function (this: Query) {
   if (this.constructor === Query) {
     throw new TypeError('Query is abstract and cannot be instantiated');
   }
-  Serializable.call(this);
+  SqlElement.call(this);
   EventEmitter.call(this);
   this._comment = [];
 } as QueryCtor;

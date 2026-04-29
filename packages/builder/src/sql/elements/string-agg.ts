@@ -1,14 +1,14 @@
 import { SerializationType } from '../../enums.js';
 import { printArray } from '../../helpers.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { Field } from './field.js';
 import { OrderColumn } from './order-column.js';
 
-class StringAggClass extends Serializable {
-  _field!: Serializable;
+class StringAggClass extends SqlElement {
+  _field!: SqlElement;
   _delimiter!: string;
-  _orderBy?: (OrderColumn | Serializable)[];
+  _orderBy?: (OrderColumn | SqlElement)[];
   _alias?: string;
 
   get _type(): SerializationType {
@@ -23,7 +23,7 @@ class StringAggClass extends Serializable {
   /**
    * Defines "order by" part of StringAGG.
    */
-  orderBy(...field: (string | Serializable)[]): this {
+  orderBy(...field: (string | SqlElement)[]): this {
     this._orderBy = this._orderBy || [];
     for (const arg of field) {
       if (!arg) continue;
@@ -88,18 +88,18 @@ class StringAggClass extends Serializable {
 }
 
 interface StringAggCtor {
-  new (field: string | Serializable, delimiter?: string): StringAgg;
-  (field: string | Serializable, delimiter?: string): StringAgg;
+  new (field: string | SqlElement, delimiter?: string): StringAgg;
+  (field: string | SqlElement, delimiter?: string): StringAgg;
   prototype: StringAgg;
 }
 
 export const StringAgg = function (
   this: StringAgg,
-  field: string | Serializable,
+  field: string | SqlElement,
   delimiter?: string,
 ) {
   if (!(this instanceof StringAgg)) return new StringAgg(field, delimiter);
-  Serializable.call(this);
+  SqlElement.call(this);
   this._field = typeof field === 'string' ? new Field(field) : field;
   this._delimiter = delimiter || ',';
 } as StringAggCtor;

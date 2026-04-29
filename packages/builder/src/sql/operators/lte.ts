@@ -1,18 +1,18 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { CompOperator } from './comp-operator.js';
 
 class LteClass extends CompOperator {}
 
 interface LteCtor {
-  new (left: string | Serializable, right?: any): Lte;
-  (left: string | Serializable, right?: any): Lte;
+  new (left: string | SqlElement, right?: any): Lte;
+  (left: string | SqlElement, right?: any): Lte;
   prototype: Lte;
 }
 
 export const Lte = function (
   this: Lte,
-  left: string | Serializable,
+  left: string | SqlElement,
   right?: any,
 ) {
   if (!(this instanceof Lte)) return new Lte(left, right);

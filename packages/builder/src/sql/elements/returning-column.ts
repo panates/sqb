@@ -1,5 +1,5 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { BaseField } from './base-field.js';
 
@@ -37,7 +37,7 @@ interface ReturningColumnCtor {
 
 export const ReturningColumn = function (this: ReturningColumn, field: string) {
   if (!(this instanceof ReturningColumn)) return new ReturningColumn(field);
-  Serializable.call(this);
+  SqlElement.call(this);
   const m = field.match(RETURNING_COLUMN_PATTERN);
   if (!m)
     throw new TypeError(`"${field}" does not match returning column format`);

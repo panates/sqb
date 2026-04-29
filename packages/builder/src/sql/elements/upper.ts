@@ -1,8 +1,8 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
-class UpperClass extends Serializable {
+class UpperClass extends SqlElement {
   _expression: any;
   _alias?: string;
 
@@ -44,7 +44,7 @@ interface UpperCtor {
 
 export const Upper = function (this: Upper, expression: any) {
   if (!(this instanceof Upper)) return new Upper(expression);
-  Serializable.call(this);
+  SqlElement.call(this);
   this._expression = expression;
 } as UpperCtor;
 

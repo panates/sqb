@@ -1,5 +1,5 @@
 import { OperatorType } from '../../enums.js';
-import type { Serializable } from '../../serializable.js';
+import type { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { CompOperator } from './comp-operator.js';
 
@@ -34,16 +34,16 @@ class BetweenClass extends CompOperator {
 }
 
 interface BetweenCtor {
-  new (left: string | Serializable, right: any[] | Serializable): Between;
-  new (left: string | Serializable, right1: any, right2: any): Between;
-  (left: string | Serializable, right: any[] | Serializable): Between;
-  (left: string | Serializable, right1: any, right2: any): Between;
+  new (left: string | SqlElement, right: any[] | SqlElement): Between;
+  new (left: string | SqlElement, right1: any, right2: any): Between;
+  (left: string | SqlElement, right: any[] | SqlElement): Between;
+  (left: string | SqlElement, right1: any, right2: any): Between;
   prototype: Between;
 }
 
 export const Between = function (
   this: Between,
-  left: string | Serializable,
+  left: string | SqlElement,
   right1: any,
   right2: any,
 ) {

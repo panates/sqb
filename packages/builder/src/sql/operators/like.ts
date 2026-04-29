@@ -1,5 +1,5 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { CompOperator } from './comp-operator.js';
 
@@ -15,15 +15,15 @@ class LikeClass extends CompOperator {
 }
 
 interface LikeCtor {
-  new (left: string | Serializable, right?: string | Serializable): Like;
-  (left: string | Serializable, right?: string | Serializable): Like;
+  new (left: string | SqlElement, right?: string | SqlElement): Like;
+  (left: string | SqlElement, right?: string | SqlElement): Like;
   prototype: Like;
 }
 
 export const Like = function (
   this: Like,
-  left: string | Serializable,
-  right?: string | Serializable,
+  left: string | SqlElement,
+  right?: string | SqlElement,
 ) {
   if (!(this instanceof Like)) return new Like(left, right);
   CompOperator.call(this, left, right);
