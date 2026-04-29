@@ -1,8 +1,8 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
-class MaxClass extends Serializable {
+class MaxClass extends SqlElement {
   _expression: any;
   _alias?: string;
 
@@ -45,7 +45,7 @@ interface MaxCtor {
 
 export const Max = function (this: Max, expression: any) {
   if (!(this instanceof Max)) return new Max(expression);
-  Serializable.call(this);
+  SqlElement.call(this);
   this._expression = expression;
 } as MaxCtor;
 

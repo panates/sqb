@@ -1,8 +1,8 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
-class MinClass extends Serializable {
+class MinClass extends SqlElement {
   _expression: any;
   _alias?: string;
 

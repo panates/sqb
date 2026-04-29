@@ -1,18 +1,18 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { Is } from './is.js';
 
 class IsNotClass extends Is {}
 
 interface IsNotCtor {
-  new (left: string | Serializable, right?: any): IsNot;
-  (left: string | Serializable, right?: any): IsNot;
+  new (left: string | SqlElement, right?: any): IsNot;
+  (left: string | SqlElement, right?: any): IsNot;
   prototype: IsNot;
 }
 
 export const IsNot = function (
   this: IsNot,
-  left: string | Serializable,
+  left: string | SqlElement,
   right?: any,
 ) {
   if (!(this instanceof IsNot)) return new IsNot(left, right);

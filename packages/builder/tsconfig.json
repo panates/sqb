@@ -6,6 +6,6 @@
     "composite": true,
     "incremental": true,
     "rootDir": "src",
-    "outDir": "./build",
+    "outDir": "./build"
   }
 }

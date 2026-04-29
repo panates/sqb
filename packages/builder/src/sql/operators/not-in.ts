@@ -1,18 +1,18 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { In } from './in.js';
 
 class NotInClass extends In {}
 
 interface NotInCtor {
-  new (left: string | Serializable, right: any[] | Serializable): NotIn;
-  (left: string | Serializable, right: any[] | Serializable): NotIn;
+  new (left: string | SqlElement, right: any[] | SqlElement): NotIn;
+  (left: string | SqlElement, right: any[] | SqlElement): NotIn;
   prototype: NotIn;
 }
 
 export const NotIn = function (
   this: NotIn,
-  left: string | Serializable,
+  left: string | SqlElement,
   right: any[],
 ) {
   if (!(this instanceof NotIn)) return new NotIn(left, right);

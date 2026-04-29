@@ -1,5 +1,5 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { BaseField } from './base-field.js';
 
@@ -41,7 +41,7 @@ interface OrderColumnCtor {
 
 export const OrderColumn = function (this: OrderColumn, value: string) {
   if (!(this instanceof OrderColumn)) return new OrderColumn(value);
-  Serializable.call(this);
+  SqlElement.call(this);
   const m = value.match(ORDER_COLUMN_PATTERN);
   if (!m) throw new TypeError(`"${value}" does not match order column format`);
   this._field = m[3];

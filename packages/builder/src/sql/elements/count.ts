@@ -1,8 +1,8 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
-class CountClass extends Serializable {
+class CountClass extends SqlElement {
   _alias?: string;
 
   get _type(): SerializationType {
@@ -49,7 +49,7 @@ interface CountCtor {
 
 export const Count = function (this: Count) {
   if (!(this instanceof Count)) return new Count();
-  Serializable.call(this);
+  SqlElement.call(this);
 } as CountCtor;
 
 Count.prototype = CountClass.prototype;

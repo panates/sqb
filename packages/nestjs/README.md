@@ -49,7 +49,7 @@ All environment variables starts with prefix (SQB\_). This can be configured whi
 <!--- BEGIN env --->
 
 | Environment Variable         | Type    | Default | Description                                           |
-|------------------------------|---------|---------|-------------------------------------------------------|
+| ---------------------------- | ------- | ------- | ----------------------------------------------------- |
 | SQB_DIALECT                  | String  |         | Database dialect (e.g. postgres, mysql, oracle)       |
 | SQB_CONNECTION_NAME          | String  |         | Logical name of the database connection               |
 | SQB_HOST                     | String  |         | Database server host address                          |
@@ -93,4 +93,3 @@ SQB is available under [MIT](LICENSE) license.
 [devdependencies-url]: https://david-dm.org/sqbjs/@sqb/nestjs?type=dev
 [quality-image]: http://npm.packagequality.com/shield/@sqb/nestjs.png
 [quality-url]: http://packagequality.com/#?package=@sqb/nestjs
-

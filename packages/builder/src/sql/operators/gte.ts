@@ -1,18 +1,18 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { CompOperator } from './comp-operator.js';
 
 class GteClass extends CompOperator {}
 
 interface GteCtor {
-  new (left: string | Serializable, right?: any): Gte;
-  (left: string | Serializable, right?: any): Gte;
+  new (left: string | SqlElement, right?: any): Gte;
+  (left: string | SqlElement, right?: any): Gte;
   prototype: Gte;
 }
 
 export const Gte = function (
   this: Gte,
-  left: string | Serializable,
+  left: string | SqlElement,
   right?: any,
 ) {
   if (!(this instanceof Gte)) return new Gte(left, right);

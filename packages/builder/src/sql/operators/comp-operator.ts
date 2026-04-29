@@ -1,5 +1,5 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { Field, Param } from '../elements/index.js';
 import { Operator } from './operator.js';
@@ -7,8 +7,8 @@ import { Operator } from './operator.js';
 const EXPRESSION_PATTERN = /^([\w\\.$]+)(\[])?/;
 
 class CompOperatorClass extends Operator {
-  _left!: Serializable | string;
-  _right?: any | Serializable;
+  _left!: SqlElement | string;
+  _right?: any | SqlElement;
   _symbol?: string;
   _isArray?: boolean;
 
@@ -31,11 +31,11 @@ class CompOperatorClass extends Operator {
 
   __serializeItem(
     ctx: SerializeContext,
-    x: string | Serializable,
+    x: string | SqlElement,
     left?: any,
   ): any {
     const isRight = !!left;
-    if (ctx.strictParams && !(x instanceof Serializable) && isRight) {
+    if (ctx.strictParams && !(x instanceof SqlElement) && isRight) {
       ctx.strictParamGenId = ctx.strictParamGenId || 0;
       const name = 'P$_' + ++ctx.strictParamGenId;
       ctx.params = ctx.params || {};
@@ -47,7 +47,7 @@ class CompOperatorClass extends Operator {
       });
     }
 
-    if (x instanceof Serializable) {
+    if (x instanceof SqlElement) {
       const expression = ctx.anyToSQL(x);
       const result: any = {
         expression,
@@ -87,14 +87,14 @@ class CompOperatorClass extends Operator {
 }
 
 interface CompOperatorCtor {
-  new (left: string | Serializable, right?: any): CompOperator;
-  (left: string | Serializable, right?: any): CompOperator;
+  new (left: string | SqlElement, right?: any): CompOperator;
+  (left: string | SqlElement, right?: any): CompOperator;
   prototype: CompOperator;
 }
 
 export const CompOperator = function (
   this: CompOperator,
-  left: string | Serializable,
+  left: string | SqlElement,
   right?: any,
 ) {
   if (!(this instanceof CompOperator)) return new CompOperator(left, right);

@@ -1,5 +1,5 @@
 import { SerializationType } from './enums.js';
-import type { Serializable } from './serializable.js';
+import type { SqlElement } from './serializable.js';
 import type {
   Case,
   CompOperator,
@@ -20,8 +20,13 @@ import type {
   Update,
 } from './sql/index.js';
 
-export function isSerializable(value: any): value is Serializable {
+export function isSqlElement(value: any): value is SqlElement {
   return typeof value === 'object' && typeof value._serialize === 'function';
+}
+
+/* Backward compatibility */
+export function isSerializable(value: any): value is SqlElement {
+  return isSqlElement(value);
 }
 
 export function isQuery(value: any): value is Query {

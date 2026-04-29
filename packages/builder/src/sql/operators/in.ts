@@ -1,5 +1,5 @@
 import { OperatorType } from '../../enums.js';
-import type { Serializable } from '../../serializable.js';
+import type { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { isSerializable } from '../../type-guards.js';
 import { CompOperator } from './comp-operator.js';
@@ -12,16 +12,12 @@ class InClass extends CompOperator {
 }
 
 interface InCtor {
-  new (left: string | Serializable, right: any[] | Serializable): In;
-  (left: string | Serializable, right: any[] | Serializable): In;
+  new (left: string | SqlElement, right: any[] | SqlElement): In;
+  (left: string | SqlElement, right: any[] | SqlElement): In;
   prototype: In;
 }
 
-export const In = function (
-  this: In,
-  left: string | Serializable,
-  right: any[],
-) {
+export const In = function (this: In, left: string | SqlElement, right: any[]) {
   if (!(this instanceof In)) return new In(left, right);
   CompOperator.call(this, left, right);
   this._operatorType = OperatorType.in;

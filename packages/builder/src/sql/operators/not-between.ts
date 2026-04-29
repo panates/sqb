@@ -1,20 +1,20 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { Between } from './between.js';
 
 class NotBetweenClass extends Between {}
 
 interface NotBetweenCtor {
-  new (left: string | Serializable, right: any[] | Serializable): NotBetween;
-  new (left: string | Serializable, right1: any, right2: any): NotBetween;
-  (left: string | Serializable, right: any[] | Serializable): NotBetween;
-  (left: string | Serializable, right1: any, right2: any): NotBetween;
+  new (left: string | SqlElement, right: any[] | SqlElement): NotBetween;
+  new (left: string | SqlElement, right1: any, right2: any): NotBetween;
+  (left: string | SqlElement, right: any[] | SqlElement): NotBetween;
+  (left: string | SqlElement, right1: any, right2: any): NotBetween;
   prototype: NotBetween;
 }
 
 export const NotBetween = function (
   this: NotBetween,
-  left: string | Serializable,
+  left: string | SqlElement,
   right1: any,
   right2: any,
 ) {

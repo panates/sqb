@@ -1,20 +1,20 @@
 import { OperatorType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { CompOperator } from './comp-operator.js';
 import { Like } from './like.js';
 
 class ILikeClass extends Like {}
 
 interface ILikeCtor {
-  new (left: string | Serializable, right?: string | Serializable): ILike;
-  (left: string | Serializable, right?: string | Serializable): ILike;
+  new (left: string | SqlElement, right?: string | SqlElement): ILike;
+  (left: string | SqlElement, right?: string | SqlElement): ILike;
   prototype: ILike;
 }
 
 export const ILike = function (
   this: ILike,
-  left: string | Serializable,
-  right?: string | Serializable,
+  left: string | SqlElement,
+  right?: string | SqlElement,
 ) {
   if (!(this instanceof ILike)) return new ILike(left, right);
   CompOperator.call(this, left, right);

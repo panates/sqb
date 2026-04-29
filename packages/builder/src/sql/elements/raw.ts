@@ -1,8 +1,8 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
-class RawClass extends Serializable {
+class RawClass extends SqlElement {
   _text!: string;
 
   get _type(): SerializationType {
@@ -22,7 +22,7 @@ interface RawCtor {
 
 export const Raw = function (this: Raw, str: string) {
   if (!(this instanceof Raw)) return new Raw(str);
-  Serializable.call(this);
+  SqlElement.call(this);
   this._text = str;
 } as RawCtor;
 

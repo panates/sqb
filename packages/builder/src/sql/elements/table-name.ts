@@ -1,8 +1,8 @@
 import { SerializationType } from '../../enums.js';
-import { Serializable } from '../../serializable.js';
+import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
-class TableNameClass extends Serializable {
+class TableNameClass extends SqlElement {
   schema?: string;
   table?: string;
   alias?: string;
@@ -40,7 +40,7 @@ export const TableName = function (
   tableName: string | TableName.Args,
 ) {
   if (!(this instanceof TableName)) return new TableName(tableName);
-  Serializable.call(this);
+  SqlElement.call(this);
   if (typeof tableName === 'string') {
     const m = tableName.match(
       /^(?:([a-zA-Z][\w$]*)\.)? *([a-zA-Z][\w$]*) *(?:as)? *(\w+)?$/,

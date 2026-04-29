@@ -172,7 +172,7 @@ describe('builder:serialize "Operators"', () => {
       expect(result.sql).toStrictEqual('select * from table1 where id = 1');
     });
 
-    it('should use Serializable as first arg', () => {
+    it('should use SqlElement as first arg', () => {
       const query = Select()
         .from('table1')
         .where(Eq(Raw('id'), 1));
@@ -226,7 +226,7 @@ describe('builder:serialize "Operators"', () => {
       expect(result.sql).toStrictEqual('select * from table1 where id != 1');
     });
 
-    it('should use Serializable as first arg', () => {
+    it('should use SqlElement as first arg', () => {
       const query = Select()
         .from('table1')
         .where(Ne(Raw('id'), 1));

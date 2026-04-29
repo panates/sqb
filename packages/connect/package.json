@@ -1,7 +1,7 @@
 {
   "name": "@sqb/connect",
   "description": "Multi-dialect database connection framework written with TypeScript",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -33,7 +33,7 @@
     "putil-promisify": "^1.10.1",
     "putil-varhelpers": "^1.7.0",
     "strict-typed-events": "^2.8.0",
-    "ts-gems": "^3.11.6",
+    "ts-gems": "^3.12.0",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
@@ -44,7 +44,7 @@
     "postgrejs": "^2.23.0"
   },
   "peerDependencies": {
-    "@sqb/builder": "^5.0.0",
+    "@sqb/builder": "^5.0.1",
     "reflect-metadata": "^0.2.2"
   },
   "type": "module",
