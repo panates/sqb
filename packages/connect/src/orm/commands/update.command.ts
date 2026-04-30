@@ -1,4 +1,4 @@
-import { And, Param, TableName, Update } from '@sqb/builder';
+import { And, Param, SqlElement, TableName, Update } from '@sqb/builder';
 import type { SqbConnection } from '../../client/sqb-connection.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import type { Repository } from '../repository.class.js';
@@ -99,6 +99,11 @@ export class UpdateCommand {
       if (v === undefined) continue;
       if (isColumnField(col)) {
         if (col.noUpdate) continue;
+        const fieldName = prefix + col.fieldName + suffix;
+        if (v instanceof SqlElement) {
+          ctx.queryValues[fieldName] = v;
+          return;
+        }
         if (typeof col.serialize === 'function') v = col.serialize(v, col.name);
         if (v === null && col.notNull)
           throw new Error(
@@ -106,7 +111,6 @@ export class UpdateCommand {
           );
         if (v === undefined) continue;
         checkEnumValue(col, v);
-        const fieldName = prefix + col.fieldName + suffix;
         const k = ('I$_' + fieldName).substring(0, 30);
         ctx.queryValues[fieldName] = Param({
           name: k,
