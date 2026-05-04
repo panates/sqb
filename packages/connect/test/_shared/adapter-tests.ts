@@ -414,6 +414,9 @@ export function getInsertSQLsForTestData(opts: {
     'customer_vip_details',
     'tags',
     'customer_tags',
+    'parents',
+    'children',
+    'grandchildren',
   ].map(f =>
     JSON.parse(
       fs.readFileSync(

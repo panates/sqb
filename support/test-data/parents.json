@@ -1,0 +1,19 @@
+{
+  "name": "parents",
+  "fields": [
+    {
+      "fieldName": "id",
+      "dataType": "integer",
+      "jsType": "number"
+    },
+    {
+      "fieldName": "name",
+      "dataType": "varchar",
+      "jsType": "string"
+    }
+  ],
+  "rows": [
+    { "id": 1, "name": "Parent 1" },
+    { "id": 2, "name": "Parent 2" }
+  ]
+}

@@ -69,4 +69,26 @@ CREATE TABLE customer_tags
     PRIMARY KEY (customer_id, tag_id)
 );
 
+CREATE TABLE parents
+(
+    id INTEGER PRIMARY KEY,
+    name text
+);
+
+CREATE TABLE children
+(
+    id INTEGER PRIMARY KEY,
+    name text,
+    parent_id INTEGER,
+    FOREIGN KEY (parent_id) REFERENCES parents (id)
+);
+
+CREATE TABLE grandchildren
+(
+    id INTEGER PRIMARY KEY,
+    name text,
+    child_id INTEGER,
+    FOREIGN KEY (child_id) REFERENCES children (id)
+);
+
 `;
