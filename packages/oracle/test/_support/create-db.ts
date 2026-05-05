@@ -21,7 +21,13 @@ export const dbConfig: ClientConfiguration = {
 };
 
 // drop sequences
-for (const s of ['customers_id_seq', 'tags_id_seq']) {
+for (const s of [
+  'customers_id_seq',
+  'tags_id_seq',
+  'parents_id_seq',
+  'children_id_seq',
+  'grandchildren_id_seq',
+]) {
   sqls.push(`
 BEGIN
 EXECUTE IMMEDIATE 'DROP SEQUENCE ${schema}.${s}';
@@ -33,6 +39,9 @@ END;`);
 
 // drop tables
 for (const s of [
+  'grandchildren',
+  'children',
+  'parents',
   'customer_tags',
   'customer_details',
   'customer_vip_details',
@@ -208,6 +217,91 @@ ALTER TABLE ${schema}.customer_tags ADD CONSTRAINT FK_cust_tags_customer_id
   `
 ALTER TABLE ${schema}.customer_tags ADD CONSTRAINT FK_cust_tags_tag_id
  FOREIGN KEY (tag_id) REFERENCES ${schema}.tags (id)`,
+);
+
+sqls.push(
+  `
+CREATE TABLE ${schema}.parents
+(
+  id    INTEGER not null,
+  name  VARCHAR2(64)
+)`,
+  `
+ALTER TABLE ${schema}.parents ADD CONSTRAINT pk_parents PRIMARY KEY (id)
+`,
+  `
+CREATE SEQUENCE ${schema}.parents_id_seq START WITH 1
+`,
+  `
+CREATE OR REPLACE TRIGGER ${schema}.parents_bi
+BEFORE INSERT ON ${schema}.parents
+FOR EACH ROW
+BEGIN
+  if :new.id is null then
+      select ${schema}.parents_id_seq.nextval into :new.id from dual;
+  end if;
+END;
+`,
+);
+
+sqls.push(
+  `
+CREATE TABLE ${schema}.children
+(
+  id        INTEGER not null,
+  name      VARCHAR2(64),
+  parent_id INTEGER
+)`,
+  `
+ALTER TABLE ${schema}.children ADD CONSTRAINT pk_children PRIMARY KEY (id)
+`,
+  `
+ALTER TABLE ${schema}.children ADD CONSTRAINT fk_children_parent_id
+  FOREIGN KEY (parent_id) REFERENCES ${schema}.parents (id)
+`,
+  `
+CREATE SEQUENCE ${schema}.children_id_seq START WITH 1
+`,
+  `
+CREATE OR REPLACE TRIGGER ${schema}.children_bi
+BEFORE INSERT ON ${schema}.children
+FOR EACH ROW
+BEGIN
+  if :new.id is null then
+      select ${schema}.children_id_seq.nextval into :new.id from dual;
+  end if;
+END;
+`,
+);
+
+sqls.push(
+  `
+CREATE TABLE ${schema}.grandchildren
+(
+  id       INTEGER not null,
+  name     VARCHAR2(64),
+  child_id INTEGER
+)`,
+  `
+ALTER TABLE ${schema}.grandchildren ADD CONSTRAINT pk_grandchildren PRIMARY KEY (id)
+`,
+  `
+ALTER TABLE ${schema}.grandchildren ADD CONSTRAINT fk_grandchildren_child_id
+  FOREIGN KEY (child_id) REFERENCES ${schema}.children (id)
+`,
+  `
+CREATE SEQUENCE ${schema}.grandchildren_id_seq START WITH 1
+`,
+  `
+CREATE OR REPLACE TRIGGER ${schema}.grandchildren_bi
+BEFORE INSERT ON ${schema}.grandchildren
+FOR EACH ROW
+BEGIN
+  if :new.id is null then
+      select ${schema}.grandchildren_id_seq.nextval into :new.id from dual;
+  end if;
+END;
+`,
 );
 
 export async function createTestSchema() {

@@ -2,6 +2,7 @@ import { DataType } from '@sqb/builder';
 import type { Type } from 'ts-gems';
 import type { FieldInfoMap } from '../../client/field-info-map.js';
 import type { SqbConnection } from '../../client/sqb-connection.js';
+import { FieldInfo } from '../../client/types.js';
 import type { ColumnTransformFunction } from '../orm.type.js';
 import type { Repository } from '../repository.class.js';
 import type { FindCommand } from './find.command.js';
@@ -119,7 +120,7 @@ export class RowConverter {
 
     await this._iterateForNested(this, connection, fields, rows, result);
 
-    // Return only non empty objects
+    // Return only non-empty objects
     return result.filter(x => !!x);
   }
 
@@ -184,64 +185,67 @@ export class RowConverter {
       if (isNestedProperty(prop)) {
         if (!(prop.paramValues && prop.paramValues.length)) continue;
         const resultType = this.resultType;
-        const promise = (async function (p: NestedProperty) {
-          const findCommand = p.findCommand;
-          let fld;
-          const map = new Map<any, any[]>();
-          const r = await findCommand.execute({
-            connection,
-            limit: findCommand.maxEagerFetch + 1,
-            params: { [p.parentField]: p.paramValues },
-            onTransformRow: (_fields, row, obj) => {
-              fld = fld || _fields.get('' + p.keyField);
-              const keyValue = fld && row[fld.index];
-              if (keyValue != null) {
-                const keyValues = Array.isArray(keyValue)
-                  ? keyValue
-                  : [keyValue];
-                keyValues.forEach(k => {
-                  let arr = map.get(k);
-                  if (!arr) {
-                    arr = [];
-                    map.set(k, arr);
-                  }
-                  arr.push(obj);
-                });
-              }
-            },
-          });
-          if (r.length > findCommand.maxEagerFetch) {
-            throw new Error(
-              `Number of returning rows for "${propKey}" exceeds maxEagerFetch limit`,
-            );
-          }
+        const promise = Promise.resolve(prop).then(
+          async (p: NestedProperty) => {
+            const findCommand = p.findCommand;
+            let fld: FieldInfo;
+            const map = new Map<any, any[]>();
+            const r = await findCommand.execute({
+              connection,
+              limit: findCommand.maxEagerFetch + 1,
+              params: { [p.parentField]: p.paramValues },
+              onTransformRow: (_fields, row, obj) => {
+                fld = fld || _fields.get('' + p.keyField);
+                const keyValue = fld && row[fld.index];
+                if (keyValue != null) {
+                  const keyValues = Array.isArray(keyValue)
+                    ? keyValue
+                    : [keyValue];
+                  keyValues.forEach(k => {
+                    let arr = map.get(k);
+                    if (!arr) {
+                      arr = [];
+                      map.set(k, arr);
+                    }
+                    arr.push(obj);
+                  });
+                }
+              },
+            });
+            if (r.length > findCommand.maxEagerFetch) {
+              throw new Error(
+                `Number of returning rows for "${propKey}" exceeds maxEagerFetch limit`,
+              );
+            }
 
-          for (let i = 0; i < result.length; i++) {
-            const row = rows[i];
-            let obj = result[i];
-            if (!obj) {
-              obj = {};
-              Object.setPrototypeOf(result, resultType.prototype);
-            }
-            const f = fields.get('' + p.parentField);
-            const keyValue = f && row[f.index];
-            if (keyValue != null) {
-              const arr = map.get(keyValue);
-              if (arr) {
-                obj[propKey] = arr;
+            for (let i = 0; i < result.length; i++) {
+              const row = rows[i];
+              let obj = result[i];
+              if (!obj) {
+                obj = {};
+                Object.setPrototypeOf(result, resultType.prototype);
+              }
+              const f = fields.get('' + p.parentField);
+              const keyValue = f && row[f.index];
+              if (keyValue != null) {
+                const arr = map.get(keyValue);
+                if (arr) {
+                  obj[propKey] = arr;
+                }
               }
             }
-          }
-        })(prop);
+          },
+        );
         promises.push(promise);
       } else if (isObjectProperty(prop)) {
+        const subResult: any[] = result.map(r => r[propKey]).filter(x => x);
         promises.push(
           this._iterateForNested(
             prop.converter,
             connection,
             fields,
             rows,
-            result,
+            subResult,
           ),
         );
       }

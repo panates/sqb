@@ -116,6 +116,37 @@ CREATE TABLE ${schema}.customer_tags
         REFERENCES ${schema}.tags (id)
 );
 
+CREATE TABLE ${schema}.parents
+(
+    id SERIAL,
+    name character varying(64),
+    CONSTRAINT pk_parents PRIMARY KEY (id)
+);
+
+CREATE TABLE ${schema}.children
+(
+    id SERIAL,
+    name character varying(64),
+    parent_id int4,
+    CONSTRAINT pk_children PRIMARY KEY (id),
+    CONSTRAINT fk_children_parent_id FOREIGN KEY (parent_id)
+        REFERENCES ${schema}.parents (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+CREATE TABLE ${schema}.grandchildren
+(
+    id SERIAL,
+    name character varying(64),
+    child_id int4,
+    CONSTRAINT pk_grandchildren PRIMARY KEY (id),
+    CONSTRAINT fk_grandchildren_child_id FOREIGN KEY (child_id)
+        REFERENCES ${schema}.children (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
 CREATE TABLE ${schema}.data_types
 (
     id SERIAL NOT NULL,
