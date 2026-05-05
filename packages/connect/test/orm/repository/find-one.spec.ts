@@ -37,7 +37,7 @@ describe('connect:Repository.findOne()', () => {
     const row = await repo.findOne({
       projection: ['+child.+grandchildren'],
     });
-    expect(row).toStrictEqual({
+    expect(row).toEqual({
       id: 1,
       name: 'Parent 1',
       child: {

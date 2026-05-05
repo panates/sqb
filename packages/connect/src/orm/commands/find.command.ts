@@ -222,7 +222,7 @@ export class FindCommand {
             maxSubQueries: this.maxSubQueries - 1,
             maxEagerFetch: this.maxEagerFetch,
           });
-          findCommand.converter.parent = this.converter;
+          findCommand.converter.parent = converter;
           await findCommand.filter(In(targetCol.name, Param(parentField)));
           const sort = sortFields && extractSubFields(colNameLower, sortFields);
           await findCommand.addFields({
