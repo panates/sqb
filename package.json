@@ -23,7 +23,8 @@
     "qc": "rman run lint && rman run check",
     "lint": "rman run lint",
     "lint:fix": "rman run lint:fix",
-    "check": "rman run check"
+    "check": "rman run check",
+    "update-graph": "graphify update ."
   },
   "devDependencies": {
     "@panates/eslint-config": "^2.1.6",
