@@ -33,7 +33,7 @@
     "@sqb/postgres": "^5.0.3"
   },
   "devDependencies": {
-    "expect": "^30.3.0",
+    "expect": "^30.4.1",
     "postgrejs": "^2.23.0"
   },
   "type": "module",
