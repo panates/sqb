@@ -23,7 +23,8 @@
     "qc": "rman run lint && rman run check",
     "lint": "rman run lint",
     "lint:fix": "rman run lint:fix",
-    "check": "rman run check"
+    "check": "rman run check",
+    "update-graph": "graphify update ."
   },
   "devDependencies": {
     "@panates/eslint-config": "^2.1.6",
@@ -33,13 +34,13 @@
     "@swc/core": "^1.15.33",
     "@swc/helpers": "^0.5.21",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.9.1",
     "@types/sinon": "^21.0.1",
     "c8": "^11.0.0",
     "globals": "^17.6.0",
-    "dpdm": "^4.0.1",
+    "dpdm": "^4.2.0",
     "mocha": "^11.7.5",
-    "npm-check-updates": "^22.1.0",
+    "npm-check-updates": "^22.2.0",
     "postgrejs": "^2.23.0",
     "prettier": "^3.8.3",
     "rimraf": "^6.1.3",
