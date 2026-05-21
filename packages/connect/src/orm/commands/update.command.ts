@@ -102,7 +102,7 @@ export class UpdateCommand {
         const fieldName = prefix + col.fieldName + suffix;
         if (v instanceof SqlElement) {
           ctx.queryValues[fieldName] = v;
-          return;
+          continue;
         }
         if (typeof col.serialize === 'function') v = col.serialize(v, col.name);
         if (v === null && col.notNull)
