@@ -30,9 +30,9 @@
     "oracledb": ">= 6.4.0"
   },
   "devDependencies": {
-    "@types/oracledb": "^6.10.4",
+    "@types/oracledb": "^7.0.1",
     "expect": "^30.4.1",
-    "oracledb": "^6.6.0"
+    "oracledb": "^7.0.0"
   },
   "type": "module",
   "module": "./index.js",
