@@ -137,7 +137,26 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
   ): Promise<any> {
     if (!this._intlcon)
       throw new Error(`Can't execute query, because connection is released`);
-    return this._tasks.enqueue(() => this._execute(query, options)).toPromise();
+    try {
+      return await this._tasks
+        .enqueue(() => this._execute(query, options))
+        .toPromise();
+    } catch (err: any) {
+      if (err.stack)
+        err.stack = err.stack
+          .split('\n')
+          .filter(
+            (line: string) =>
+              !(
+                line.includes('/power-tasks/') ||
+                line.includes(':internal') ||
+                line.includes('Task._executeFn') ||
+                line.includes('SqbConnection._')
+              ),
+          )
+          .join('\n');
+      throw err;
+    }
   }
 
   getRepository<T>(
