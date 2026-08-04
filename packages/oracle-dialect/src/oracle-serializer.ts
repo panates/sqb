@@ -253,6 +253,10 @@ export class OracleSerializer implements SerializerExtension {
         ctx.preparedParams[o.name] = toDateString(v).replace('T', ' ');
         return `TO_DATE(:${o.name}, 'yyyy-mm-dd hh24:mi:ss.SSSSS')`;
       }
+      if (Array.isArray(v)) {
+        delete ctx.params?.[o.name];
+        return ctx.anyToSQL(v);
+      }
     }
     return defFn(ctx, o);
   }
