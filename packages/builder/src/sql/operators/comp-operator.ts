@@ -25,6 +25,8 @@ class CompOperatorClass extends Operator {
       symbol: this._symbol,
       left,
       right,
+      orgLeft: this._left,
+      orgRight: this._right,
     };
     return this.__serialize(ctx, o);
   }
@@ -62,7 +64,7 @@ class CompOperatorClass extends Operator {
           value = [value];
         result.value = value;
         result.isArray = x._isArray || Array.isArray(value);
-        result.isParam = true;
+        result.isParam = ctx.params?.[x._name] != undefined;
       }
       return result;
     }

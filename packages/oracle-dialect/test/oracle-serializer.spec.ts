@@ -104,7 +104,7 @@ describe('oracle-dialect:OracleSerializer', () => {
       expect(result.params).toStrictEqual({ ID: 5 });
     });
 
-    it('Should serialize array parameter in "in" operator', () => {
+    it('Should serialize array parameter with "in" operator', () => {
       const query = Select()
         .from('table1')
         .where(Eq('ID', Param('ID')));
@@ -115,7 +115,7 @@ describe('oracle-dialect:OracleSerializer', () => {
       expect(result.sql).toStrictEqual(
         'select * from table1 where ID in (1,2,3)',
       );
-      expect(result.params).toStrictEqual({});
+      expect(result.params).not.toBeDefined();
     });
 
     it('should serialize index hint', () => {

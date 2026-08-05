@@ -116,29 +116,30 @@ export class OracleSerializer implements SerializerExtension {
     defFn: DefaultSerializeFunction,
   ): string {
     if (
-      o.right &&
-      o.right.expression?.startsWith(':') &&
-      Array.isArray(o.right?.value)
+      o.orgRight &&
+      typeof o.orgRight === 'object' &&
+      o.orgRight._type === SerializationType.EXTERNAL_PARAMETER
     ) {
-      const s = o.right.expression.substring(1);
-      if (ctx.params) delete ctx.params[s];
-      if (ctx.preparedParams) delete ctx.preparedParams[s];
-      if (ctx.paramOptions) delete ctx.paramOptions[s];
-      o.right.expression = ctx.anyToSQL(o.right.value);
-      o.right.isParam = false;
-      if (o.operatorType === 'eq')
-        return defFn(ctx, {
-          ...o,
-          operatorType: OperatorType.is,
-          symbol: 'in',
-        });
-      if (o.operatorType === 'ne')
-        return defFn(ctx, {
-          ...o,
-          operatorType: OperatorType.isNot,
-          symbol: 'not in',
-        });
-    } else if (
+      const n = o.orgRight._name;
+      const v = ctx.orgParams?.[n];
+      if (Array.isArray(v)) {
+        o.right.isParam = false;
+        if (o.operatorType === 'eq')
+          return defFn(ctx, {
+            ...o,
+            operatorType: OperatorType.in,
+            symbol: 'in',
+          });
+        if (o.operatorType === 'ne')
+          return defFn(ctx, {
+            ...o,
+            operatorType: OperatorType.notIn,
+            symbol: 'not in',
+          });
+      }
+    }
+
+    if (
       (o.right?.expression && o.right?.expression === 'null') ||
       (o.right &&
         o.right?.value == null &&

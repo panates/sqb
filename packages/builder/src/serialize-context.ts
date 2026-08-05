@@ -72,6 +72,7 @@ export class SerializeContext implements GenerateOptions {
   dialect?: string;
   prettyPrint?: boolean;
   params?: Record<string, any>;
+  orgParams?: Record<string, any>;
   dialectVersion?: string;
   strictParams?: boolean;
   serializeHooks?: Function[];
