@@ -17,6 +17,7 @@ class QueryClass extends SqlElement {
   generate(options?: GenerateOptions): GenerateResult {
     const ctx = new SerializeContext(this, options);
     if (this._params) ctx.params = { ...ctx.params, ...this._params };
+    ctx.orgParams = { ...ctx.params };
     ctx.serializeHooks = this.listeners('serialize');
 
     /* generate output */

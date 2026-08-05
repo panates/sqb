@@ -1,4 +1,4 @@
-import { Query } from '@sqb/builder';
+import { isQuery, Query } from '@sqb/builder';
 import assert from 'assert';
 import _debug from 'debug';
 import { TaskQueue } from 'power-tasks';
@@ -137,7 +137,26 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
   ): Promise<any> {
     if (!this._intlcon)
       throw new Error(`Can't execute query, because connection is released`);
-    return this._tasks.enqueue(() => this._execute(query, options)).toPromise();
+    try {
+      return await this._tasks
+        .enqueue(() => this._execute(query, options))
+        .toPromise();
+    } catch (err: any) {
+      if (err.stack)
+        err.stack = err.stack
+          .split('\n')
+          .filter(
+            (line: string) =>
+              !(
+                line.includes('/power-tasks/') ||
+                line.includes(':internal') ||
+                line.includes('Task._executeFn') ||
+                line.includes('SqbConnection._')
+              ),
+          )
+          .join('\n');
+      throw err;
+    }
   }
 
   getRepository<T>(
@@ -391,7 +410,7 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     };
     request.ignoreNulls = request.ignoreNulls && request.objectRows;
 
-    if (query instanceof Query) {
+    if (isQuery(query)) {
       if (this._intlcon.onGenerateQuery)
         this._intlcon.onGenerateQuery(request, query);
       const q = query.generate({

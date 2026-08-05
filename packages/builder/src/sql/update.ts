@@ -1,8 +1,7 @@
 import { SerializationType } from '../enums.js';
 import { printArray } from '../helpers.js';
-import { SqlElement } from '../serializable.js';
 import { SerializeContext } from '../serialize-context.js';
-import { isRaw } from '../type-guards.js';
+import { isRaw, isSelect, isTableName } from '../type-guards.js';
 import { Raw } from './elements/raw.js';
 import { TableName } from './elements/table-name.js';
 import { And } from './operators/and.js';
@@ -96,14 +95,12 @@ export const Update = function (
 ) {
   if (!(this instanceof Update)) return new Update(tableName, input);
   Query.call(this);
-  if (
-    !(
-      tableName &&
-      (tableName instanceof TableName ||
-        typeof tableName === 'string' ||
-        isRaw(tableName))
-    )
-  ) {
+  if (!(
+    tableName &&
+    (isTableName(tableName) ||
+      typeof tableName === 'string' ||
+      isRaw(tableName))
+  )) {
     throw new TypeError(
       'String or Raw instance required as first argument (tableName) for Update',
     );
@@ -112,21 +109,19 @@ export const Update = function (
     !input ||
     !(
       (typeof input === 'object' && !Array.isArray(input)) ||
-      (input instanceof SqlElement &&
-        (input._type === SerializationType.SELECT_QUERY ||
-          input._type === SerializationType.RAW))
+      isSelect(input) ||
+      isRaw(input)
     )
   ) {
     throw new TypeError(
       'Object or Raw instance required as second argument (input) for Update',
     );
   }
-  this._table =
-    tableName instanceof TableName
-      ? tableName
-      : typeof tableName === 'string'
-        ? new TableName(tableName)
-        : tableName;
+  this._table = isTableName(tableName)
+    ? tableName
+    : typeof tableName === 'string'
+      ? new TableName(tableName)
+      : tableName;
   this._input = input;
 } as UpdateCtor;
 

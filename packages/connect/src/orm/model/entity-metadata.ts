@@ -24,9 +24,7 @@ import type {
 import type { IndexMetadata } from './index-metadata.js';
 
 export type AnyFieldMetadata =
-  | ColumnFieldMetadata
-  | EmbeddedFieldMetadata
-  | AssociationFieldMetadata;
+  ColumnFieldMetadata | EmbeddedFieldMetadata | AssociationFieldMetadata;
 export type EntityOptions = Partial<
   Pick<EntityMetadata, 'name' | 'schema' | 'comment' | 'tableName'>
 >;

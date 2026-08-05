@@ -100,14 +100,12 @@ export const Join = function (
   if (!(this instanceof Join)) return new Join(joinType, table);
   SqlElement.call(this);
   // noinspection SuspiciousTypeOfGuard
-  if (
-    !(
-      isSelect(table) ||
-      isRaw(table) ||
-      isTableName(table) ||
-      typeof table === 'string'
-    )
-  ) {
+  if (!(
+    isSelect(table) ||
+    isRaw(table) ||
+    isTableName(table) ||
+    typeof table === 'string'
+  )) {
     throw new TypeError(
       'Table name, select query or raw object required for Join',
     );

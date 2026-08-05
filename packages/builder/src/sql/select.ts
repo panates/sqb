@@ -4,7 +4,7 @@ import { SerializationType } from '../enums.js';
 import { printArray } from '../helpers.js';
 import { SqlElement } from '../serializable.js';
 import { SerializeContext } from '../serialize-context.js';
-import { isJoin } from '../type-guards.js';
+import { isJoin, isSelect, isTableName } from '../type-guards.js';
 import { Field } from './elements/field.js';
 import { GroupColumn } from './elements/group-column.js';
 import { Join } from './elements/join.js';
@@ -67,7 +67,7 @@ class SelectClass extends Query {
     for (const arg of table) {
       if (!arg) continue;
       this._tables.push(
-        arg instanceof TableName
+        isTableName(arg)
           ? arg
           : typeof arg === 'string'
             ? new TableName(arg)
@@ -228,7 +228,7 @@ class SelectClass extends Query {
         const s = ctx.anyToSQL(t);
         // t._serialize(ctx);
         if (s) {
-          if (t instanceof SelectClass) {
+          if (isSelect(t)) {
             if (!t._alias)
               throw new TypeError('Alias required for sub-select in columns');
             arr.push(s + ' ' + t._alias);
@@ -253,7 +253,7 @@ class SelectClass extends Query {
         const s = t._serialize(ctx);
         /* istanbul ignore else */
         if (s) {
-          if (t instanceof SelectClass) {
+          if (isSelect(t)) {
             if (!t._alias)
               throw new TypeError('Alias required for sub-select in "from"');
             arr.push({

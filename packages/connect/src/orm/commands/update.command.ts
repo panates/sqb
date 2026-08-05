@@ -1,4 +1,4 @@
-import { And, Param, SqlElement, TableName, Update } from '@sqb/builder';
+import { And, isSqlElement, Param, TableName, Update } from '@sqb/builder';
 import type { SqbConnection } from '../../client/sqb-connection.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import type { Repository } from '../repository.class.js';
@@ -100,7 +100,7 @@ export class UpdateCommand {
       if (isColumnField(col)) {
         if (col.noUpdate) continue;
         const fieldName = prefix + col.fieldName + suffix;
-        if (v instanceof SqlElement) {
+        if (isSqlElement(v)) {
           ctx.queryValues[fieldName] = v;
           continue;
         }

@@ -1,5 +1,6 @@
 import {
   type DefaultSerializeFunction,
+  isParam,
   OperatorType,
   SerializationType,
   SerializeContext,
@@ -115,30 +116,27 @@ export class OracleSerializer implements SerializerExtension {
     o: any,
     defFn: DefaultSerializeFunction,
   ): string {
+    if (isParam(o.orgRight)) {
+      const n = o.orgRight._name;
+      const v = ctx.orgParams?.[n];
+      if (Array.isArray(v)) {
+        o.right.isParam = false;
+        if (o.operatorType === 'eq')
+          return defFn(ctx, {
+            ...o,
+            operatorType: OperatorType.in,
+            symbol: 'in',
+          });
+        if (o.operatorType === 'ne')
+          return defFn(ctx, {
+            ...o,
+            operatorType: OperatorType.notIn,
+            symbol: 'not in',
+          });
+      }
+    }
+
     if (
-      o.right &&
-      o.right.expression?.startsWith(':') &&
-      Array.isArray(o.right?.value)
-    ) {
-      const s = o.right.expression.substring(1);
-      if (ctx.params) delete ctx.params[s];
-      if (ctx.preparedParams) delete ctx.preparedParams[s];
-      if (ctx.paramOptions) delete ctx.paramOptions[s];
-      o.right.expression = ctx.anyToSQL(o.right.value);
-      o.right.isParam = false;
-      if (o.operatorType === 'eq')
-        return defFn(ctx, {
-          ...o,
-          operatorType: OperatorType.is,
-          symbol: 'in',
-        });
-      if (o.operatorType === 'ne')
-        return defFn(ctx, {
-          ...o,
-          operatorType: OperatorType.isNot,
-          symbol: 'not in',
-        });
-    } else if (
       (o.right?.expression && o.right?.expression === 'null') ||
       (o.right &&
         o.right?.value == null &&
@@ -252,6 +250,10 @@ export class OracleSerializer implements SerializerExtension {
         ctx.preparedParams = ctx.preparedParams || {};
         ctx.preparedParams[o.name] = toDateString(v).replace('T', ' ');
         return `TO_DATE(:${o.name}, 'yyyy-mm-dd hh24:mi:ss.SSSSS')`;
+      }
+      if (Array.isArray(v)) {
+        delete ctx.params?.[o.name];
+        return ctx.anyToSQL(v);
       }
     }
     return defFn(ctx, o);

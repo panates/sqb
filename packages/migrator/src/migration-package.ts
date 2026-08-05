@@ -21,9 +21,7 @@ export interface Migration {
 }
 
 export type MigrationTask =
-  | SqlScriptMigrationTask
-  | CustomMigrationTask
-  | InsertDataMigrationTask;
+  SqlScriptMigrationTask | CustomMigrationTask | InsertDataMigrationTask;
 
 export interface BaseMigrationTask {
   title?: string;

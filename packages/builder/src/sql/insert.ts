@@ -1,8 +1,7 @@
 import { SerializationType } from '../enums.js';
 import { printArray } from '../helpers.js';
-import { SqlElement } from '../serializable.js';
 import { SerializeContext } from '../serialize-context.js';
-import { isRaw, isSelect, isSerializable } from '../type-guards.js';
+import { isRaw, isSelect, isSqlElement } from '../type-guards.js';
 import { Raw } from './elements/raw.js';
 import { TableName } from './elements/table-name.js';
 import { Query } from './query.js';
@@ -64,7 +63,7 @@ class InsertClass extends ReturningQuery {
    *
    */
   protected __serializeValues(ctx: SerializeContext): string {
-    if (isSerializable(this._input)) return this._input._serialize(ctx);
+    if (isSqlElement(this._input)) return this._input._serialize(ctx);
 
     const arr: string[] = [];
     const allValues = this._input;
@@ -103,9 +102,8 @@ export const Insert = function (
     !input ||
     !(
       (typeof input === 'object' && !Array.isArray(input)) ||
-      (input instanceof SqlElement &&
-        (input._type === SerializationType.SELECT_QUERY ||
-          input._type === SerializationType.RAW))
+      isSelect(input) ||
+      isRaw(input)
     )
   ) {
     throw new TypeError(
@@ -127,7 +125,5 @@ export interface Insert extends InsertClass {}
  * @param value
  */
 export function isInsertQuery(value: any): value is Insert {
-  return (
-    isSerializable(value) && value._type === SerializationType.INSERT_QUERY
-  );
+  return isSqlElement(value, SerializationType.INSERT_QUERY);
 }
