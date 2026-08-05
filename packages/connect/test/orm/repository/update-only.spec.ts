@@ -58,14 +58,14 @@ describe('connect:Repository.updateOnly()', () => {
       name: newName,
     });
     expect(c1).toBeDefined();
-    expect(c1 instanceof Customer).toBeTruthy();
+    expect(c1).toBeInstanceOf(Customer);
     expect(c1!.id).toStrictEqual(old.id);
     expect(c1!.name!.given).toStrictEqual(newName.given);
     expect(c1!.name!.given).not.toStrictEqual(old!.name!.given);
 
     const c2 = await repo.findById(old.id);
     expect(c2).toBeDefined();
-    expect(c2 instanceof Customer).toBeTruthy();
+    expect(c2).toBeInstanceOf(Customer);
     expect(c2!.id).toStrictEqual(old.id);
     expect(c2!.name!.given).toStrictEqual(newName.given);
   });
@@ -80,14 +80,14 @@ describe('connect:Repository.updateOnly()', () => {
       address: newAddress,
     });
     expect(c1).toBeDefined();
-    expect(c1 instanceof Customer).toStrictEqual(true);
+    expect(c1).toBeInstanceOf(Customer);
     expect(c1!.id).toStrictEqual(old.id);
     expect(c1!.address!.city).toStrictEqual(newAddress.city);
     expect(c1!.address!.city).not.toStrictEqual(old.address!.city);
 
     const c2 = await repo.findById(old.id);
     expect(c2).toBeDefined();
-    expect(c2 instanceof Customer).toBeTruthy();
+    expect(c2).toBeInstanceOf(Customer);
     expect(c2!.id).toStrictEqual(old.id);
     expect(c2!.address!.city).toStrictEqual(newAddress.city);
   });

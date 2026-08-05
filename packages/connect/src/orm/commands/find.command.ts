@@ -1,5 +1,6 @@
 import { And, In, Param, Select, TableName } from '@sqb/builder';
 import type { SqbConnection } from '../../client/sqb-connection.js';
+import { isAssociationNode } from '../../type-guards.js';
 import { AssociationNode } from '../model/association-node.js';
 import type { ColumnFieldMetadata } from '../model/column-field-metadata.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
@@ -65,7 +66,7 @@ export class FindCommand {
   ): Promise<FindCommand> {
     let command: FindCommand;
     let listingEntity: EntityMetadata;
-    if (source instanceof AssociationNode) {
+    if (isAssociationNode(source)) {
       const node = source;
       listingEntity = await node.resolveTarget();
       const resultEntity = await node.getLast().resolveTarget();

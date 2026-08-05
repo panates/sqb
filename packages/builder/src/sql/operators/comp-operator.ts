@@ -1,7 +1,8 @@
 import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
-import { Field, Param } from '../elements/index.js';
+import { isFieldName, isParam, isSqlElement } from '../../type-guards.js';
+import { Param } from '../elements/index.js';
 import { Operator } from './operator.js';
 
 const EXPRESSION_PATTERN = /^([\w\\.$]+)(\[])?/;
@@ -37,11 +38,13 @@ class CompOperatorClass extends Operator {
     left?: any,
   ): any {
     const isRight = !!left;
-    if (ctx.strictParams && !(x instanceof SqlElement) && isRight) {
+    if (ctx.strictParams && !isSqlElement(x) && isRight) {
       ctx.strictParamGenId = ctx.strictParamGenId || 0;
       const name = 'P$_' + ++ctx.strictParamGenId;
       ctx.params = ctx.params || {};
+      ctx.orgParams = ctx.orgParams || {};
       ctx.params[name] = x;
+      ctx.orgParams[name] = x;
       x = Param({
         name,
         dataType: left?.dataType,
@@ -49,16 +52,16 @@ class CompOperatorClass extends Operator {
       });
     }
 
-    if (x instanceof SqlElement) {
+    if (isSqlElement(x)) {
       const expression = ctx.anyToSQL(x);
       const result: any = {
         expression,
       };
-      if (x instanceof Field) {
+      if (isFieldName(x)) {
         result.dataType = x._dataType;
         result.isArray = x._isArray;
       }
-      if (x instanceof Param) {
+      if (isParam(x)) {
         let value = ctx.params ? ctx.params[x._name] : undefined;
         if (x._isArray && value != null && !Array.isArray(value))
           value = [value];

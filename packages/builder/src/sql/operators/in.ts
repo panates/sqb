@@ -1,7 +1,7 @@
 import { OperatorType } from '../../enums.js';
 import type { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
-import { isSerializable } from '../../type-guards.js';
+import { isSqlElement } from '../../type-guards.js';
 import { CompOperator } from './comp-operator.js';
 
 class InClass extends CompOperator {
@@ -29,7 +29,7 @@ export const In = function (this: In, left: string | SqlElement, right: any[]) {
     this._left = m[1];
     this._isArray = !!m[2];
   }
-  this._right = Array.isArray(right) || isSerializable(right) ? right : [right];
+  this._right = Array.isArray(right) || isSqlElement(right) ? right : [right];
 } as InCtor;
 
 In.prototype = InClass.prototype;

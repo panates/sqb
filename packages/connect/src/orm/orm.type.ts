@@ -9,11 +9,7 @@ export type FieldKind = 'column' | 'object' | 'association';
  * Indicates auto generation strategy
  */
 export type ColumnAutoGenerationStrategy =
-  | 'increment'
-  | 'uuid'
-  | 'rowid'
-  | 'timestamp'
-  | 'custom';
+  'increment' | 'uuid' | 'rowid' | 'timestamp' | 'custom';
 
 export type ColumnTransformFunction = (value: any, name: string) => any;
 

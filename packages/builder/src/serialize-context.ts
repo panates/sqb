@@ -1,8 +1,7 @@
 import { SerializationType } from './enums.js';
 import { SerializerRegistry } from './extensions.js';
-import { SqlElement } from './serializable.js';
 import { Query } from './sql/index.js';
-import { isLogicalOperator, isQuery, isSerializable } from './type-guards.js';
+import { isLogicalOperator, isQuery, isSqlElement } from './type-guards.js';
 import type {
   DefaultSerializeFunction,
   GenerateOptions,
@@ -120,7 +119,7 @@ export class SerializeContext implements GenerateOptions {
       );
     }
     if (typeof v === 'object') {
-      if (isSerializable(v)) {
+      if (isSqlElement(v)) {
         const s = v._serialize(this);
         return s
           ? isQuery(v) || isLogicalOperator(v)
@@ -150,7 +149,7 @@ export class SerializeContext implements GenerateOptions {
         this.numberToSQL(v),
       );
     }
-    if (v instanceof SqlElement) return v._serialize(this);
+    if (isSqlElement(v)) return v._serialize(this);
     return v;
   }
 

@@ -1,6 +1,6 @@
 import { SerializationType } from '../enums.js';
 import { SerializeContext } from '../serialize-context.js';
-import { isRaw } from '../type-guards.js';
+import { isRaw, isSqlElement } from '../type-guards.js';
 import { Raw } from './elements/raw.js';
 import { TableName } from './elements/table-name.js';
 import { And } from './operators/and.js';
@@ -64,24 +64,21 @@ export const Delete = function (
 ) {
   if (!(this instanceof Delete)) return new Delete(tableName);
   Query.call(this);
-  if (
-    !(
-      tableName &&
-      (tableName instanceof TableName ||
-        typeof tableName === 'string' ||
-        isRaw(tableName))
-    )
-  ) {
+  if (!(
+    tableName &&
+    (isSqlElement(tableName, SerializationType.TABLE_NAME) ||
+      typeof tableName === 'string' ||
+      isRaw(tableName))
+  )) {
     throw new TypeError(
       'String or Raw instance required as first argument (tableName) for Delete',
     );
   }
-  this._table =
-    tableName instanceof TableName
-      ? tableName
-      : typeof tableName === 'string'
-        ? TableName(tableName)
-        : tableName;
+  this._table = isSqlElement(tableName, SerializationType.TABLE_NAME)
+    ? tableName
+    : typeof tableName === 'string'
+      ? TableName(tableName)
+      : tableName;
 } as DeleteCtor;
 
 Delete.prototype = DeleteClass.prototype;

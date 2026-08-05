@@ -50,10 +50,7 @@ export namespace Repository {
           dialect?: string[];
         }[];
     optimizerHint?:
-      | string
-      | string[]
-      | TableName.OptimizerHint
-      | TableName.OptimizerHint[];
+      string | string[] | TableName.OptimizerHint | TableName.OptimizerHint[];
   }
 
   export interface CreateOptions extends CommandOptions, Projection {}

@@ -26,7 +26,7 @@ describe('connect:Repository.create()', () => {
     const customer = await repo.create(values);
     expect(customer).toBeDefined();
     // noinspection SuspiciousTypeOfGuard
-    expect(customer instanceof Customer).toBeTruthy();
+    expect(customer).toBeInstanceOf(Customer);
     expect(customer.id).toBeDefined();
     expect(customer.id).toBeGreaterThan(0);
     expect(customer.givenName).toStrictEqual(values.givenName);
@@ -89,7 +89,7 @@ describe('connect:Repository.create()', () => {
     const customer = await repo.create(values);
     expect(customer).toBeDefined();
     // noinspection SuspiciousTypeOfGuard
-    expect(customer instanceof Customer).toBeTruthy();
+    expect(customer).toBeInstanceOf(Customer);
     expect(customer.id).toBeDefined();
     expect(customer.id).toBeGreaterThan(0);
     expect({ ...customer.name }).toStrictEqual(values.name);

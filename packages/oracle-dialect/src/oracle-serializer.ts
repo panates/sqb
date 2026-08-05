@@ -1,5 +1,6 @@
 import {
   type DefaultSerializeFunction,
+  isParam,
   OperatorType,
   SerializationType,
   SerializeContext,
@@ -115,11 +116,7 @@ export class OracleSerializer implements SerializerExtension {
     o: any,
     defFn: DefaultSerializeFunction,
   ): string {
-    if (
-      o.orgRight &&
-      typeof o.orgRight === 'object' &&
-      o.orgRight._type === SerializationType.EXTERNAL_PARAMETER
-    ) {
+    if (isParam(o.orgRight)) {
       const n = o.orgRight._name;
       const v = ctx.orgParams?.[n];
       if (Array.isArray(v)) {

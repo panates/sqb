@@ -1,4 +1,4 @@
-import { Query } from '@sqb/builder';
+import { isQuery, Query } from '@sqb/builder';
 import assert from 'assert';
 import _debug from 'debug';
 import { TaskQueue } from 'power-tasks';
@@ -410,7 +410,7 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     };
     request.ignoreNulls = request.ignoreNulls && request.objectRows;
 
-    if (query instanceof Query) {
+    if (isQuery(query)) {
       if (this._intlcon.onGenerateQuery)
         this._intlcon.onGenerateQuery(request, query);
       const q = query.generate({
