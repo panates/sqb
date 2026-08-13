@@ -45,12 +45,14 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(
   private readonly _pool: LightningPool<Adapter.Connection>;
   private readonly _defaults: ClientDefaults;
   private readonly _entities: Record<string, Type> = {};
+  readonly config: ClientConfiguration;
 
   constructor(config: ClientConfiguration) {
     super();
     if (!(config && typeof config === 'object'))
       throw new TypeError('Configuration object required');
 
+    this.config = config;
     let adapter;
     if (config.driver) {
       adapter = AdapterRegistry.findDriver(config.driver);
