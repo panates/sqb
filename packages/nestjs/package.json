@@ -29,8 +29,8 @@
   "devDependencies": {
     "@nestjs/common": "^11.1.2",
     "@nestjs/core": "^11.1.2",
-    "@nestjs/platform-express": "^11.1.28",
-    "@nestjs/testing": "^11.1.28",
+    "@nestjs/platform-express": "^11.1.29",
+    "@nestjs/testing": "^11.1.29",
     "expect": "^30.4.1",
     "postgrejs": "^2.23.0",
     "rxjs": "^7.8.1",
