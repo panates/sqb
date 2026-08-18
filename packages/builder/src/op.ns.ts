@@ -12,6 +12,7 @@ import { IsNot } from './sql/operators/is-not.js';
 import { Like } from './sql/operators/like.js';
 import { Lt } from './sql/operators/lt.js';
 import { Lte } from './sql/operators/lte.js';
+import { Match } from './sql/operators/match.js';
 import { Ne } from './sql/operators/ne.js';
 import { Not } from './sql/operators/not.js';
 import { NotBetween } from './sql/operators/not-between.js';
@@ -61,6 +62,7 @@ export interface OperatorsMap {
   exists: typeof Exists;
   notExists: typeof NotExists;
   '!exists': typeof NotExists;
+  match: typeof Match;
 }
 
 const Operators: OperatorsMap = {
@@ -103,6 +105,7 @@ const Operators: OperatorsMap = {
   exists: Exists,
   notExists: NotExists,
   '!exists': NotExists,
+  match: Match,
 };
 
 (LogicalOperator as any).Operators = Operators;

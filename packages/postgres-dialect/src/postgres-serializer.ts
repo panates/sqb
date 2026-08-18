@@ -76,7 +76,7 @@ export class PostgresSerializer implements SerializerExtension {
           o.right.expression = 'null';
           o.right.isParam = false;
         }
-        if (o.operatorType === 'eq')
+        if (o.operatorType === OperatorType.eq)
           return defFn(ctx, {
             ...o,
             operatorType: OperatorType.is,
@@ -108,7 +108,10 @@ export class PostgresSerializer implements SerializerExtension {
         o.right.value = [o.right.value];
       }
 
-      if (o.operatorType === 'in' || o.operatorType === 'notIn') {
+      if (
+        o.operatorType === OperatorType.in ||
+        o.operatorType === OperatorType.notIn
+      ) {
         if (o.left.isArray && !o.right.isArray && o.right.isParam) {
           const left = o.left;
           const right = o.right;
@@ -116,13 +119,13 @@ export class PostgresSerializer implements SerializerExtension {
           return defFn(ctx, {
             ...o,
             operatorType: OperatorType.eq,
-            symbol: o.operatorType === 'notIn' ? '!=' : '=',
+            symbol: o.operatorType === OperatorType.notIn ? '!=' : '=',
             left: right,
             right: left,
           });
         }
         if (o.left.isArray && o.right.isArray) {
-          if (o.operatorType === 'notIn')
+          if (o.operatorType === OperatorType.notIn)
             o.left.expression = 'not ' + o.left.expression;
           return defFn(ctx, { ...o, symbol: '&&' });
         }
@@ -131,9 +134,19 @@ export class PostgresSerializer implements SerializerExtension {
           return defFn(ctx, {
             ...o,
             operatorType: OperatorType.eq,
-            symbol: o.operatorType === 'notIn' ? '!=' : '=',
+            symbol: o.operatorType === OperatorType.notIn ? '!=' : '=',
           });
         }
+      }
+      if (o.operatorType === OperatorType.match) {
+        const config = o.customArgs
+          ? typeof o.customArgs === 'object'
+            ? o.customArgs
+            : String(o.customArgs)
+          : undefined;
+        o.symbol = '@@';
+        o.right.expression = `plainto_tsquery('${(config || 'simple').replace(/'/g, '"')}', ${o.right.expression})`;
+        return defFn(ctx, o);
       }
     }
     return defFn(ctx, o);
