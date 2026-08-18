@@ -1,11 +1,4 @@
-import {
-  Eq,
-  Param,
-  Raw,
-  Select,
-  SerializerRegistry,
-  Update,
-} from '@sqb/builder';
+import { SerializerRegistry, sql } from '@sqb/builder';
 import { expect } from 'expect';
 import { PostgresSerializer } from '../src/postgres-serializer.js';
 
@@ -15,27 +8,28 @@ describe('postgres-dialect:PostgresSerializer', () => {
   after(() => SerializerRegistry.unRegister(postgresSerializer));
 
   it('should replace "= null" to "is null": test1', () => {
-    const query = Select().from('table1').where({ ID: null });
+    const query = sql.Select().from('table1').where({ ID: null });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 where ID is null');
   });
 
   it('should replace "= null" to "is null": test2', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ ID: Param('cid') });
+      .where({ ID: sql.Param('cid') });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 where ID is null');
   });
 
   it('should replace "= null" to "is null": test3', () => {
-    const query = Select().from('table1').where(Eq('ID', null));
+    const query = sql.Select().from('table1').where(sql.Eq('ID', null));
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 where ID is null');
   });
 
   it('should replace "!= null" to "is not null": test1', () => {
-    const query = Select().from('table1').where({ 'ID !=': null });
+    const query = sql.Select().from('table1').where({ 'ID !=': null });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual(
       'select * from table1 where ID is not null',
@@ -43,7 +37,7 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('should replace "!= null" to "is not null": test2', () => {
-    const query = Select().from('table1').where({ 'ID !=': null });
+    const query = sql.Select().from('table1').where({ 'ID !=': null });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual(
       'select * from table1 where ID is not null',
@@ -51,25 +45,25 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('should serialize reserved word', () => {
-    const query = Select('comment').from('table1');
+    const query = sql.Select('comment').from('table1');
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select "comment" from table1');
   });
 
   it('should serialize "limit"', () => {
-    const query = Select().from('table1').limit(10);
+    const query = sql.Select().from('table1').limit(10);
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 LIMIT 10');
   });
 
   it('should serialize "offset"', () => {
-    const query = Select().from('table1').offset(4);
+    const query = sql.Select().from('table1').offset(4);
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 OFFSET 4');
   });
 
   it('should serialize "limit" pretty print', () => {
-    const query = Select().from('table1').limit(10);
+    const query = sql.Select().from('table1').limit(10);
     const result = query.generate({
       dialect: 'postgres',
       prettyPrint: true,
@@ -78,7 +72,7 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('should serialize "offset" pretty print', () => {
-    const query = Select().from('table1').offset(10);
+    const query = sql.Select().from('table1').offset(10);
     const result = query.generate({
       dialect: 'postgres',
       prettyPrint: true,
@@ -87,13 +81,13 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('should serialize "limit/offset"', () => {
-    const query = Select().from('table1').offset(4).limit(10);
+    const query = sql.Select().from('table1').offset(4).limit(10);
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 LIMIT 10 OFFSET 4');
   });
 
   it('should serialize "limit/offset" pretty print', () => {
-    const query = Select().from('table1').offset(4).limit(10);
+    const query = sql.Select().from('table1').offset(4).limit(10);
     const result = query.generate({
       dialect: 'postgres',
       prettyPrint: true,
@@ -102,9 +96,10 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should serialize params', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ ID: Param('ID') });
+      .where({ ID: sql.Param('ID') });
     const result = query.generate({
       dialect: 'postgres',
       params: { ID: 5 },
@@ -114,17 +109,19 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should change "= null" to "is null"', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ ID: Raw('null') });
+      .where({ ID: sql.Raw('null') });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 where ID is null');
   });
 
   it('Should change "!= null" to "is not null"', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ 'ID !=': Raw('null') });
+      .where({ 'ID !=': sql.Raw('null') });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual(
       'select * from table1 where ID is not null',
@@ -132,9 +129,10 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should compare array params using "in" operator', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ 'ID in': Param('id') })
+      .where({ 'ID in': sql.Param('id') })
       .values({ id: [1, 2, 3] });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 where ID = ANY($1)');
@@ -142,9 +140,10 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should compare array params using "nin" operator', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ 'ID !in': Param('id') })
+      .where({ 'ID !in': sql.Param('id') })
       .values({ id: [1, 2, 3] });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual(
@@ -154,7 +153,8 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should compare array value using "in" operator', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
       .where({ 'ID in': [1, 2, 3] });
     const result = query.generate({
@@ -167,9 +167,10 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should serialize array params for "not in" operator', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ 'ID !in': Param('id') })
+      .where({ 'ID !in': sql.Param('id') })
       .values({ id: [1, 2, 3] });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual(
@@ -178,8 +179,37 @@ describe('postgres-dialect:PostgresSerializer', () => {
     expect(result.params).toStrictEqual([[1, 2, 3]]);
   });
 
+  it('Should serialize "match" operator', () => {
+    const query = sql
+      .Select()
+      .from('table1')
+      .where(sql.Match('search', sql.Param('text')));
+    const result = query.generate({
+      dialect: 'postgres',
+      params: { text: 'abc' },
+    });
+    expect(result.sql).toStrictEqual(
+      "select * from table1 where search @@ plainto_tsquery('simple', $1)",
+    );
+  });
+
+  it('Should serialize "match" operator with custom config', () => {
+    const query = sql
+      .Select()
+      .from('table1')
+      .where(sql.Match('search', sql.Param('text'), 'english'));
+    const result = query.generate({
+      dialect: 'postgres',
+      params: { text: 'abc' },
+    });
+    expect(result.sql).toStrictEqual(
+      "select * from table1 where search @@ plainto_tsquery('english', $1)",
+    );
+  });
+
   it('Should compare array using "not in" operator', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
       .where({ 'ID !in': [1, 2, 3] });
     const result = query.generate({ dialect: 'postgres' });
@@ -189,15 +219,16 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should serialize "ne" operator as !=', () => {
-    const query = Select().from('table1').where({ 'ID ne': 0 });
+    const query = sql.Select().from('table1').where({ 'ID ne': 0 });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 where ID != 0');
   });
 
   it('Should compare if both expression and value is array', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ 'ids[] in': Param('ids') })
+      .where({ 'ids[] in': sql.Param('ids') })
       .values({ ids: [1, 2, 3] });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('select * from table1 where ids && $1');
@@ -205,9 +236,10 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should compare if expression is array and but value', () => {
-    const query = Select()
+    const query = sql
+      .Select()
       .from('table1')
-      .where({ 'ids[] in': Param('id') })
+      .where({ 'ids[] in': sql.Param('id') })
       .values({ id: 1 });
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual(
@@ -217,7 +249,7 @@ describe('postgres-dialect:PostgresSerializer', () => {
   });
 
   it('Should serialize update returning query', () => {
-    const query = Update('table1', { id: 1 }).returning('id');
+    const query = sql.Update('table1', { id: 1 }).returning('id');
     const result = query.generate({ dialect: 'postgres' });
     expect(result.sql).toStrictEqual('update table1 set id = 1 returning id');
     expect(result.returningFields).toStrictEqual([

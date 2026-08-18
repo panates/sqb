@@ -75,6 +75,7 @@ export enum OperatorType {
   exists = 'exists',
   notExists = 'notExists',
   not = 'not',
+  match = 'match',
 }
 
 export enum DataType {

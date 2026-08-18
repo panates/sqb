@@ -13,6 +13,7 @@ export * from './like.js';
 export * from './logical-operator.js';
 export * from './lt.js';
 export * from './lte.js';
+export * from './match.js';
 export * from './ne.js';
 export * from './not.js';
 export * from './not-between.js';
