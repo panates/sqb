@@ -21,6 +21,7 @@ on:
       - '.mocharc.cjs'
       - 'package.json'
       - 'tsconfig*.json'
+      - '.github/workflows/test.yml'
 
 # Only one run per branch at a time
 concurrency:
