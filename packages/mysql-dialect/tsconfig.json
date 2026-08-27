@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig-base.json",
+  "include": ["src"],
+  "exclude": ["build"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "./build",
+    "paths": {
+      "@sqb/builder": ["../builder/src/index.js"]
+    }
+  },
+  "references": [{ "path": "../builder" }]
+}
