@@ -28,7 +28,7 @@ export class AdapterRegistry {
   }
 
   static unRegister(...extensions: Adapter[]) {
-    this.adapters = extensions.filter(x => !extensions.includes(x));
+    this.adapters = this.adapters.filter(x => !extensions.includes(x));
   }
 
   static getAll(dialect: string): Adapter[] {
