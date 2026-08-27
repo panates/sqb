@@ -121,6 +121,15 @@ export namespace MigrationPackage {
 
       srcMigrations.sort((a, b) => a.version - b.version);
 
+      const seenVersions = new Set<number>();
+      for (const m of srcMigrations) {
+        if (seenVersions.has(m.version))
+          throw new Error(
+            `Migration package "${asyncConfig.name}" has more than one migration defined for version ${m.version}`,
+          );
+        seenVersions.add(m.version);
+      }
+
       for (const migration of srcMigrations) {
         const trgMigration: Migration = {
           baseDir: '',
