@@ -7,6 +7,8 @@ services:
       - "1521:1521"
     environment:
       ORACLE_PASSWORD: Sqb_Test_2024!
+    volumes:
+      - ./data:/opt/oracle/oradata
     healthcheck:
       test: ["CMD", "healthcheck.sh"]
       interval: 10s
