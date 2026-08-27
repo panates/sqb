@@ -136,10 +136,14 @@ export async function createTestSchema(database: string) {
     const dataFiles = getInsertSQLsForTestData({ dialect: 'mysql' });
     for (const table of dataFiles) {
       for (const script of table.scripts) {
-        // Insert()'s column list is not passed through reserved-word
-        // escaping (unlike SELECT/RETURNING), so `rank` — reserved in
-        // MySQL 8.0+ for window functions — must be quoted by hand here.
-        await connection.query(script.replace(/\brank\b/g, '`rank`'));
+        // The builder's default escapeReserved() always uses ANSI double
+        // quotes, which MySQL only accepts as identifiers under
+        // ANSI_QUOTES sql_mode. Since @sqb/mysql doesn't set that mode,
+        // rewrite the one reserved identifier in this fixture data
+        // ("rank") to backtick-quoted form. A blanket "..."->`...`
+        // replacement would also corrupt double quotes inside JSON string
+        // literal values (e.g. custom_data).
+        await connection.query(script.replace(/"rank"/g, '`rank`'));
       }
     }
   } finally {
