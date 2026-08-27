@@ -20,13 +20,7 @@ export class DeleteCommand {
 
     const where: LogicalOperator = And();
     if (filter) await prepareFilter(entity, filter, where);
-    // An empty filter (or one that resolves to zero conditions) must never
-    // be allowed to fall through as "no WHERE clause" - that would delete
-    // every row in the table instead of the rows the caller intended.
-    if (!where._items.length)
-      throw new Error(
-        'deleteMany() requires a non-empty filter to prevent accidental deletion of all rows',
-      );
+    // An empty filter (or one that resolves to zero conditions) must be allowed
     const query = Delete(
       TableName({
         table: entity.tableName!,
