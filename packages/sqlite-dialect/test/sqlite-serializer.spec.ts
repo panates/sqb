@@ -7,6 +7,14 @@ describe('sqlite-dialect:SqliteSerializer', () => {
   before(() => SerializerRegistry.register(postgresSerializer));
   after(() => SerializerRegistry.unRegister(postgresSerializer));
 
+  it('should serialize SQLite-specific reserved words', () => {
+    const query = Select('glob', 'pragma', 'vacuum').from('table1');
+    const result = query.generate({ dialect: 'sqlite' });
+    expect(result.sql).toStrictEqual(
+      'select "glob", "pragma", "vacuum" from table1',
+    );
+  });
+
   it('should serialize "limit"', () => {
     const query = Select().from('table1').limit(10);
     const result = query.generate({ dialect: 'sqlite' });
