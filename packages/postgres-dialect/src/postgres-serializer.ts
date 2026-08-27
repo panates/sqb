@@ -6,15 +6,73 @@ import {
   type SerializerExtension,
 } from '@sqb/builder';
 
-const reservedWords = ['comment'];
+// PostgreSQL "reserved" and "reserved (can be function or type)" keywords
+// (https://www.postgresql.org/docs/current/sql-keywords-appendix.html)
+// that are not already covered by SerializeContext's base reservedWords list.
+// Keywords common to all SQL dialects (case, check, union, ...) live in
+// SerializeContext.reservedWords instead of being duplicated here.
+const reservedWords = new Set([
+  'analyse',
+  'analyze',
+  'any',
+  'array',
+  'asymmetric',
+  'binary',
+  'both',
+  'collate',
+  'collation',
+  'comment',
+  'concurrently',
+  'cross',
+  'current_catalog',
+  'current_date',
+  'current_role',
+  'current_schema',
+  'current_time',
+  'current_timestamp',
+  'current_user',
+  'deferrable',
+  'do',
+  'except',
+  'false',
+  'fetch',
+  'freeze',
+  'grant',
+  'initially',
+  'intersect',
+  'isnull',
+  'lateral',
+  'leading',
+  'limit',
+  'localtime',
+  'localtimestamp',
+  'natural',
+  'notnull',
+  'offset',
+  'only',
+  'overlaps',
+  'placing',
+  'returning',
+  'session_user',
+  'similar',
+  'some',
+  'symmetric',
+  'system_user',
+  'tablesample',
+  'trailing',
+  'true',
+  'using',
+  'variadic',
+  'verbose',
+  'window',
+]);
 
 export class PostgresSerializer implements SerializerExtension {
   dialect = 'postgres';
+  reservedWords = reservedWords;
 
-  isReservedWord(ctx, s) {
-    return (
-      s && typeof s === 'string' && reservedWords.includes(s.toLowerCase())
-    );
+  isReservedWord(_: any, s: any): boolean {
+    return s && typeof s === 'string' && reservedWords.has(s.toLowerCase());
   }
 
   serialize(
