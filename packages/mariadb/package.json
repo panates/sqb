@@ -1,7 +1,7 @@
 {
   "name": "@sqb/mariadb",
   "description": "SQB adapter for the mariadb driver",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -28,9 +28,9 @@
     "mariadb": "^3.5.3"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.0.0",
-    "@sqb/connect": "^6.0.0",
-    "@sqb/mariadb-dialect": "^6.0.0",
+    "@sqb/builder": "^6.0.1",
+    "@sqb/connect": "^6.0.1",
+    "@sqb/mariadb-dialect": "^6.0.1",
     "mariadb": "^3.5.3"
   },
   "type": "module",
