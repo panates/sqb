@@ -7,6 +7,14 @@ describe('mssql-dialect:MSSqlSerializer', () => {
   before(() => SerializerRegistry.register(mssqlSerializer));
   after(() => SerializerRegistry.unRegister(mssqlSerializer));
 
+  it('should serialize MSSQL-specific reserved words', () => {
+    const query = Select('top', 'cursor', 'identity').from('table1');
+    const result = query.generate({ dialect: 'mssql' });
+    expect(result.sql).toStrictEqual(
+      'select "top", "cursor", "identity" from table1',
+    );
+  });
+
   it('should serialize "limit"', () => {
     const query = Select().from('table1').as('t1').limit(10);
     const result = query.generate({ dialect: 'mssql' });
