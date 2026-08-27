@@ -6,11 +6,6 @@ class MinClass extends SqlElement {
   _expression: any;
   _alias?: string;
 
-  constructor(expression: any) {
-    super();
-    this._expression = expression;
-  }
-
   get _type(): SerializationType {
     return SerializationType.MIN_STATEMENT;
   }
@@ -50,6 +45,7 @@ interface MinCtor {
 
 export const Min = function (this: Min, expression: any) {
   if (!(this instanceof Min)) return new Min(expression);
+  SqlElement.call(this);
   this._expression = expression;
 } as MinCtor;
 

@@ -111,6 +111,14 @@ describe('builder:Serialize insert query', () => {
     );
   });
 
+  it('should escape reserved words in the column list', () => {
+    const query = Insert('table1', { id: 1, with: 'aaa' });
+    const result = query.generate(options);
+    expect(result.sql).toStrictEqual(
+      `insert into table1 (id, "with") values (1, 'aaa')`,
+    );
+  });
+
   it('should serialize insert with returning', () => {
     const query = Insert('table1', { id: 1, name: 'aaa' }).returning(
       'id',

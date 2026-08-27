@@ -26,7 +26,7 @@ class FieldClass extends BaseField {
         (this._table ? this._table + '.' : '');
       return (
         prefix +
-        (!prefix && o.isReservedWord ? '"' + this._field + '"' : this._field) +
+        (o.isReservedWord ? '"' + this._field + '"' : this._field) +
         (this._alias ? ' as ' + this._alias : '')
       );
     });

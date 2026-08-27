@@ -111,6 +111,14 @@ describe('builder:Serialize update query', () => {
     ).toThrow('Invalid argument');
   });
 
+  it('should escape reserved words in the SET clause', () => {
+    const query = Update('table1', { id: 2, with: 'aaa' }).where(Eq('id', 1));
+    const result = query.generate(options);
+    expect(result.sql).toStrictEqual(
+      `update table1 set id = 2, "with" = 'aaa' where id = 1`,
+    );
+  });
+
   it('should serialize update with returning', () => {
     const query = Update('table1', { id: 1, name: 'aaa' }).returning(
       'id',

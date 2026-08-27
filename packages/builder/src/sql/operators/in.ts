@@ -6,7 +6,13 @@ import { CompOperator } from './comp-operator.js';
 
 class InClass extends CompOperator {
   _serialize(ctx: SerializeContext): string {
-    if (Array.isArray(this._right) && !this._right.length) return '';
+    if (Array.isArray(this._right) && !this._right.length) {
+      // Nothing can be IN an empty list (always false), and everything is
+      // NOT IN an empty list (always true). Emit a self-contained literal
+      // instead of dropping the condition, which would silently invert its
+      // meaning into "no filter at all".
+      return this._operatorType === OperatorType.notIn ? '1=1' : '1=0';
+    }
     return super._serialize(ctx);
   }
 }
