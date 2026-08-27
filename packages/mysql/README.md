@@ -4,6 +4,11 @@
 
 <br>
 
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![CI Tests][ci-test-image]][ci-test-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
+
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
@@ -46,3 +51,12 @@ const client = new SqbClient({
 ### License
 
 SQB is available under [MIT](LICENSE) license.
+
+[npm-image]: https://img.shields.io/npm/v/@sqb/mysql.svg
+[npm-url]: https://npmjs.org/package/@sqb/mysql
+[downloads-image]: https://img.shields.io/npm/dm/@sqb/mysql.svg
+[downloads-url]: https://npmjs.org/package/@sqb/mysql
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

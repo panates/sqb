@@ -6,30 +6,23 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
+[![CI Tests][ci-test-image]][ci-test-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-[![Dependencies][dependencies-image]][dependencies-url]
-[![DevDependencies][devdependencies-image]][devdependencies-url]
-[![Package Quality][quality-image]][quality-url]
 
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
 
-## Main goals
+## About @sqb/sqljs
 
-- Single code base for any sql based database
-- Powerful and simplified query coding scheme
-- Fast applications with low memory requirements
-- Let applications work with large data tables efficiently
-- Support latest JavaScript language standards
-- Lightweight and extensible framework.
+This package is a SQB `Adapter` for SQLite backed by [`sql.js`](https://github.com/sql-js/sql.js),
+a WebAssembly build of SQLite. Unlike [`@sqb/sqlite`](../sqlite), it needs no native bindings or a
+runtime-provided SQLite module, so it runs anywhere WebAssembly does — including the browser.
 
-You can report bugs and discuss features on the [GitHub issues](https://github.com/sqbjs/sqb/issues) page
-
-Thanks to all of the great [contributions](https://github.com/sqbjs/sqb/graphs/contributors) to the project.
-
-You may want to check detailed [DOCUMENTATION](https://sqbjs.github.io/sqb/)
+Pass a file path as `database` to load (and keep in sync with) an on-disk `.sqlite` file, or
+`:memory:` (optionally suffixed, e.g. `:memory:test1`) for a purely in-memory database. Databases
+opened with the same name are reference-counted and shared across connections rather than reopened.
+It shares its SQL serialization rules with `@sqb/sqlite` via [`@sqb/sqlite-dialect`](../sqlite-dialect).
 
 ## Installation
 
@@ -37,9 +30,21 @@ You may want to check detailed [DOCUMENTATION](https://sqbjs.github.io/sqb/)
 $ npm install @sqb/sqljs --save
 ```
 
+## Usage
+
+```ts
+import '@sqb/sqljs';
+import { SqbClient } from '@sqb/connect';
+
+const client = new SqbClient({
+  driver: 'sqljs',
+  database: '/path/to/database.sqlite', // or ':memory:'
+});
+```
+
 ## Node Compatibility
 
-- node >= 16.x
+- node >= 20.x
 
 ### License
 
@@ -47,17 +52,9 @@ SQB is available under [MIT](LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/sqljs.svg
 [npm-url]: https://npmjs.org/package/@sqb/sqljs
-[travis-image]: https://img.shields.io/travis/sqbjs/@sqb/sqljs/master.svg
-[travis-url]: https://travis-ci.org/sqbjs/@sqb/sqljs
-[coveralls-image]: https://img.shields.io/coveralls/sqbjs/@sqb/sqljs/master.svg
-[coveralls-url]: https://coveralls.io/r/sqbjs/@sqb/sqljs
 [downloads-image]: https://img.shields.io/npm/dm/@sqb/sqljs.svg
 [downloads-url]: https://npmjs.org/package/@sqb/sqljs
-[gitter-image]: https://badges.gitter.im/sqbjs/@sqb/sqljs.svg
-[gitter-url]: https://gitter.im/sqbjs/@sqb/sqljs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[dependencies-image]: https://david-dm.org/sqbjs/@sqb/sqljs/status.svg
-[dependencies-url]: https://david-dm.org/sqbjs/@sqb/sqljs
-[devdependencies-image]: https://david-dm.org/sqbjs/@sqb/sqljs/dev-status.svg
-[devdependencies-url]: https://david-dm.org/sqbjs/@sqb/sqljs?type=dev
-[quality-image]: http://npm.packagequality.com/shield/@sqb/sqljs.png
-[quality-url]: http://packagequality.com/#?package=@sqb/sqljs
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

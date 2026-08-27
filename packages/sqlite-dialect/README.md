@@ -6,30 +6,23 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
+[![CI Tests][ci-test-image]][ci-test-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-[![Dependencies][dependencies-image]][dependencies-url]
-[![DevDependencies][devdependencies-image]][devdependencies-url]
-[![Package Quality][quality-image]][quality-url]
 
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
 
-## Main goals
+## About @sqb/sqlite-dialect
 
-- Single code base for any sql based database
-- Powerful and simplified query coding scheme
-- Fast applications with low memory requirements
-- Let applications work with large data tables efficiently
-- Support latest JavaScript language standards
-- Lightweight and extensible framework.
+This package registers the `sqlite` SQL serialization dialect (a `SerializerExtension` for
+[`@sqb/builder`](../builder)) shared by both [`@sqb/sqlite`](../sqlite) (native `node:sqlite` /
+`bun:sqlite` bindings) and [`@sqb/sqljs`](../sqljs) (the `sql.js` WASM build). It is loaded
+automatically when either adapter is imported, so you normally don't need to depend on it directly.
 
-You can report bugs and discuss features on the [GitHub issues](https://github.com/sqbjs/sqb/issues) page
-
-Thanks to all of the great [contributions](https://github.com/sqbjs/sqb/graphs/contributors) to the project.
-
-You may want to check detailed [DOCUMENTATION](https://sqbjs.github.io/sqb/)
+It applies SQLite's `LIMIT`/`OFFSET` syntax and reserved-word list. `RETURNING` is stripped from
+the generated SQL; both adapters emulate it with a follow-up `SELECT` keyed on SQLite's implicit
+`rowid`, rather than relying on `RETURNING` support that may not be present in every SQLite build.
 
 ## Installation
 
@@ -39,7 +32,7 @@ $ npm install @sqb/sqlite-dialect --save
 
 ## Node Compatibility
 
-- node >= 16.x
+- node >= 20.x
 
 ### License
 
@@ -47,17 +40,9 @@ SQB is available under [MIT](LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/sqlite-dialect.svg
 [npm-url]: https://npmjs.org/package/@sqb/sqlite-dialect
-[travis-image]: https://img.shields.io/travis/sqbjs/@sqb/sqlite-dialect/master.svg
-[travis-url]: https://travis-ci.org/sqbjs/@sqb/sqlite-dialect
-[coveralls-image]: https://img.shields.io/coveralls/sqbjs/@sqb/sqlite-dialect/master.svg
-[coveralls-url]: https://coveralls.io/r/sqbjs/@sqb/sqlite-dialect
 [downloads-image]: https://img.shields.io/npm/dm/@sqb/sqlite-dialect.svg
 [downloads-url]: https://npmjs.org/package/@sqb/sqlite-dialect
-[gitter-image]: https://badges.gitter.im/sqbjs/@sqb/sqlite-dialect.svg
-[gitter-url]: https://gitter.im/sqbjs/@sqb/sqlite-dialect?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[dependencies-image]: https://david-dm.org/sqbjs/@sqb/sqlite-dialect/status.svg
-[dependencies-url]: https://david-dm.org/sqbjs/@sqb/sqlite-dialect
-[devdependencies-image]: https://david-dm.org/sqbjs/@sqb/sqlite-dialect/dev-status.svg
-[devdependencies-url]: https://david-dm.org/sqbjs/@sqb/sqlite-dialect?type=dev
-[quality-image]: http://npm.packagequality.com/shield/@sqb/sqlite-dialect.png
-[quality-url]: http://packagequality.com/#?package=@sqb/sqlite-dialect
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

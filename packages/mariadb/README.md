@@ -4,6 +4,11 @@
 
 <br>
 
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![CI Tests][ci-test-image]][ci-test-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
+
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
@@ -15,9 +20,11 @@ This package is a SQB `Adapter` for MariaDB, backed by the official
 driver's named placeholder support (`:name`), which matches the parameter syntax `@sqb/builder`
 generates by default.
 
-Unlike [`@sqb/mysql`](../mysql), this adapter does not emulate `INSERT ... RETURNING` /
-`UPDATE ... RETURNING` with a follow-up `SELECT`: MariaDB (10.5+) supports `RETURNING` natively on
-`INSERT`, `UPDATE` and `DELETE`, so affected rows are read directly from the statement response.
+Unlike [`@sqb/mysql`](../mysql), `INSERT ... RETURNING` and `DELETE ... RETURNING` don't need a
+follow-up `SELECT`: MariaDB (10.5+) supports `RETURNING` natively for those, so affected rows are
+read directly from the statement response. MariaDB has no `UPDATE ... RETURNING` (verified against
+11.8), so that one case still falls back to a follow-up `SELECT`, the same way `@sqb/mysql` handles
+every statement type.
 
 ## Installation
 
@@ -47,3 +54,12 @@ const client = new SqbClient({
 ### License
 
 SQB is available under [MIT](LICENSE) license.
+
+[npm-image]: https://img.shields.io/npm/v/@sqb/mariadb.svg
+[npm-url]: https://npmjs.org/package/@sqb/mariadb
+[downloads-image]: https://img.shields.io/npm/dm/@sqb/mariadb.svg
+[downloads-url]: https://npmjs.org/package/@sqb/mariadb
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

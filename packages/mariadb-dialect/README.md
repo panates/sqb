@@ -4,15 +4,24 @@
 
 <br>
 
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![CI Tests][ci-test-image]][ci-test-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
+
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
 
 ## About @sqb/mariadb-dialect
 
-This package registers the `mariadb` SQL serialization dialect used by [`@sqb/mariadb`](../mariadb).
-It is loaded automatically when `@sqb/mariadb` is imported; you normally don't need to depend
-on it directly.
+This package registers the `mariadb` SQL serialization dialect (a `SerializerExtension` for
+[`@sqb/builder`](../builder)) used by [`@sqb/mariadb`](../mariadb). It is loaded automatically
+when `@sqb/mariadb` is imported, so you normally don't need to depend on it directly.
+
+It's a close relative of [`@sqb/mysql-dialect`](../mysql-dialect) — same `LIMIT`/`OFFSET` syntax,
+`1`/`0` booleans, and `IS [NOT] NULL` rewriting — extended with MariaDB's own reserved words on
+top of MySQL's, and RETURNING handling that reflects what MariaDB actually supports (see below).
 
 Unlike [`@sqb/mysql-dialect`](../mysql-dialect), this dialect does **not** strip the `RETURNING`
 clause from `INSERT` and `DELETE` statements: MariaDB (10.5+) supports `RETURNING` natively for
@@ -34,3 +43,12 @@ $ npm install @sqb/mariadb-dialect --save
 ### License
 
 SQB is available under [MIT](LICENSE) license.
+
+[npm-image]: https://img.shields.io/npm/v/@sqb/mariadb-dialect.svg
+[npm-url]: https://npmjs.org/package/@sqb/mariadb-dialect
+[downloads-image]: https://img.shields.io/npm/dm/@sqb/mariadb-dialect.svg
+[downloads-url]: https://npmjs.org/package/@sqb/mariadb-dialect
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

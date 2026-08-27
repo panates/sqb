@@ -6,30 +6,27 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
+[![CI Tests][ci-test-image]][ci-test-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-[![Dependencies][dependencies-image]][dependencies-url]
-[![DevDependencies][devdependencies-image]][devdependencies-url]
-[![Package Quality][quality-image]][quality-url]
 
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
 
-## Main goals
+## About @sqb/oracle
 
-- Single code base for any sql based database
-- Powerful and simplified query coding scheme
-- Fast applications with low memory requirements
-- Let applications work with large data tables efficiently
-- Support latest JavaScript language standards
-- Lightweight and extensible framework.
+This package is a SQB `Adapter` for Oracle Database, backed by the official
+[`oracledb`](https://github.com/oracle/node-oracledb) driver. It supports cursors, working
+schemas, and `INSERT ... RETURNING` / `UPDATE ... RETURNING` (emulated with a follow-up `SELECT`,
+using the row's `ROWID` for inserts).
 
-You can report bugs and discuss features on the [GitHub issues](https://github.com/sqbjs/sqb/issues) page
+`oracledb` can run in two modes:
 
-Thanks to all of the great [contributions](https://github.com/sqbjs/sqb/graphs/contributors) to the project.
-
-You may want to check detailed [DOCUMENTATION](https://sqbjs.github.io/sqb/)
+- **Thin mode** (`driverOptions: { direct: true }`) — pure JavaScript, no Oracle Client
+  installation required.
+- **Thick mode** (the default) — uses Oracle Client libraries for features thin mode doesn't yet
+  support. The adapter locates them automatically by scanning `LD_LIBRARY_PATH` and `ORA_HOME`
+  for `libclntsh.so` / `libclntsh.dylib` / `oci.dll`.
 
 ## Installation
 
@@ -37,9 +34,25 @@ You may want to check detailed [DOCUMENTATION](https://sqbjs.github.io/sqb/)
 $ npm install @sqb/oracle --save
 ```
 
+## Usage
+
+```ts
+import '@sqb/oracle';
+import { SqbClient } from '@sqb/connect';
+
+const client = new SqbClient({
+  driver: 'oracledb',
+  host: 'localhost',
+  port: 1521,
+  database: 'FREEPDB1',
+  user: 'system',
+  password: 'yourPassword',
+});
+```
+
 ## Node Compatibility
 
-- node >= 16.x
+- node >= 20.x
 
 ### License
 
@@ -47,17 +60,9 @@ SQB is available under [MIT](LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/oracle.svg
 [npm-url]: https://npmjs.org/package/@sqb/oracle
-[travis-image]: https://img.shields.io/travis/sqbjs/@sqb/oracle/master.svg
-[travis-url]: https://travis-ci.org/sqbjs/@sqb/oracle
-[coveralls-image]: https://img.shields.io/coveralls/sqbjs/@sqb/oracle/master.svg
-[coveralls-url]: https://coveralls.io/r/sqbjs/@sqb/oracle
 [downloads-image]: https://img.shields.io/npm/dm/@sqb/oracle.svg
 [downloads-url]: https://npmjs.org/package/@sqb/oracle
-[gitter-image]: https://badges.gitter.im/sqbjs/@sqb/oracle.svg
-[gitter-url]: https://gitter.im/sqbjs/@sqb/oracle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[dependencies-image]: https://david-dm.org/sqbjs/@sqb/oracle/status.svg
-[dependencies-url]: https://david-dm.org/sqbjs/@sqb/oracle
-[devdependencies-image]: https://david-dm.org/sqbjs/@sqb/oracle/dev-status.svg
-[devdependencies-url]: https://david-dm.org/sqbjs/@sqb/oracle?type=dev
-[quality-image]: http://npm.packagequality.com/shield/@sqb/oracle.png
-[quality-url]: http://packagequality.com/#?package=@sqb/oracle
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

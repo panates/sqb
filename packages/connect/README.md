@@ -6,15 +6,46 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
+[![CI Tests][ci-test-image]][ci-test-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-[![Dependencies][dependencies-image]][dependencies-url]
-[![DevDependencies][devdependencies-image]][devdependencies-url]
-[![Package Quality][quality-image]][quality-url]
 
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
+
+## About @sqb/connect
+
+`@sqb/connect` is the driver-agnostic connection and ORM layer built on top of
+[`@sqb/builder`](../builder). It provides:
+
+- **`SqbClient`** — manages a connection pool for a given `Adapter` (the actual database driver
+  package, e.g. [`@sqb/postgres`](../postgres) or [`@sqb/mysql`](../mysql)), and runs queries or
+  callbacks against acquired connections.
+- **`SqbConnection`** — wraps a single live connection: executes generated queries, streams or
+  fetches cursors, and manages transactions (`startTransaction`/`commit`/`rollback`, with
+  savepoint support where the adapter allows it).
+- **`Repository` / `@Entity`** — a full-featured ORM on top of the client: decorate a class with
+  `@Entity`, `@Column`, `@PrimaryKey`, `@ForeignKey` and `@Link`, then use `find`, `findOne`,
+  `create`, `update`, `delete` and their `*Many` counterparts, including eager-loaded associations
+  and embedded objects.
+- **`Adapter`** — the interface each driver package implements, so a new database only needs a
+  connection/cursor implementation and a dialect (`SerializerExtension` from `@sqb/builder`) to
+  plug into the rest of the stack.
+
+```ts
+import '@sqb/postgres';
+import { SqbClient } from '@sqb/connect';
+
+const client = new SqbClient({
+  dialect: 'postgres',
+  host: 'localhost',
+  database: 'mydb',
+});
+
+const result = await client.execute('select * from customers where id = $1', {
+  params: [1],
+});
+```
 
 ## Main goals
 
@@ -39,7 +70,7 @@ $ npm install @sqb/connect --save
 
 ## Node Compatibility
 
-- node >= 16.x
+- node >= 20.x
 
 ### License
 
@@ -47,17 +78,9 @@ SQB is available under [MIT](LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/connect.svg
 [npm-url]: https://npmjs.org/package/@sqb/connect
-[travis-image]: https://img.shields.io/travis/sqbjs/@sqb/connect/master.svg
-[travis-url]: https://travis-ci.org/sqbjs/@sqb/connect
-[coveralls-image]: https://img.shields.io/coveralls/sqbjs/@sqb/connect/master.svg
-[coveralls-url]: https://coveralls.io/r/sqbjs/@sqb/connect
 [downloads-image]: https://img.shields.io/npm/dm/@sqb/connect.svg
 [downloads-url]: https://npmjs.org/package/@sqb/connect
-[gitter-image]: https://badges.gitter.im/sqbjs/@sqb/connect.svg
-[gitter-url]: https://gitter.im/sqbjs/@sqb/connect?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[dependencies-image]: https://david-dm.org/sqbjs/@sqb/connect/status.svg
-[dependencies-url]: https://david-dm.org/sqbjs/@sqb/connect
-[devdependencies-image]: https://david-dm.org/sqbjs/@sqb/connect/dev-status.svg
-[devdependencies-url]: https://david-dm.org/sqbjs/@sqb/connect?type=dev
-[quality-image]: http://npm.packagequality.com/shield/@sqb/connect.png
-[quality-url]: http://packagequality.com/#?package=@sqb/connect
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master
