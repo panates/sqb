@@ -15,7 +15,10 @@ describe('mariadb:MariadbAdapter', () => {
   const env = process.env;
   initAdapterTests(adapter, {
     host: env.MARIADB_HOST,
-    port: env.MARIADB_PORT ? parseInt(env.MARIADB_PORT, 10) : undefined,
+    // Defaults to 3307, matching packages/mariadb/docker-compose.yml - the
+    // driver's own default (3306) would silently hit the mysql test
+    // container instead, which doesn't understand RETURNING.
+    port: env.MARIADB_PORT ? parseInt(env.MARIADB_PORT, 10) : 3307,
     database,
     user: env.MARIADB_USER || 'root',
     password: env.MARIADB_PASSWORD,

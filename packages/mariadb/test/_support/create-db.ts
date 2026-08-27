@@ -121,9 +121,12 @@ export async function createTestSchema(database: string) {
   schemaCreated[database] = true;
   const connection = await createConnection({
     host: process.env.MARIADB_HOST,
+    // Defaults to 3307, matching packages/mariadb/docker-compose.yml - the
+    // driver's own default (3306) would silently hit the mysql test
+    // container instead, which doesn't understand RETURNING.
     port: process.env.MARIADB_PORT
       ? parseInt(process.env.MARIADB_PORT, 10)
-      : undefined,
+      : 3307,
     user: process.env.MARIADB_USER || 'root',
     password: process.env.MARIADB_PASSWORD,
     multipleStatements: true,
