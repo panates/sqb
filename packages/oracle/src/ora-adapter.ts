@@ -16,7 +16,7 @@ export interface OraClientConfiguration extends ClientConfiguration {
 export class OraAdapter implements Adapter {
   driver = 'oracledb';
   dialect = 'oracle';
-  features = {
+  features: Adapter.Features = {
     cursor: true,
     schema: true,
     // fetchAsString: [DataType.DATE, DataType.TIMESTAMP, DataType.TIMESTAMPTZ]

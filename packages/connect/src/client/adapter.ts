@@ -10,11 +10,7 @@ import {
 export interface Adapter {
   driver: string;
   dialect: string;
-  features?: {
-    cursor?: boolean;
-    schema?: boolean;
-    fetchAsString?: DataType[];
-  };
+  features?: Adapter.Features;
   connect: (config: ClientConfiguration) => Promise<Adapter.Connection>;
 }
 
@@ -63,5 +59,11 @@ export namespace Adapter {
     size?: number;
     precision?: number;
     _inf: any;
+  }
+
+  export interface Features {
+    cursor?: boolean;
+    schema?: boolean;
+    fetchAsString?: DataType[];
   }
 }
