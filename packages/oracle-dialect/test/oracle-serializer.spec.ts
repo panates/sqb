@@ -22,6 +22,14 @@ describe('oracle-dialect:OracleSerializer', () => {
       expect(result.sql).toStrictEqual('select * from dual');
     });
 
+    it('should serialize Oracle-specific reserved words', () => {
+      const query = Select('level', 'rownum', 'sysdate').from('table1');
+      const result = query.generate({ dialect: 'oracle' });
+      expect(result.sql).toStrictEqual(
+        'select "level", "rownum", "sysdate" from table1',
+      );
+    });
+
     it('should replace "= null" to "is null": test1', () => {
       const query = Select().from().where({ ID: null });
       const result = query.generate({ dialect: 'oracle' });
@@ -81,6 +89,24 @@ describe('oracle-dialect:OracleSerializer', () => {
       const result = query.generate({ dialect: 'oracle' });
       expect(result.sql).toStrictEqual(
         "select * from table1 where dt = to_date('2017-01-01', 'yyyy-mm-dd')",
+      );
+    });
+
+    it('should serialize date-like string value with "to_date()" function', () => {
+      const query = Select().from('table1').where(Eq('dt', '2017-01-01'));
+      const result = query.generate({ dialect: 'oracle' });
+      expect(result.sql).toStrictEqual(
+        "select * from table1 where dt = to_date('2017-01-01', 'yyyy-mm-dd')",
+      );
+    });
+
+    it('should serialize ISO date-time string value with "to_timestamp_tz()" function', () => {
+      const query = Select()
+        .from('table1')
+        .where(Eq('dt', '2017-01-01T10:30:15'));
+      const result = query.generate({ dialect: 'oracle' });
+      expect(result.sql).toStrictEqual(
+        "select * from table1 where dt = to_timestamp_tz('2017-01-01T10:30:15','yyyy-mm-dd\"T\"hh24:mi:sstzh:tzm')",
       );
     });
 
