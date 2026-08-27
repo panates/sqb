@@ -31,7 +31,7 @@
     "@sqb/builder": "^6.0.0",
     "@sqb/connect": "^6.0.0",
     "@sqb/mysql-dialect": "^6.0.0",
-    "mysql2": "^3.9.0"
+    "mysql2": "^3.24.2"
   },
   "type": "module",
   "module": "./index.js",

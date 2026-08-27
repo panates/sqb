@@ -31,7 +31,7 @@
     "@sqb/builder": "^6.0.0",
     "@sqb/connect": "^6.0.0",
     "@sqb/mariadb-dialect": "^6.0.0",
-    "mariadb": "^3.4.0"
+    "mariadb": "^3.5.3"
   },
   "type": "module",
   "module": "./index.js",

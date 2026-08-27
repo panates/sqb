@@ -161,7 +161,10 @@ export class MariadbConnection implements Adapter.Connection {
       // A RETURNING clause on INSERT/DELETE (or a plain SELECT) makes the
       // server respond with a result set instead of an OK packet - no
       // follow-up SELECT is needed to read back inserted/deleted rows.
-      out.fields = this._convertFields(result.meta);
+      // `result` narrows to `any[]` here (a plain array type with no
+      // `.meta`), even though at runtime the driver attaches a non-
+      // enumerable `meta` property to it - cast back to `any` to read it.
+      out.fields = this._convertFields((result as any).meta);
       out.rowType = rowType;
       out.rows = query.fetchRows ? result.slice(0, query.fetchRows) : result;
       if (query.returningFields) out.rowsAffected = result.length;
