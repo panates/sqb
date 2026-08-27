@@ -18,5 +18,9 @@ Allowed types:
 - `refactor:` — code change that doesn't add a feature or fix a bug (renames, restructuring, cleanup)
 - `chore:` — maintenance work: dependency bumps, CI/tooling changes, config
 - `dev:` — internal dev-environment/tooling changes not shipped to consumers (e.g. `.gitignore`, editor/repo scripts)
+- `test:` — adding or updating tests only
+- `docs:` — documentation-only changes
+- `style:` — formatting/whitespace/lint-style changes with no code behavior change
+- `perf:` — a performance improvement
 
-Do not invent other types (no `test:`, `docs:`, `style:`, `perf:`, etc.) unless the user explicitly asks for one — stick to the five above to match existing history. Release/version-bump commits (e.g. `5.0.7`) and `Merge pull request #...` commits are exceptions and do not need a type prefix.
+Do not invent other types beyond the nine above unless the user explicitly asks for one. Release/version-bump commits (e.g. `5.0.7`) and `Merge pull request #...` commits are exceptions and do not need a type prefix.
