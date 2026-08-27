@@ -19,7 +19,7 @@ export function serializeColumn(col: FieldMetadata, v: any): any {
   return v;
 }
 
-const padZero = (n: number): string => (n < 9 ? '0' : '') + n;
+const padZero = (n: number): string => (n < 10 ? '0' : '') + n;
 
 function serializeDataValue(dataType: DataType, v: any): any {
   if (v == null) return;

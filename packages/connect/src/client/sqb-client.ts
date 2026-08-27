@@ -177,8 +177,7 @@ export class SqbClient extends TypedEventEmitterClass<SqbClientEvents>(
    * Shuts down the pool and destroys all resources.
    */
   async close(terminateWait?: number): Promise<void> {
-    const ms = terminateWait == null ? Infinity : 0;
-    return this._pool.close(ms);
+    return this._pool.close(terminateWait);
   }
 
   /**

@@ -58,9 +58,17 @@ export class CursorStream extends Readable {
 
   _read() {
     if (this._rowNum >= this._limit) {
-      this.pause();
-      this.unpipe();
-      this.emit('end');
+      // Mirror the natural-EOF path below: close the JSON array (or push
+      // null directly in object mode) instead of manually emitting 'end',
+      // which skipped push(null) and left the buffer without its closing
+      // ']' and the Readable state machine without a proper EOF signal.
+      if (this._eof) {
+        this.push(null);
+        return;
+      }
+      this._eof = true;
+      if (!this._objectMode) this.push(']');
+      else this.push(null);
       return;
     }
     this._cursor
@@ -96,12 +104,14 @@ export class CursorStream extends Readable {
   }
 
   emit(event: string | symbol, ...args: any[]): boolean {
-    try {
-      if (event === 'error' && !this.listenerCount('error')) return false;
-      return super.emit(event, ...args);
-    } catch (ignored) {
-      debug('emit-error', ignored);
+    // Node's EventEmitter throws when 'error' is emitted with no listener
+    // attached; guard against that specifically. Exceptions thrown by
+    // listeners of other events (e.g. a consumer's 'data'/'end' handler)
+    // must propagate normally instead of being silently swallowed.
+    if (event === 'error' && !this.listenerCount('error')) {
+      debug('unhandled error event ignored', args[0]);
       return false;
     }
+    return super.emit(event, ...args);
   }
 }
