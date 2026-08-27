@@ -8,15 +8,87 @@ import {
 } from '@sqb/builder';
 import { toDateString } from 'valgen';
 
-const reservedWords = ['comment', 'dual'];
+// Oracle reserved words (Oracle Database SQL Language Reference, "Oracle SQL
+// Reserved Words") that are not already covered by SerializeContext's base
+// reservedWords list.
+const reservedWords = new Set([
+  'comment',
+  'dual',
+  'access',
+  'any',
+  'audit',
+  'char',
+  'cluster',
+  'column_value',
+  'compress',
+  'connect',
+  'current',
+  'date',
+  'decimal',
+  'exclusive',
+  'exists',
+  'file',
+  'float',
+  'grant',
+  'identified',
+  'immediate',
+  'increment',
+  'initial',
+  'integer',
+  'intersect',
+  'level',
+  'lock',
+  'long',
+  'maxextents',
+  'minus',
+  'mlslabel',
+  'mode',
+  'modify',
+  'nested_table_id',
+  'noaudit',
+  'nocompress',
+  'nowait',
+  'number',
+  'of',
+  'offline',
+  'online',
+  'option',
+  'pctfree',
+  'prior',
+  'public',
+  'raw',
+  'rename',
+  'resource',
+  'revoke',
+  'row',
+  'rowid',
+  'rownum',
+  'rows',
+  'session',
+  'set',
+  'share',
+  'size',
+  'smallint',
+  'start',
+  'successful',
+  'synonym',
+  'sysdate',
+  'trigger',
+  'uid',
+  'validate',
+  'values',
+  'varchar',
+  'varchar2',
+  'view',
+  'whenever',
+]);
 
 export class OracleSerializer implements SerializerExtension {
   dialect = 'oracle';
+  reservedWords = reservedWords;
 
-  isReservedWord(ctx, s) {
-    return (
-      s && typeof s === 'string' && reservedWords.includes(s.toLowerCase())
-    );
+  isReservedWord(_: any, s: any) {
+    return s && typeof s === 'string' && reservedWords.has(s.toLowerCase());
   }
 
   serialize(
@@ -74,7 +146,10 @@ export class OracleSerializer implements SerializerExtension {
     const offset = Math.max(o.offset || 0, 0);
 
     if (limit || offset) {
-      if (ctx.dialectVersion && ctx.dialectVersion >= '12') {
+      const majorVersion = ctx.dialectVersion
+        ? parseInt(String(ctx.dialectVersion).split('.')[0], 10)
+        : 0;
+      if (majorVersion >= 12) {
         if (offset)
           out +=
             '\nOFFSET ' +
@@ -173,7 +248,7 @@ export class OracleSerializer implements SerializerExtension {
   ): string {
     if (typeof o === 'string') {
       if (o.match(/^\d{4}-\d{2}-\d{2}$/))
-        return 'to_date(' + o + ", 'yyyy-mm-dd')";
+        return `to_date('${o}', 'yyyy-mm-dd')`;
       if (o.match(/^\d{4}-\d{2}-\d{2}T/))
         return `to_timestamp_tz('${o}','yyyy-mm-dd"T"hh24:mi:sstzh:tzm')`;
     }
@@ -249,7 +324,7 @@ export class OracleSerializer implements SerializerExtension {
       if (v instanceof Date) {
         ctx.preparedParams = ctx.preparedParams || {};
         ctx.preparedParams[o.name] = toDateString(v).replace('T', ' ');
-        return `TO_DATE(:${o.name}, 'yyyy-mm-dd hh24:mi:ss.SSSSS')`;
+        return `TO_TIMESTAMP(:${o.name}, 'yyyy-mm-dd hh24:mi:ss.FF3')`;
       }
       if (Array.isArray(v)) {
         delete ctx.params?.[o.name];

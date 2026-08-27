@@ -4,6 +4,7 @@
 packages/*/dist
 packages/*/build
 /support/docker/data
+packages/*/data
 /reports
 /debug
 *.cache.json

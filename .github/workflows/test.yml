@@ -21,6 +21,7 @@ on:
       - '.mocharc.cjs'
       - 'package.json'
       - 'tsconfig*.json'
+      - '.github/workflows/test.yml'
 
 # Only one run per branch at a time
 concurrency:
@@ -58,14 +59,72 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: sqb_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      # Mapped to a non-default host port (3307) because the mysql service
+      # above already occupies 3306 - see MARIADB_PORT below.
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: yes
+          MARIADB_DATABASE: sqb_test
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: Sqb_Test_2024!
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd="/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P Sqb_Test_2024! -Q 'SELECT 1' || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      # Oracle test coverage is currently disabled (describe.skip in
+      # packages/oracle/test/oracledb-adapter.spec.ts) - this service is
+      # wired up and ready for when that test file gets finished.
+      oracle:
+        image: gvenzl/oracle-free:23-slim
+        env:
+          ORACLE_PASSWORD: Sqb_Test_2024!
+        ports:
+          - 1521:1521
+        options: >-
+          --health-cmd="healthcheck.sh"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=20
+          --health-start-period=30s
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 'Setup Environment'
         uses: panates/ghac-setup-node@v1
         with:
-          node-version: '22'
+          node-version: '24'
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Install rman
@@ -78,6 +137,22 @@ jobs:
         run: npm run citest
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_PORT: 3306
+          MYSQL_USER: root
+          # mapped to 3307 in the mariadb service above - mysql already owns 3306
+          MARIADB_HOST: 127.0.0.1
+          MARIADB_PORT: 3307
+          MARIADB_USER: root
+          MSSQL_HOST: 127.0.0.1
+          MSSQL_PORT: 1433
+          MSSQL_USER: sa
+          MSSQL_PASSWORD: Sqb_Test_2024!
+          ORAHOST: 127.0.0.1
+          ORAPORT: 1521
+          ORADATABASE: FREEPDB1
+          ORAUSER: system
+          ORAPASSWORD: Sqb_Test_2024!
 
       - name: Send coverage to Coveralls
         uses: coverallsapp/github-action@v2

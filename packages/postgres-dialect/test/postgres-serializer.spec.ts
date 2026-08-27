@@ -50,6 +50,14 @@ describe('postgres-dialect:PostgresSerializer', () => {
     expect(result.sql).toStrictEqual('select "comment" from table1');
   });
 
+  it('should serialize newly added reserved words', () => {
+    const query = sql.Select('array', 'binary', 'isnull').from('table1');
+    const result = query.generate({ dialect: 'postgres' });
+    expect(result.sql).toStrictEqual(
+      'select "array", "binary", "isnull" from table1',
+    );
+  });
+
   it('should serialize "limit"', () => {
     const query = sql.Select().from('table1').limit(10);
     const result = query.generate({ dialect: 'postgres' });

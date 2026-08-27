@@ -1,22 +1,48 @@
-<center>
-<p>
+<p style="text-align:center">
   <img src="https://user-images.githubusercontent.com/3836517/32965280-1a2b63ce-cbe7-11e7-8ee1-ba47313503c5.png" width="500px" alt="SQB Logo"/>
 </p>
-</center>
 
 <br>
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
+[![CI Tests][ci-test-image]][ci-test-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-[![Dependencies][dependencies-image]][dependencies-url]
-[![DevDependencies][devdependencies-image]][devdependencies-url]
-[![Package Quality][quality-image]][quality-url]
 
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
+
+## About @sqb/migrator
+
+`@sqb/migrator` is a schema/data migration runner for SQB. A `MigrationPackage` describes an
+ordered set of versioned migrations, each made up of one or more tasks:
+
+- a raw SQL script (a `.sql` file, or an inline string/function),
+- a data-insert task (`{ tableName, rows }`), or
+- a custom function that runs arbitrary code against the connection.
+
+Migrations and tasks can be declared inline or discovered from disk via glob patterns (e.g.
+`v*/migration.json` + `*.task.sql`). `DbMigrator.execute()` loads the package, compares its
+migrations against the target database's tracked version, and applies everything up to an
+optional `targetVersion` in order — recording progress (and per-task success/error events) in a
+`migration_summary` / `migration_events` table pair it creates automatically. Migration scripts
+can reference `$(schema)`, `$(tablespace)` and other variables that get substituted per-run.
+
+```ts
+import { DbMigrator } from '@sqb/migrator';
+
+const migrator = new DbMigrator();
+await migrator.execute({
+  connection: { dialect: 'postgres', database: 'mydb' },
+  migrationPackage: {
+    name: 'my-app',
+    migrations: ['migrations/v*/migration.json'],
+  },
+});
+```
+
+Currently only PostgreSQL is supported, via the bundled `PgMigrationAdapter`.
 
 ## Main goals
 
@@ -41,7 +67,7 @@ $ npm install @sqb/migrator --save
 
 ## Node Compatibility
 
-- node >= 16.x
+- node >= 20.x
 
 ### License
 
@@ -49,17 +75,9 @@ SQB is available under [MIT](LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/migrator.svg
 [npm-url]: https://npmjs.org/package/@sqb/migrator
-[travis-image]: https://img.shields.io/travis/sqbjs/@sqb/migrator/master.svg
-[travis-url]: https://travis-ci.org/sqbjs/@sqb/migrator
-[coveralls-image]: https://img.shields.io/coveralls/sqbjs/@sqb/migrator/master.svg
-[coveralls-url]: https://coveralls.io/r/sqbjs/@sqb/migrator
 [downloads-image]: https://img.shields.io/npm/dm/@sqb/migrator.svg
 [downloads-url]: https://npmjs.org/package/@sqb/migrator
-[gitter-image]: https://badges.gitter.im/sqbjs/@sqb/migrator.svg
-[gitter-url]: https://gitter.im/sqbjs/@sqb/migrator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[dependencies-image]: https://david-dm.org/sqbjs/@sqb/migrator/status.svg
-[dependencies-url]: https://david-dm.org/sqbjs/@sqb/migrator
-[devdependencies-image]: https://david-dm.org/sqbjs/@sqb/migrator/dev-status.svg
-[devdependencies-url]: https://david-dm.org/sqbjs/@sqb/migrator?type=dev
-[quality-image]: http://npm.packagequality.com/shield/@sqb/migrator.png
-[quality-url]: http://packagequality.com/#?package=@sqb/migrator
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

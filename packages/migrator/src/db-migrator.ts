@@ -39,7 +39,7 @@ export class DbMigrator extends AsyncEventEmitter {
     );
 
     const targetVersion: number = Math.min(
-      options?.targetVersion || Number.MAX_SAFE_INTEGER,
+      options?.targetVersion ?? Number.MAX_SAFE_INTEGER,
       maxVersion,
     );
 

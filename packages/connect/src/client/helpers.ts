@@ -46,13 +46,9 @@ export function wrapAdapterFields(
     if (name) return { ...f, name, index } as FieldInfo;
   };
   const result = new FieldInfoMap();
-  let i = 0;
-  oldFields.forEach(f => {
+  oldFields.forEach((f, i) => {
     const x = mapFieldInfo(f, i);
-    if (x) {
-      i++;
-      result.add(x);
-    }
+    if (x) result.add(x);
   });
   return result;
 }

@@ -16,6 +16,16 @@ import { MigrationStatus } from '../types.js';
 
 const pgAdapter = new PgAdapter();
 
+// Quotes a (possibly schema-qualified, e.g. "myschema.mytable") Postgres
+// identifier so reserved words / mixed case / special characters in a
+// migration task's tableName or row keys don't break the generated SQL.
+function quoteIdent(name: string): string {
+  return name
+    .split('.')
+    .map(part => '"' + part.replace(/"/g, '""') + '"')
+    .join('.');
+}
+
 export class PgMigrationAdapter extends MigrationAdapter {
   declare protected _connection: Connection;
   protected _infoSchema = 'public';
@@ -77,8 +87,11 @@ export class PgMigrationAdapter extends MigrationAdapter {
       }
 
       // Check if migration schema
+      // No AUTHORIZATION clause - let it default to the connecting role,
+      // since hardcoding a specific owner (e.g. "postgres") makes this
+      // fail with a permission error for any non-superuser connection.
       await connection.query(
-        `CREATE SCHEMA IF NOT EXISTS ${adapter.infoSchema} AUTHORIZATION postgres;`,
+        `CREATE SCHEMA IF NOT EXISTS ${adapter.infoSchema};`,
       );
       // Create summary table if not exists
       await connection.execute(`
@@ -161,7 +174,7 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
       params.push(info.status);
       sql += ',\n  status = $' + params.length;
     }
-    if (info.version && info.version !== this.version) {
+    if (info.version != null && info.version !== this.version) {
       params.push(info.version);
       sql += ',\n  current_version = $' + params.length;
     }
@@ -174,7 +187,7 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
         params.length;
       await this._connection.query(sql, { params });
       if (info.status) this._status = info.status;
-      if (info.version) this._version = info.version;
+      if (info.version != null) this._version = info.version;
     }
   }
 
@@ -254,22 +267,36 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     return Promise.resolve(undefined);
   }
 
-  lockSchema(): Promise<void> {
-    return Promise.resolve(undefined);
+  /**
+   * Serializes concurrent migration runs against the same package using a
+   * Postgres session-level advisory lock, so two processes migrating the
+   * same schema at once can't race on the summary table bookkeeping.
+   */
+  async lockSchema(): Promise<void> {
+    await this._connection.query(
+      'SELECT pg_advisory_lock(hashtext($1)::bigint)',
+      { params: [this.infoSchema + '.' + this.packageName] },
+    );
+    // Another process may have advanced the tracked version while we were
+    // waiting for the lock - re-read it now that we hold the lock.
+    await this.refresh();
   }
 
   restoreDatabase(): Promise<void> {
     return Promise.resolve(undefined);
   }
 
-  unlockSchema(): Promise<void> {
-    return Promise.resolve(undefined);
+  async unlockSchema(): Promise<void> {
+    await this._connection.query(
+      'SELECT pg_advisory_unlock(hashtext($1)::bigint)',
+      { params: [this.infoSchema + '.' + this.packageName] },
+    );
   }
 
   protected rowToSql(tableName: string, row: Object): string {
     let sql = '';
     const keys = Object.keys(row);
-    sql += `insert into ${tableName} (${keys}) values (`;
+    sql += `insert into ${quoteIdent(tableName)} (${keys.map(quoteIdent).join(', ')}) values (`;
     for (let i = 0; i < keys.length; i++) {
       sql += (i ? ', ' : '') + stringifyValueForSQL(row[keys[i]]);
     }

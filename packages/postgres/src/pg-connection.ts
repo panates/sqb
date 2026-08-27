@@ -138,7 +138,7 @@ export class PgConnection implements Adapter.Connection {
     };
     if (query.fetchAsString) {
       const items = query.fetchAsString.reduce<OID[]>((a, v) => {
-        const oid = SqbDataTypToOIDMap[v][0];
+        const oid = SqbDataTypToOIDMap[v]?.[0];
         if (oid) a.push(oid);
         return a;
       }, []);

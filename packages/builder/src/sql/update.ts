@@ -38,6 +38,10 @@ class UpdateClass extends ReturningQuery {
       where: this.__serializeWhere(ctx),
       returning: this.__serializeReturning(ctx),
     };
+    return ctx.serialize(this._type, o, () => this.__defaultSerialize(ctx, o));
+  }
+
+  protected __defaultSerialize(ctx: SerializeContext, o: any): string {
     let out = 'update ' + o.table + ' set \n\t' + o.values + '\b';
     if (o.where) out += '\n' + o.where;
     if (o.returning) out += '\n' + o.returning;
@@ -58,7 +62,7 @@ class UpdateClass extends ReturningQuery {
       });
     }
     return ctx.serialize(SerializationType.UPDATE_QUERY_VALUES, arr, () => {
-      const a = arr.map(o => o.field + ' = ' + o.value);
+      const a = arr.map(o => ctx.escapeReserved(o.field) + ' = ' + o.value);
       return printArray(a, ',');
     });
   }

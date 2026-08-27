@@ -91,6 +91,7 @@ export class Association {
         this._sourceProperty = foreign._sourceProperty;
         this._targetKey = foreign._targetKey;
         this._targetProperty = foreign._targetProperty;
+        this._resolved = true;
         return;
       }
       // Try to determine key fields from foreign key from target to source
@@ -101,6 +102,7 @@ export class Association {
         this._sourceProperty = foreign._targetProperty;
         this._targetKey = foreign._sourceKey;
         this._targetProperty = foreign._sourceProperty;
+        this._resolved = true;
         return;
       }
 
@@ -153,5 +155,6 @@ export class Association {
       throw new Error(`Can't determine source key of ${this.name}`);
     this._targetKey = targetKey;
     this._sourceKey = sourceKey;
+    this._resolved = true;
   }
 }

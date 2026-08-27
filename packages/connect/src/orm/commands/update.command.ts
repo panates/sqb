@@ -52,6 +52,13 @@ export class UpdateCommand {
     if (!ctx.colCount) return 0;
 
     if (args.filter) await this._prepareFilter(ctx, args.filter);
+    // An empty filter (or one that resolves to zero conditions) must never
+    // be allowed to fall through as "no WHERE clause" - that would update
+    // every row in the table instead of the rows the caller intended.
+    if (!ctx.queryFilter.length)
+      throw new Error(
+        'updateMany() requires a non-empty filter to prevent accidental update of all rows',
+      );
     const query = Update(
       TableName({
         table: tableName,

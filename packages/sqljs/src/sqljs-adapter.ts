@@ -13,7 +13,7 @@ const dbCache = new Map<string, CachedDatabase>();
 export class SqljsAdapter implements Adapter {
   driver = 'sqljs';
   dialect = 'sqlite';
-  features = {
+  features: Adapter.Features = {
     cursor: true,
     // fetchAsString: [DataType.DATE, DataType.TIMESTAMP, DataType.TIMESTAMPTZ]
   };

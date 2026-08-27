@@ -6,7 +6,7 @@ import { PgConnection } from './pg-connection.js';
 export class PgAdapter implements Adapter {
   driver = 'postgrejs';
   dialect = 'postgres';
-  features = {
+  features: Adapter.Features = {
     cursor: true,
     schema: true,
     fetchAsString: [DataType.DATE, DataType.TIMESTAMP, DataType.TIMESTAMPTZ],

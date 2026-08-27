@@ -17,7 +17,7 @@ export class BaseEntity {
 
   async destroy(): Promise<boolean> {
     const repo = this[REPOSITORY_KEY];
-    return !!(repo && repo.destroy(this));
+    return !!(repo && repo.delete(this));
   }
 
   async exists(): Promise<boolean> {

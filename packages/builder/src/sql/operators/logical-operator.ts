@@ -47,9 +47,12 @@ function wrapObject(obj: any): SqlElement[] {
       const m = n.match(COMPARE_LEFT_PATTERN);
       if (!m)
         throw new TypeError(`"${n}" is not a valid expression definition`);
-      fn = registeredOperators[m[2] || 'eq'];
-      if (!fn) throw new Error(`Unknown operator "${m[2]}"`);
-      const inst = fn(m[1], obj[n]);
+      // A bare array value with no explicit operator (e.g. {status: [...]})
+      // means "one of these values", not literal equality to an array.
+      const opKey = m[2] || (Array.isArray(v) ? 'in' : 'eq');
+      fn = registeredOperators[opKey];
+      if (!fn) throw new Error(`Unknown operator "${opKey}"`);
+      const inst = fn(m[1], v);
       result.push(inst);
     }
   }

@@ -122,9 +122,12 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
    */
   async close(): Promise<void> {
     if (!this._intlcon) return;
-    await this.emitAsyncSerial('close');
+    // Capture and clear _intlcon synchronously (before the first await) so
+    // that an overlapping close() call sees it already cleared instead of
+    // both calls passing the guard and releasing the same connection twice.
     const intlcon = this._intlcon;
     this._intlcon = undefined;
+    await this.emitAsyncSerial('close');
     this.client.pool.release(intlcon, (e: any) => {
       if (e) this.client.emit('error', e);
     });
@@ -271,7 +274,8 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
         }
       }
 
-      if (response.rowsAffected) result.rowsAffected = response.rowsAffected;
+      if (response.rowsAffected != null)
+        result.rowsAffected = response.rowsAffected;
 
       return result;
     } catch (e: any) {

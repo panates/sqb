@@ -18,11 +18,15 @@ export class DeleteCommand {
   static async execute(args: DestroyCommandArgs): Promise<number> {
     const { connection, entity, filter, params } = args;
 
-    let where: LogicalOperator | undefined;
-    if (filter) {
-      where = And();
-      await prepareFilter(entity, filter, where);
-    }
+    const where: LogicalOperator = And();
+    if (filter) await prepareFilter(entity, filter, where);
+    // An empty filter (or one that resolves to zero conditions) must never
+    // be allowed to fall through as "no WHERE clause" - that would delete
+    // every row in the table instead of the rows the caller intended.
+    if (!where._items.length)
+      throw new Error(
+        'deleteMany() requires a non-empty filter to prevent accidental deletion of all rows',
+      );
     const query = Delete(
       TableName({
         table: entity.tableName!,
@@ -36,7 +40,7 @@ export class DeleteCommand {
       else query.comment(args.comment as any);
     }
 
-    if (where) query.where(...where._items);
+    query.where(...where._items);
     // Execute query
     const resp = await connection.execute(query, {
       params,

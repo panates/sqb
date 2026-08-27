@@ -9,7 +9,7 @@ import type {
 } from './types.js';
 
 export class SerializeContext implements GenerateOptions {
-  readonly reservedWords = [
+  readonly reservedWords = new Set([
     'schema',
     'table',
     'field',
@@ -66,7 +66,27 @@ export class SerializeContext implements GenerateOptions {
     'foreign',
     'user',
     'password',
-  ];
+    'all',
+    'as',
+    'asc',
+    'case',
+    'cast',
+    'check',
+    'column',
+    'desc',
+    'else',
+    'end',
+    'for',
+    'in',
+    'into',
+    'is',
+    'on',
+    'then',
+    'to',
+    'union',
+    'unique',
+    'when',
+  ]);
 
   dialect?: string;
   prettyPrint?: boolean;
@@ -203,7 +223,7 @@ export class SerializeContext implements GenerateOptions {
    */
   isReservedWord(s: string | undefined | null): boolean {
     if (!s) return false;
-    if (this.reservedWords.includes(s.toLowerCase())) return true;
+    if (this.reservedWords.has(s.toLowerCase())) return true;
     for (const ext of SerializerRegistry.items()) {
       if (ext.dialect === this.dialect && ext.isReservedWord) {
         if (ext.isReservedWord(this, s)) return true;

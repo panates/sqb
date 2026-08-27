@@ -26,7 +26,10 @@ class InsertClass extends ReturningQuery {
       values: this.__serializeValues(ctx),
       returning: this.__serializeReturning(ctx),
     };
+    return ctx.serialize(this._type, o, () => this.__defaultSerialize(ctx, o));
+  }
 
+  protected __defaultSerialize(ctx: SerializeContext, o: any): string {
     let out =
       'insert into ' +
       o.table +
@@ -55,7 +58,7 @@ class InsertClass extends ReturningQuery {
       }
     } else arr = Object.keys(this._input);
     return ctx.serialize(SerializationType.INSERT_QUERY_COLUMNS, arr, () =>
-      printArray(arr),
+      printArray(arr.map(c => ctx.escapeReserved(c))),
     );
   }
 

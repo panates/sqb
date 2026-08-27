@@ -6,30 +6,25 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
+[![CI Tests][ci-test-image]][ci-test-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-[![Dependencies][dependencies-image]][dependencies-url]
-[![DevDependencies][devdependencies-image]][devdependencies-url]
-[![Package Quality][quality-image]][quality-url]
 
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
 
-## Main goals
+## About @sqb/mssql-dialect
 
-- Single code base for any sql based database
-- Powerful and simplified query coding scheme
-- Fast applications with low memory requirements
-- Let applications work with large data tables efficiently
-- Support latest JavaScript language standards
-- Lightweight and extensible framework.
+This package registers the `mssql` SQL serialization dialect (a `SerializerExtension` for
+[`@sqb/builder`](../builder)) used by [`@sqb/mssql`](../mssql). It is loaded automatically when
+`@sqb/mssql` is imported, so you normally don't need to depend on it directly.
 
-You can report bugs and discuss features on the [GitHub issues](https://github.com/sqbjs/sqb/issues) page
-
-Thanks to all of the great [contributions](https://github.com/sqbjs/sqb/graphs/contributors) to the project.
-
-You may want to check detailed [DOCUMENTATION](https://sqbjs.github.io/sqb/)
+It adapts query output to T-SQL: `@name` parameter placeholders instead of `:name`, `OFFSET ...
+ROWS [FETCH NEXT ... ROWS ONLY]` instead of `LIMIT`/`OFFSET` (SQL Server requires an `ORDER BY`
+before `OFFSET`, which the dialect adds automatically when a query needs pagination but has none),
+and SQL Server's own reserved-word list. `RETURNING` is rewritten into SQL Server's native `OUTPUT
+INSERTED.col` / `OUTPUT DELETED.col` clause rather than being stripped, since SQL Server has no
+`RETURNING` keyword but its `OUTPUT` clause achieves the same thing without a follow-up `SELECT`.
 
 ## Installation
 
@@ -39,7 +34,7 @@ $ npm install @sqb/mssql-dialect --save
 
 ## Node Compatibility
 
-- node >= 16.x
+- node >= 20.x
 
 ### License
 
@@ -47,17 +42,9 @@ SQB is available under [MIT](LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/mssql-dialect.svg
 [npm-url]: https://npmjs.org/package/@sqb/mssql-dialect
-[travis-image]: https://img.shields.io/travis/sqbjs/@sqb/mssql-dialect/master.svg
-[travis-url]: https://travis-ci.org/sqbjs/@sqb/mssql-dialect
-[coveralls-image]: https://img.shields.io/coveralls/sqbjs/@sqb/mssql-dialect/master.svg
-[coveralls-url]: https://coveralls.io/r/sqbjs/@sqb/mssql-dialect
 [downloads-image]: https://img.shields.io/npm/dm/@sqb/mssql-dialect.svg
 [downloads-url]: https://npmjs.org/package/@sqb/mssql-dialect
-[gitter-image]: https://badges.gitter.im/sqbjs/@sqb/mssql-dialect.svg
-[gitter-url]: https://gitter.im/sqbjs/@sqb/mssql-dialect?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[dependencies-image]: https://david-dm.org/sqbjs/@sqb/mssql-dialect/status.svg
-[dependencies-url]: https://david-dm.org/sqbjs/@sqb/mssql-dialect
-[devdependencies-image]: https://david-dm.org/sqbjs/@sqb/mssql-dialect/dev-status.svg
-[devdependencies-url]: https://david-dm.org/sqbjs/@sqb/mssql-dialect?type=dev
-[quality-image]: http://npm.packagequality.com/shield/@sqb/mssql-dialect.png
-[quality-url]: http://packagequality.com/#?package=@sqb/mssql-dialect
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

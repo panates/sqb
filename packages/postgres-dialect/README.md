@@ -6,30 +6,25 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
+[![CI Tests][ci-test-image]][ci-test-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-[![Dependencies][dependencies-image]][dependencies-url]
-[![DevDependencies][devdependencies-image]][devdependencies-url]
-[![Package Quality][quality-image]][quality-url]
 
 ## About SQB
 
 SQB is an extensible, multi-dialect SQL query builder and Database connection wrapper for NodeJS.
 
-## Main goals
+## About @sqb/postgres-dialect
 
-- Single code base for any sql based database
-- Powerful and simplified query coding scheme
-- Fast applications with low memory requirements
-- Let applications work with large data tables efficiently
-- Support latest JavaScript language standards
-- Lightweight and extensible framework.
+This package registers the `postgres` SQL serialization dialect (a `SerializerExtension` for
+[`@sqb/builder`](../builder)) used by [`@sqb/postgres`](../postgres). It is loaded automatically
+when `@sqb/postgres` is imported, so you normally don't need to depend on it directly.
 
-You can report bugs and discuss features on the [GitHub issues](https://github.com/sqbjs/sqb/issues) page
-
-Thanks to all of the great [contributions](https://github.com/sqbjs/sqb/graphs/contributors) to the project.
-
-You may want to check detailed [DOCUMENTATION](https://sqbjs.github.io/sqb/)
+PostgreSQL already speaks close to standard SQL, so this dialect makes fewer changes than most:
+`LIMIT`/`OFFSET` for pagination, `= NULL`/`!= NULL` rewritten to `IS [NOT] NULL`, and Postgres's
+own reserved-word list. It also rewrites the builder's default `:name` named placeholders into
+Postgres's positional `$1, $2, ...` parameter syntax. `RETURNING` is left untouched — Postgres
+supports it natively on `INSERT`, `UPDATE` and `DELETE`, so `@sqb/postgres` reads affected rows
+straight from the statement response with no follow-up query needed.
 
 ## Installation
 
@@ -39,7 +34,7 @@ $ npm install @sqb/postgres-dialect --save
 
 ## Node Compatibility
 
-- node >= 16.x
+- node >= 20.x
 
 ### License
 
@@ -47,17 +42,9 @@ SQB is available under [MIT](LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/postgres-dialect.svg
 [npm-url]: https://npmjs.org/package/@sqb/postgres-dialect
-[travis-image]: https://img.shields.io/travis/sqbjs/@sqb/postgres-dialect/master.svg
-[travis-url]: https://travis-ci.org/sqbjs/@sqb/postgres-dialect
-[coveralls-image]: https://img.shields.io/coveralls/sqbjs/@sqb/postgres-dialect/master.svg
-[coveralls-url]: https://coveralls.io/r/sqbjs/@sqb/postgres-dialect
 [downloads-image]: https://img.shields.io/npm/dm/@sqb/postgres-dialect.svg
 [downloads-url]: https://npmjs.org/package/@sqb/postgres-dialect
-[gitter-image]: https://badges.gitter.im/sqbjs/@sqb/postgres-dialect.svg
-[gitter-url]: https://gitter.im/sqbjs/@sqb/postgres-dialect?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[dependencies-image]: https://david-dm.org/sqbjs/@sqb/postgres-dialect/status.svg
-[dependencies-url]: https://david-dm.org/sqbjs/@sqb/postgres-dialect
-[devdependencies-image]: https://david-dm.org/sqbjs/@sqb/postgres-dialect/dev-status.svg
-[devdependencies-url]: https://david-dm.org/sqbjs/@sqb/postgres-dialect?type=dev
-[quality-image]: http://npm.packagequality.com/shield/@sqb/postgres-dialect.png
-[quality-url]: http://packagequality.com/#?package=@sqb/postgres-dialect
+[ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
+[ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
+[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

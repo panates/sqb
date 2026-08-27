@@ -238,13 +238,27 @@ export class RowConverter {
         );
         promises.push(promise);
       } else if (isObjectProperty(prop)) {
-        const subResult: any[] = result.map(r => r[propKey]).filter(x => x);
+        // Keep subResult and subRows in lockstep: rows whose embedded value
+        // is falsy are dropped from subResult, so the corresponding raw row
+        // must be dropped from subRows at the same position - otherwise
+        // subResult[i] and rows[i] drift apart once any row is skipped, and
+        // the recursive nested-property lookup below reads key values from
+        // the wrong row.
+        const subResult: any[] = [];
+        const subRows: any[] = [];
+        result.forEach((r, idx) => {
+          const v = r[propKey];
+          if (v) {
+            subResult.push(v);
+            subRows.push(rows[idx]);
+          }
+        });
         promises.push(
           this._iterateForNested(
             prop.converter,
             connection,
             fields,
-            rows,
+            subRows,
             subResult,
           ),
         );

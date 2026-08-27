@@ -742,12 +742,22 @@ describe('builder:serialize "Operators"', () => {
       );
     });
 
-    it('should ignore if list is empty', () => {
+    it('should default a bare array value to "in" instead of literal equality', () => {
+      const query = Select()
+        .from('table1')
+        .where({ id: [1, 2, 3] });
+      const result = query.generate(options);
+      expect(result.sql).toStrictEqual(
+        'select * from table1 where id in (1,2,3)',
+      );
+    });
+
+    it('should serialize as an always-false condition if list is empty', () => {
       const query = Select()
         .from('table1')
         .where(Or(In('id', [])));
       const result = query.generate(options);
-      expect(result.sql).toStrictEqual('select * from table1');
+      expect(result.sql).toStrictEqual('select * from table1 where (1=0)');
     });
   });
 
@@ -789,6 +799,14 @@ describe('builder:serialize "Operators"', () => {
         'select * from table1 where id not in :id',
       );
       expect(result.params.id).toStrictEqual([1, 2, 3]);
+    });
+
+    it('should serialize as an always-true condition if list is empty', () => {
+      const query = Select()
+        .from('table1')
+        .where(Or(NotIn('id', [])));
+      const result = query.generate(options);
+      expect(result.sql).toStrictEqual('select * from table1 where (1=1)');
     });
 
     it('should wrap native objects to operators', () => {

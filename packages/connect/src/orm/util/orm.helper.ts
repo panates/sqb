@@ -51,9 +51,11 @@ export async function resolveEntityForEmbeddedField(
 
 export function checkEnumValue(col: ColumnFieldMetadata, v: FieldValue) {
   if (v === undefined || !col.enum || (v == null && !col.notNull)) return;
-  const enumKeys = Array.isArray(col.enum) ? col.enum : Object.keys(col.enum);
-  if (!enumKeys.includes(v))
+  const enumValues = Array.isArray(col.enum)
+    ? col.enum
+    : Object.values(col.enum);
+  if (!enumValues.includes(v))
     throw new Error(
-      `${col.entity.name}.${col.name} value must be one of (${enumKeys})`,
+      `${col.entity.name}.${col.name} value must be one of (${enumValues})`,
     );
 }
