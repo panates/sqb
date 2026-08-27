@@ -51,20 +51,22 @@ export class OraAdapter implements Adapter {
 let oracleClientInitialized = false;
 function initOracleClient() {
   if (oracleClientInitialized) return;
-  const libDirs = process.env.LD_LIBRARY_PATH || process.env.ORA_HOME;
-  if (libDirs) {
-    for (const libDir of libDirs.split(':')) {
-      if (
-        (os.type() === 'Linux' &&
-          fs.existsSync(path.join(libDir, 'libclntsh.so'))) ||
-        (os.type() === 'Darwin' &&
-          fs.existsSync(path.join(libDir, 'libclntsh.dylib'))) ||
-        (os.type() === 'Windows_NT' &&
-          fs.existsSync(path.join(libDir, 'oci.dll')))
-      ) {
-        oracledb.initOracleClient({ libDir });
-        oracleClientInitialized = true;
-      }
+  const libDirs = [
+    ...(process.env.LD_LIBRARY_PATH?.split(path.delimiter) || []),
+    ...(process.env.ORA_HOME?.split(path.delimiter) || []),
+  ];
+  for (const libDir of libDirs) {
+    if (
+      (os.type() === 'Linux' &&
+        fs.existsSync(path.join(libDir, 'libclntsh.so'))) ||
+      (os.type() === 'Darwin' &&
+        fs.existsSync(path.join(libDir, 'libclntsh.dylib'))) ||
+      (os.type() === 'Windows_NT' &&
+        fs.existsSync(path.join(libDir, 'oci.dll')))
+    ) {
+      oracledb.initOracleClient({ libDir });
+      oracleClientInitialized = true;
+      return;
     }
   }
 }
