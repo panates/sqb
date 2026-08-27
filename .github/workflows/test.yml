@@ -101,6 +101,22 @@ jobs:
           --health-timeout=5s
           --health-retries=10
 
+      # Oracle test coverage is currently disabled (describe.skip in
+      # packages/oracle/test/oracledb-adapter.spec.ts) - this service is
+      # wired up and ready for when that test file gets finished.
+      oracle:
+        image: gvenzl/oracle-free:23-slim
+        env:
+          ORACLE_PASSWORD: Sqb_Test_2024!
+        ports:
+          - 1521:1521
+        options: >-
+          --health-cmd="healthcheck.sh"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=20
+          --health-start-period=30s
+
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -132,6 +148,11 @@ jobs:
           MSSQL_PORT: 1433
           MSSQL_USER: sa
           MSSQL_PASSWORD: Sqb_Test_2024!
+          ORAHOST: 127.0.0.1
+          ORAPORT: 1521
+          ORADATABASE: FREEPDB1
+          ORAUSER: system
+          ORAPASSWORD: Sqb_Test_2024!
 
       - name: Send coverage to Coveralls
         uses: coverallsapp/github-action@v2
