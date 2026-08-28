@@ -28,7 +28,7 @@ const SqbDataTypToOIDMap = {
   [DataType.GUID]: [DataTypeOIDs.uuid, DataTypeOIDs._uuid],
 };
 
-const NAMED_PARAM_PATTERN = / *:([a-zA-Z_]+)/;
+const NAMED_PARAM_PATTERN = /^( *):([a-zA-Z_]\w*)$/;
 
 export class PgConnection implements Adapter.Connection {
   private intlcon?: Connection;
@@ -189,29 +189,39 @@ export class PgConnection implements Adapter.Connection {
     let out = '';
     let namedParams: Map<string, any> | undefined;
     let params = request.params;
-    let m;
+    // Tracks the previous raw token so a "::" type-cast can be recognized:
+    // the tokenizer splits it into a lone ":" token followed by a ":name"
+    // token, which looks exactly like a named param unless we know the
+    // ":" right before it isn't part of a legitimate delimiter. quotes:true
+    // hands back an entire string/quoted-identifier literal as one token
+    // (e.g. "'literal :notparam text'"), so a ":name" occurring inside one
+    // never matches NAMED_PARAM_PATTERN at all - the tokenizer always
+    // isolates a genuine ":name" reference as its own token (only ever
+    // preceded by whitespace merged into the same token), so there's
+    // nothing else in the token to rule it out with.
+    let prevToken = '';
     while ((token = tokenizer.next())) {
-      m = NAMED_PARAM_PATTERN.exec(token);
-      if (m) {
+      const m = NAMED_PARAM_PATTERN.exec(token);
+      if (m && prevToken !== ':') {
+        const [, leading, k] = m;
         if (!namedParams) {
           if (typeof params !== 'object' || Array.isArray(params))
             throw new Error('"params" should be an key, value object');
           namedParams = new Map();
         }
-        const k = m[1];
-        let index = namedParams.size + 1;
-        if (namedParams.has(k)) {
-          index = namedParams.get(k).index;
-        } else {
-          const v = params[k];
-          if (v != undefined)
-            namedParams.set(k, {
-              index: namedParams.size + 1,
-              value: v,
-            });
+        // Register the param (even if it has no matching value) as soon as
+        // it's first seen, so its index is reserved right away - deferring
+        // registration until a value is found let a later, unrelated param
+        // silently reuse the same index instead.
+        let entry = namedParams.get(k);
+        if (!entry) {
+          entry = { index: namedParams.size + 1, value: params[k] };
+          namedParams.set(k, entry);
         }
-        token = `$${index}`;
+        token = leading + `$${entry.index}`;
       }
+      const trimmed = token.trim();
+      if (trimmed) prevToken = trimmed;
       out += token;
     }
     if (namedParams) {

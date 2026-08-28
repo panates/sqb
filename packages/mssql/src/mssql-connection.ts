@@ -39,7 +39,7 @@ const typeNameMap: Record<string, { dataType: string; jsType: string }> = {
   Image: { dataType: 'IMAGE', jsType: 'Buffer' },
 };
 
-const NAMED_PARAM_PATTERN = / *:([a-zA-Z_]+)/;
+const NAMED_PARAM_PATTERN = /^( *):([a-zA-Z_]\w*)$/;
 
 export class MssqlConnection implements Adapter.Connection {
   private intlcon?: ConnectionPool;
@@ -228,11 +228,26 @@ export class MssqlConnection implements Adapter.Connection {
     });
     let token: string | null;
     let out = '';
-    let m;
+    // quotes:true hands back an entire string/double-quoted-identifier
+    // literal as one token, so a ":name" occurring inside one never
+    // matches the anchored NAMED_PARAM_PATTERN at all. T-SQL's [bracket]
+    // identifier quoting isn't a "quote" character the tokenizer knows
+    // about though (brackets:false), so "[col:name]" comes back as three
+    // separate tokens ("[col", ":name", "]") - track bracket state
+    // explicitly so a ":name" inside one isn't mistaken for a param.
+    let inBracket = false;
     while ((token = tokenizer.next())) {
-      m = NAMED_PARAM_PATTERN.exec(token);
-      if (m) {
-        token = '@' + m[1];
+      const trimmed = token.trim();
+      if (inBracket) {
+        if (trimmed.includes(']')) inBracket = false;
+      } else if (trimmed.startsWith('[')) {
+        inBracket = true;
+      } else {
+        const m = NAMED_PARAM_PATTERN.exec(token);
+        if (m) {
+          const [, leading, name] = m;
+          token = leading + '@' + name;
+        }
       }
       out += token;
     }
