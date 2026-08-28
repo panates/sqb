@@ -106,9 +106,9 @@ describe('builder:serialize "TableField"', () => {
   });
 
   it('should place into double quote if field name is reserved, even with a table prefix', () => {
-    const query = Select('t.with').from('table1 t');
+    const query = Select('with', 't.with').from('table1 t');
     const result = query.generate(options);
-    expect(result.sql).toStrictEqual('select t."with" from table1 t');
+    expect(result.sql).toStrictEqual('select "with", t.with from table1 t');
   });
 
   it('should validate schema name', () => {
