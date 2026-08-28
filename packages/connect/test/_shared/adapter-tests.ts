@@ -30,20 +30,35 @@ export function initAdapterTests(
   afterEach(() => connection && connection.close());
 
   async function adapterExecute(
-    query: Query,
+    query: Query | string,
     opts?: Partial<QueryRequest>,
   ): Promise<Adapter.Response & { objRows: any[] }> {
-    const q = query.generate({
-      dialect: adapter.dialect,
-      params: opts?.params,
-    });
-    const result: any = await connection.execute({
+    let params = opts?.params;
+    let sql: string | undefined;
+    let returningFields = opts?.returningFields;
+    if (typeof query === 'string') {
+      sql = query;
+    } else {
+      const q = query.generate({
+        dialect: adapter.dialect,
+        params: opts?.params,
+      });
+      sql = q.sql;
+      params = q.params;
+      returningFields = q.returningFields ?? returningFields;
+    }
+    const request = {
       ...opts,
-      sql: q.sql,
-      params: q.params,
-      returningFields: q.returningFields,
+      sql,
+      params,
+      returningFields,
+      normalizeNamedParams: typeof query === 'string',
       autoCommit: !(opts?.autoCommit === false),
-    });
+    };
+
+    const result: any = await connection.execute(request);
+    result.sql = request.sql;
+    result.params = request.params;
     if (result.rows) {
       result.objRows = result.rows.reduce((target, row) => {
         const r: any = {};
@@ -209,6 +224,7 @@ export function initAdapterTests(
     const result = await adapterExecute(query, {
       autoCommit: true,
       params: { givenName, familyName },
+      showSql: true,
     });
     expect(result).toBeDefined();
     expect(result.rows).toBeDefined();
@@ -216,6 +232,21 @@ export function initAdapterTests(
     expect(result.objRows[0].id).toBeGreaterThan(0);
     expect(result.objRows[0].given_name).toStrictEqual(givenName);
     expect(result.objRows[0].family_name).toStrictEqual(familyName);
+  });
+
+  it('should execute raw script with parameters', async () => {
+    connection = await adapter.connect(clientConfig);
+    const givenName = 'X' + Math.floor(Math.random() * 1000000);
+    const familyName = 'X' + Math.floor(Math.random() * 1000000);
+    const result = await adapterExecute(
+      `select * from customers where given_name = :givenName 
+                          and (family_name = :familyName or family_name = :givenName)`,
+      {
+        autoCommit: true,
+        params: { givenName, familyName },
+      },
+    );
+    expect(result).toBeDefined();
   });
 
   it('should update record with returning', async () => {

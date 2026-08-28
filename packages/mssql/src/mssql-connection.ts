@@ -1,4 +1,5 @@
 import type { Adapter, QueryRequest } from '@sqb/connect';
+import { tokenize } from 'fast-tokenizer';
 import sql, {
   type ConnectionPool,
   type IColumnMetadata,
@@ -37,6 +38,8 @@ const typeNameMap: Record<string, { dataType: string; jsType: string }> = {
   VarBinary: { dataType: 'VARBINARY', jsType: 'Buffer' },
   Image: { dataType: 'IMAGE', jsType: 'Buffer' },
 };
+
+const NAMED_PARAM_PATTERN = / *:([a-zA-Z_]+)/;
 
 export class MssqlConnection implements Adapter.Connection {
   private intlcon?: ConnectionPool;
@@ -117,6 +120,8 @@ export class MssqlConnection implements Adapter.Connection {
     assertDefined(this.intlcon);
     if (!query.autoCommit && !this._transaction) await this.startTransaction();
     const out: Adapter.Response = {};
+
+    if (query.normalizeNamedParams) this._normalizeNamedParams(query);
 
     const m = query.sql.match(
       /\b(insert into|update|delete from)\b ("?\w+"?)/i,
@@ -209,6 +214,29 @@ export class MssqlConnection implements Adapter.Connection {
       });
     }
     return result;
+  }
+
+  _normalizeNamedParams(query: QueryRequest) {
+    const tokenizer = tokenize(query.sql, {
+      brackets: false,
+      delimiters: undefined,
+      quotes: true,
+      keepBrackets: true,
+      keepQuotes: true,
+      keepDelimiters: true,
+      emptyTokens: true,
+    });
+    let token: string | null;
+    let out = '';
+    let m;
+    while ((token = tokenizer.next())) {
+      m = NAMED_PARAM_PATTERN.exec(token);
+      if (m) {
+        token = '@' + m[1];
+      }
+      out += token;
+    }
+    query.sql = out;
   }
 }
 

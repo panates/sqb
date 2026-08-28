@@ -437,6 +437,7 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     } else {
       // noinspection SuspiciousTypeOfGuard
       if (typeof query === 'string') {
+        request.normalizeNamedParams = true;
         request.sql = query;
         request.params = options.params;
       }
