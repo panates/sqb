@@ -21,13 +21,13 @@ class FieldClass extends BaseField {
       isReservedWord: !!(this._field && ctx.isReservedWord(this._field)),
     };
     return ctx.serialize(this._type, o, () => {
-      const prefix =
-        ctx.escapeReserved(this._schema ? this._schema + '.' : '') +
-        (this._table ? this._table + '.' : '');
+      let out =
+        (this._schema ? this._schema + '.' : '') +
+        (this._table ? this._table + '.' : '') +
+        this._field;
+      if (!out.includes('.')) out = ctx.escapeReserved(out);
       return (
-        prefix +
-        (o.isReservedWord ? '"' + this._field + '"' : this._field) +
-        (this._alias ? ' as ' + this._alias : '')
+        out + (this._alias ? ' as ' + ctx.escapeReserved(this._alias) : '')
       );
     });
   }
