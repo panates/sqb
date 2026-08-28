@@ -204,6 +204,7 @@ export interface QueryRequest {
   sql: string;
   params?: any;
   paramOptions?: Record<string, ParamOptions> | ParamOptions[];
+  normalizeNamedParams?: boolean;
   returningFields?: { field: string; alias?: string }[];
   autoCommit?: boolean;
   cursor?: boolean;

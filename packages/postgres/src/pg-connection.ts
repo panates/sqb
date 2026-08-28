@@ -1,4 +1,5 @@
 import { type Adapter, DataType, type QueryRequest } from '@sqb/connect';
+import { tokenize } from 'fast-tokenizer';
 import {
   BindParam,
   Connection,
@@ -26,6 +27,8 @@ const SqbDataTypToOIDMap = {
   [DataType.TEXT]: [DataTypeOIDs.text, DataTypeOIDs._text],
   [DataType.GUID]: [DataTypeOIDs.uuid, DataTypeOIDs._uuid],
 };
+
+const NAMED_PARAM_PATTERN = / *:([a-zA-Z_]+)/;
 
 export class PgConnection implements Adapter.Connection {
   private intlcon?: Connection;
@@ -113,13 +116,14 @@ export class PgConnection implements Adapter.Connection {
     }
   }
 
-  async execute(query: QueryRequest): Promise<Adapter.Response> {
+  async execute(request: QueryRequest): Promise<Adapter.Response> {
     if (!this.intlcon)
       throw new Error('Can not execute query with a closed db session');
+    if (request.normalizeNamedParams) this._normalizeNamedParams(request);
 
-    const params = query.params?.map((v, i) => {
-      const paramOpts = Array.isArray(query.paramOptions)
-        ? query.paramOptions[i]
+    const params = request.params?.map((v, i) => {
+      const paramOpts = Array.isArray(request.paramOptions)
+        ? request.paramOptions[i]
         : undefined;
       if (v != null && paramOpts && paramOpts.dataType) {
         const oid =
@@ -130,21 +134,21 @@ export class PgConnection implements Adapter.Connection {
     });
 
     const opts: QueryOptions = {
-      autoCommit: query.autoCommit,
+      autoCommit: request.autoCommit,
       params,
-      cursor: query.cursor,
-      fetchCount: query.fetchRows,
-      objectRows: query.objectRows,
+      cursor: request.cursor,
+      fetchCount: request.fetchRows,
+      objectRows: request.objectRows,
     };
-    if (query.fetchAsString) {
-      const items = query.fetchAsString.reduce<OID[]>((a, v) => {
+    if (request.fetchAsString) {
+      const items = request.fetchAsString.reduce<OID[]>((a, v) => {
         const oid = SqbDataTypToOIDMap[v]?.[0];
         if (oid) a.push(oid);
         return a;
       }, []);
       if (items.length) opts.fetchAsString = items;
     }
-    const resp = await this.intlcon.query(query.sql, opts);
+    const resp = await this.intlcon.query(request.sql, opts);
     const out: Adapter.Response = {};
     if (resp.fields) out.fields = this._convertFields(resp.fields);
     if (resp.rows) out.rows = resp.rows;
@@ -169,5 +173,52 @@ export class PgConnection implements Adapter.Connection {
       result.push(o);
     }
     return result;
+  }
+
+  _normalizeNamedParams(request: QueryRequest) {
+    const tokenizer = tokenize(request.sql, {
+      brackets: false,
+      delimiters: undefined,
+      quotes: true,
+      keepBrackets: true,
+      keepQuotes: true,
+      keepDelimiters: true,
+      emptyTokens: true,
+    });
+    let token: string | null;
+    let out = '';
+    let namedParams: Map<string, any> | undefined;
+    let params = request.params;
+    let m;
+    while ((token = tokenizer.next())) {
+      m = NAMED_PARAM_PATTERN.exec(token);
+      if (m) {
+        if (!namedParams) {
+          if (typeof params !== 'object' || Array.isArray(params))
+            throw new Error('"params" should be an key, value object');
+          namedParams = new Map();
+        }
+        const k = m[1];
+        let index = namedParams.size + 1;
+        if (namedParams.has(k)) {
+          index = namedParams.get(k).index;
+        } else {
+          const v = params[k];
+          if (v != undefined)
+            namedParams.set(k, {
+              index: namedParams.size + 1,
+              value: v,
+            });
+        }
+        token = `$${index}`;
+      }
+      out += token;
+    }
+    if (namedParams) {
+      params = Array.from(namedParams.values());
+      params.sort((a, b) => a.index - b.index);
+      request.params = params.map(x => x.value);
+    }
+    request.sql = out;
   }
 }

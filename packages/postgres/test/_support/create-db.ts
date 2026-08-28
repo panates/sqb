@@ -5,7 +5,6 @@ const schemaCreated = {};
 
 function getSql(schema: string) {
   return `
-LOCK TABLE pg_catalog.pg_namespace;
 DROP SCHEMA IF EXISTS ${schema} CASCADE;
 CREATE SCHEMA ${schema} AUTHORIZATION postgres;
 
@@ -191,10 +190,6 @@ export async function createTestSchema(schema: string) {
   const connection = new Connection();
   await connection.connect();
   try {
-    const r = await connection.query(
-      `SELECT schema_name FROM information_schema.schemata where schema_name = '${schema}'`,
-    );
-    if (r.rows && r.rows.length) return;
     const sql = getSql(schema);
     await connection.execute(sql);
     const dataFiles = getInsertSQLsForTestData({

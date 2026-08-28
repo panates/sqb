@@ -21,6 +21,7 @@
     "clean:cover": "rimraf ../../coverage/mssql"
   },
   "dependencies": {
+    "fast-tokenizer": "^1.9.0",
     "tslib": "^2.8.1"
   },
   "devDependencies": {

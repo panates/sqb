@@ -7,10 +7,7 @@ process.env.INIT_SQB = isRoot && 'true';
 
 /** @type {import('mocha').MochaOptions} */
 module.exports = {
-  require: [
-    '@swc-node/register/esm-register',
-    __dirname + '/support/test/global-setup.ts',
-  ],
+  require: ['@swc-node/register/esm-register'],
   extension: ['ts'],
   spec: './packages/*/test/**/*.*spec.ts',
   timeout: 30000,
