@@ -8,6 +8,7 @@ export class MariadbAdapter implements Adapter {
   dialect = 'mariadb';
   features: Adapter.Features = {
     cursor: true,
+    positionalParams: true,
   };
 
   async connect(config: ClientConfiguration): Promise<Adapter.Connection> {
