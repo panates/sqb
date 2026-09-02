@@ -8,6 +8,7 @@ export class MysqlAdapter implements Adapter {
   dialect = 'mysql';
   features: Adapter.Features = {
     cursor: true,
+    positionalParams: true,
   };
 
   async connect(config: ClientConfiguration): Promise<Adapter.Connection> {

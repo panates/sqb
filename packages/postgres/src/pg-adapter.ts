@@ -10,6 +10,7 @@ export class PgAdapter implements Adapter {
     cursor: true,
     schema: true,
     fetchAsString: [DataType.DATE, DataType.TIMESTAMP, DataType.TIMESTAMPTZ],
+    positionalParams: true,
   };
 
   async connect(config: ClientConfiguration): Promise<Adapter.Connection> {

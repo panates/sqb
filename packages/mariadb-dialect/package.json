@@ -1,7 +1,7 @@
 {
   "name": "@sqb/mariadb-dialect",
   "description": "SQB serialization extension for MariaDB database",
-  "version": "6.0.4",
+  "version": "6.0.5",
   "author": "Panates",
   "license": "Apache-2.0",
   "scripts": {
@@ -24,10 +24,10 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.0.4"
+    "@sqb/builder": "^6.0.5"
   },
   "devDependencies": {
-    "expect": "^30.4.1"
+    "expect": "^30.5.1"
   },
   "type": "module",
   "module": "./index.js",

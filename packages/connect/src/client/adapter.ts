@@ -65,5 +65,6 @@ export namespace Adapter {
     cursor?: boolean;
     schema?: boolean;
     fetchAsString?: DataType[];
+    positionalParams?: boolean;
   }
 }
