@@ -1,4 +1,3 @@
-import type { SerializerExtension } from '@sqb/builder';
 import type { Adapter } from './adapter.js';
 
 export class AdapterRegistry {
@@ -35,15 +34,15 @@ export class AdapterRegistry {
     return this.adapters.filter(x => x.dialect === dialect);
   }
 
-  static get(index: number): SerializerExtension | undefined {
+  static get(index: number): Adapter | undefined {
     return this.adapters[index];
   }
 
-  static findDialect(dialect: string): SerializerExtension | undefined {
+  static findDialect(dialect: string): Adapter | undefined {
     return this.adapters.find(x => x.dialect === dialect);
   }
 
-  static findDriver(dialect: string): SerializerExtension | undefined {
+  static findDriver(dialect: string): Adapter | undefined {
     return this.adapters.find(x => x.driver === dialect);
   }
 
