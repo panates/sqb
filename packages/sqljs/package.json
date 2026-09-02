@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@types/sql.js": "^1.4.11",
-    "expect": "^30.4.1",
+    "expect": "^30.5.1",
     "sql.js": "^1.14.2"
   },
   "peerDependencies": {

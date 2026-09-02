@@ -30,8 +30,8 @@
     "oracledb": ">= 6.4.0"
   },
   "devDependencies": {
-    "@types/oracledb": "^7.0.2",
-    "expect": "^30.4.1",
+    "@types/oracledb": "^7.0.3",
+    "expect": "^30.5.1",
     "oracledb": "^7.0.0"
   },
   "type": "module",

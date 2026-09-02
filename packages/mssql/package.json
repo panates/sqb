@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@types/mssql": "^12.3.0",
-    "expect": "^30.4.1",
+    "expect": "^30.5.1",
     "mssql": "^12.7.0"
   },
   "peerDependencies": {
