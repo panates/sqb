@@ -29,13 +29,29 @@ export type FindCommandArgs = {
 
 const SORT_ORDER_PATTERN = /^([-+])?(.*)$/;
 
+/**
+ * Static-only implementation of `Repository.findById()`/`findOne()`/`findMany()`/
+ * `exists()`/`existsOne()`: incrementally builds a `SELECT` query (columns,
+ * joins for to-one associations, filter, sort) plus a {@link RowConverter}
+ * that reshapes flat result rows back into (possibly nested) entity
+ * objects, then executes it. Can also be created rooted at an
+ * {@link AssociationNode} (used internally by `Repository`'s own association
+ * eager-loading) rather than a bare entity.
+ */
 export class FindCommand {
+  /** Row-count cap for a to-many eager-loaded association at any single level (see {@link Repository.FindManyOptions.maxEagerFetch}). */
   maxEagerFetch: number = 100000;
+  /** Remaining depth of to-many eager-loaded associations this command will still follow (see {@link Repository.FindManyOptions.maxSubQueries}). */
   maxSubQueries: number = 5;
+  /** The entity the main `SELECT ... FROM` targets. */
   readonly mainEntity: EntityMetadata;
+  /** The entity result rows are shaped as (equal to `mainEntity` unless this command was created rooted at an association chain). */
   readonly resultEntity: EntityMetadata;
+  /** Builds output objects from result rows; also the target for `addFields`' column/join wiring. */
   readonly converter: RowConverter;
+  /** SQL alias of `mainEntity`'s table. */
   readonly mainAlias: string = 'T';
+  /** SQL alias of `resultEntity`'s table (equal to `mainAlias` unless rooted at an association chain, in which case it's the alias of the chain's last join). */
   resultAlias: string = 'T';
   private _joins: JoinInfo[] = [];
   private _selectColumns: Record<
@@ -57,6 +73,14 @@ export class FindCommand {
     this.converter = new RowConverter(outputEntity.ctor);
   }
 
+  /**
+   * Creates a command rooted at a plain entity, or (internally, for
+   * eager-loading a to-many association) at an {@link AssociationNode} - in
+   * the latter case, the chain's own filter/join is applied immediately and
+   * `resultAlias` is set to the chain's last hop.
+   *
+   * @throws {Error} If the listing entity isn't `@Entity`-decorated.
+   */
   static async create(
     source: EntityMetadata | AssociationNode,
     opts: {
@@ -95,6 +119,7 @@ export class FindCommand {
     return command;
   }
 
+  /** Creates a command for `args.entity`, wires up its projection/filter/sort, and executes it. */
   static async execute(args: FindCommandArgs): Promise<any[]> {
     const command = await FindCommand.create(args.entity, {
       maxSubQueries: args.maxSubQueries,
@@ -112,6 +137,18 @@ export class FindCommand {
     return await command.execute(args);
   }
 
+  /**
+   * Walks `opts.entity`'s (default: `resultEntity`'s) fields, applying
+   * `opts.projection` to decide which to include, and for each included
+   * field: a column is added to the `SELECT` list and `converter`; an
+   * embedded field recurses with its own sub-converter and name
+   * prefix/suffix; a to-one association is joined and recurses into the
+   * joined entity's fields; and a to-many association (if
+   * `maxSubQueries > 0`) becomes a separate nested {@link FindCommand}
+   * (added to `converter` as a nested property, resolved after the main
+   * query via {@link RowConverter._iterateForNested}) filtered to the
+   * parent rows already selected.
+   */
   async addFields(
     opts: {
       tableAlias?: string;
@@ -250,6 +287,7 @@ export class FindCommand {
     }
   }
 
+  /** Adds one column to the `SELECT` list (as `<table>.<field> as <alias>`, alias capped at 30 chars) and returns its alias. */
   private _selectColumn(
     tableAlias: string,
     el: ColumnFieldMetadata,
@@ -268,10 +306,21 @@ export class FindCommand {
     return fieldAlias;
   }
 
+  /** Adds `WHERE` conditions, translated from an entity-level `filter` via `prepareFilter`. */
   async filter(filter: any): Promise<void> {
     await prepareFilter(this.mainEntity, filter, this._filter);
   }
 
+  /**
+   * Sets the `ORDER BY` clause from entity-level sort field paths (each
+   * optionally `-`/`+`-prefixed for descending/ascending), resolving dotted
+   * paths through embedded fields (adjusting name prefix/suffix) and
+   * to-one associations (joining as needed); a path through a to-many
+   * association is silently dropped (sorting by a multi-row relation isn't
+   * meaningful for the parent row).
+   *
+   * @throws {Error} If a sort path doesn't resolve to a real, sortable (column) field.
+   */
   async sort(sortFields: string[]): Promise<void> {
     const out: string[] = [];
     for (const item of sortFields) {
@@ -327,6 +376,12 @@ export class FindCommand {
     this._sort = out;
   }
 
+  /**
+   * Assembles the final `SELECT` (columns, `FROM`, `WHERE`, `ORDER BY`,
+   * `OFFSET`, then joins last), executes it, and converts the resulting
+   * rows via `converter` (which also triggers any nested to-many
+   * eager-fetch sub-commands).
+   */
   async execute(
     args: Pick<
       FindCommandArgs,
@@ -398,6 +453,12 @@ export class FindCommand {
     return [];
   }
 
+  /**
+   * Resolves a SQL table alias (`mainAlias`, `resultAlias`, or a joined
+   * association's alias) back to the entity it refers to.
+   *
+   * @throws {Error} If `tableAlias` doesn't match any known table alias.
+   */
   private _getEntityFromAlias(tableAlias: string): EntityMetadata {
     if (tableAlias === this.mainAlias) return this.mainEntity;
     if (tableAlias === this.resultAlias) return this.resultEntity;
@@ -409,6 +470,7 @@ export class FindCommand {
   }
 }
 
+/** Extracts the sub-paths of `fields` nested under `colNameLower` (e.g. `'city'` out of `'address.city'`), for passing a sort/projection down into a nested `addFields`/`sort` call. */
 function extractSubFields(
   colNameLower: string,
   fields?: string[],

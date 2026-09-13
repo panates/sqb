@@ -1,3 +1,14 @@
+/**
+ * @sqb/connect - a connection-pooling database client and lightweight ORM
+ * built on top of `@sqb/builder`.
+ *
+ * Re-exports the client layer (`SqbClient`, `SqbConnection`, `Cursor`,
+ * `Adapter`, connection/query option types) for direct SQL execution, and
+ * the ORM layer (`@Entity`/`@Column`/`@Link`/... decorators, `EntityMetadata`,
+ * `Repository`, `BaseEntity`) for working with decorated entity classes.
+ * Imports `reflect-metadata` as a side effect, required by the decorators'
+ * use of `Reflect.getMetadata`/`Reflect.defineMetadata`.
+ */
 import 'reflect-metadata';
 
 export * from './client/adapter.js';

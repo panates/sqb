@@ -4,6 +4,15 @@ import { resolveEntityMeta } from '../util/orm.helper.js';
 import type { ColumnFieldMetadata } from './column-field-metadata.js';
 import type { EntityMetadata } from './entity-metadata.js';
 
+/**
+ * Describes a relation from one entity (`source`) to another (`target`),
+ * backing both `@ForeignKey` declarations and each hop of a `@Link` chain
+ * (via its {@link AssociationNode} subclass). `sourceKey`/`targetKey` are
+ * declared eagerly but resolved lazily (`resolve*` methods) - if omitted,
+ * resolution first tries to find a matching foreign key between the two
+ * entities (in either direction) before falling back to
+ * `<entityName>_<primaryKey>`-style convention.
+ */
 export class Association {
   private _resolved?: boolean;
   private _source?: EntityMetadata; // cached value
@@ -17,6 +26,7 @@ export class Association {
   readonly target: TypeThunk;
   readonly sourceKey?: string;
   readonly targetKey?: string;
+  /** Whether this association can resolve to more than one row (a to-many relation) rather than at most one (a to-one relation). */
   readonly many: boolean;
 
   constructor(name: string, args: AssociationSettings) {
@@ -28,6 +38,11 @@ export class Association {
     this.many = !!args.many;
   }
 
+  /**
+   * Resolves the source entity's metadata (following `source` if it's a lazy thunk).
+   *
+   * @throws {Error} If `source` doesn't resolve to an `@Entity`-decorated class.
+   */
   async resolveSource(): Promise<EntityMetadata> {
     this._source = await resolveEntityMeta(this.source);
     if (!this._source)
@@ -37,6 +52,11 @@ export class Association {
     return this._source;
   }
 
+  /**
+   * Resolves the target entity's metadata (following `target` if it's a lazy thunk).
+   *
+   * @throws {Error} If `target` doesn't resolve to an `@Entity`-decorated class.
+   */
   async resolveTarget(): Promise<EntityMetadata> {
     this._target = await resolveEntityMeta(this.target);
     if (!this._target)
@@ -46,34 +66,50 @@ export class Association {
     return this._target;
   }
 
+  /** Resolves the source-side key column name, applying the foreign-key/convention fallback described on the class if it wasn't given explicitly. */
   async resolveSourceKey(): Promise<string> {
     await this._resolveKeys();
     // @ts-ignore
     return this._sourceKey;
   }
 
+  /** Resolves the source-side key column's field metadata. */
   async resolveSourceProperty(): Promise<ColumnFieldMetadata> {
     await this._resolveKeys();
     // @ts-ignore
     return this._sourceProperty;
   }
 
+  /** Resolves the target-side key column name, applying the foreign-key/convention fallback described on the class if it wasn't given explicitly. */
   async resolveTargetKey(): Promise<string> {
     await this._resolveKeys();
     // @ts-ignore
     return this._targetKey;
   }
 
+  /** Resolves the target-side key column's field metadata. */
   async resolveTargetProperty(): Promise<ColumnFieldMetadata> {
     await this._resolveKeys();
     // @ts-ignore
     return this._targetProperty;
   }
 
+  /** Whether this association can resolve to more than one row. */
   returnsMany(): boolean {
     return this.many;
   }
 
+  /**
+   * Resolves and caches `_sourceKey`/`_targetKey` (and their column
+   * metadata): reuses an explicit `sourceKey`/`targetKey` if both were
+   * given, otherwise looks for a matching foreign key between the source
+   * and target entities (checked in both directions), and failing that,
+   * falls back to `<entityName>_<primaryKeyColumn>`-style convention (in
+   * camelCase if the plain snake_case form isn't a real column). A no-op if
+   * already resolved.
+   *
+   * @throws {Error} If the resolved key doesn't name a real column on the corresponding entity.
+   */
   protected async _resolveKeys(): Promise<void> {
     const { EntityMetadata } = await import('../model/entity-metadata.js');
     if (this._resolved) return;

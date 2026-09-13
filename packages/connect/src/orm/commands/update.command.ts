@@ -24,12 +24,19 @@ type UpdateCommandContext = {
   colCount: number;
 };
 
+/** Static-only implementation of `Repository.update()`/`updateOnly()`/`updateMany()`: builds and executes an `UPDATE ... SET ... WHERE ...` query. */
 export class UpdateCommand {
   // istanbul ignore next
   protected constructor() {
     throw new Error('This class is abstract');
   }
 
+  /**
+   * Builds and executes the update query.
+   *
+   * @returns The number of rows updated (`0` without even executing a query, if no field had a value to update).
+   * @throws {Error} If the entity isn't `@Entity`-decorated.
+   */
   static async execute(args: UpdateCommandArgs): Promise<number> {
     const { entity } = args;
     const tableName = entity.tableName;
@@ -74,6 +81,7 @@ export class UpdateCommand {
     return qr.rowsAffected || 0;
   }
 
+  /** Translates `filter` into `@sqb/builder` conditions appended onto `ctx.queryFilter`. */
   protected static async _prepareFilter(
     ctx: UpdateCommandContext,
     filter: any,
@@ -85,6 +93,16 @@ export class UpdateCommand {
     }
   }
 
+  /**
+   * Walks `entity`'s fields, converting each column value present in
+   * `values` into a bound {@link Param} (applying `serialize` and enum
+   * validation along the way, and passing a raw `@sqb/builder` SQL element
+   * value straight through) and recursing into embedded fields with their
+   * name prefix/suffix applied. Fields absent from `values` (`undefined`)
+   * are left unset - only fields actually present are updated.
+   *
+   * @throws {Error} If a `notNull` column is explicitly set to `null`.
+   */
   protected static async _prepareParams(
     ctx: UpdateCommandContext,
     entity: EntityMetadata,

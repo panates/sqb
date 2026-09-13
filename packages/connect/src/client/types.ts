@@ -8,15 +8,26 @@ import type { SqbConnection } from './sqb-connection.js';
 
 export { DataType } from '@sqb/builder';
 
+/** A listener registered on a `@sqb/builder` query's `'execute'` event, called just before the query is sent to the driver. */
 export type ExecuteHookFunction = (
   connection: SqbConnection,
   request: QueryRequest,
 ) => Promise<void>;
+/** A listener registered on a `@sqb/builder` query's `'fetch'` event, called once per row as rows are fetched (both non-cursor results and cursor batches). */
 export type FetchFunction = (row: any, request: QueryRequest) => void;
+/** Transforms a single field's value before it's returned to the caller (set via `QueryExecuteOptions.transform`/`ClientDefaults.transform`). */
 export type ValueTransformFunction = (value: any, fieldInfo?: FieldInfo) => any;
+/** A callback passed to `SqbClient.acquire(fn)`, receiving an auto-released connection for the duration of the call. */
 export type TransactionFunction = (connection: SqbConnection) => Promise<any>;
 
+/** Whether result rows are delivered as plain objects (`{ field: value }`) or arrays (values in column order). */
 export type RowType = 'array' | 'object';
+/**
+ * Controls how database field names are mapped onto result object keys and
+ * `FieldInfo.name`: one of the built-in case transforms, `'original'`
+ * (no change), or a custom mapping function (returning a falsy value drops
+ * the field).
+ */
 export type FieldNaming =
   | 'original'
   | 'lowercase'
@@ -24,11 +35,16 @@ export type FieldNaming =
   | 'camelcase'
   | 'pascalcase'
   | ((fieldName: string) => Maybe<string>);
+/** A single result row, keyed by field name. */
 export type ObjectRow = Record<string, any>;
+/** A single result row, as values in column order. */
 export type ArrayRow = any[];
+/** A result set of object rows. */
 export type ObjectRowset = ObjectRow[];
+/** A result set of array rows. */
 export type ArrayRowset = ArrayRow[];
 
+/** Configuration passed to `new SqbClient(...)`, identifying the target database and driver plus connection-pool and default query behavior. */
 export interface ClientConfiguration {
   /**
    * Dialect to be used
@@ -92,6 +108,7 @@ export interface ClientConfiguration {
   defaults?: ClientDefaults;
 }
 
+/** Default query-execution behavior for every connection acquired from a `SqbClient`, overridable per-call via `QueryExecuteOptions`. */
 export interface ClientDefaults {
   autoCommit?: boolean;
   cursor?: boolean;
@@ -110,6 +127,7 @@ export interface ClientDefaults {
   transform?: ValueTransformFunction;
 }
 
+/** Options passed to `SqbClient.acquire(...)` when obtaining a connection. */
 export interface ConnectionOptions {
   /**
    *  If this property is true, the transaction committed at the end of query execution.
@@ -118,6 +136,7 @@ export interface ConnectionOptions {
   autoCommit?: boolean;
 }
 
+/** Options accepted by `SqbClient.execute(...)`/`SqbConnection.execute(...)`, controlling how one query is run. */
 export interface QueryExecuteOptions {
   /**
    * Array of values or object that contains param/value pairs.
@@ -182,29 +201,52 @@ export interface QueryExecuteOptions {
   fetchAsString?: DataType[];
 }
 
+/** The result of executing a query via `SqbClient.execute(...)`/`SqbConnection.execute(...)`. */
 export interface QueryResult {
+  /** Wall-clock time the query took to execute, in milliseconds. */
   executeTime: number;
+  /** Column metadata, present whenever the query produced a result set. */
   fields?: FieldInfoMap;
+  /** Result rows, present for a non-cursor query that produced a result set (object or array rows, per `rowType`). */
   rows?: any;
+  /** Whether `rows` are objects or arrays. */
   rowType?: RowType;
+  /** The prepared request that was executed, present only when `QueryExecuteOptions.showSql` was set. */
   query?: QueryRequest;
   returns?: any;
+  /** Number of rows affected by an INSERT/UPDATE/DELETE. */
   rowsAffected?: number;
+  /** A cursor for streaming the result set, present when the query was executed with `{ cursor: true }`. */
   cursor?: Cursor;
 }
 
+/** Column metadata for one field of a result set, after naming-strategy/index normalization has been applied to the driver's raw {@link Adapter.Field}. */
 export type FieldInfo = {
+  /** Zero-based column index. */
   index: number;
+  /** The field name after applying the configured `FieldNaming` strategy (may differ from `fieldName`). */
   name: string;
 } & Adapter.Field;
 
+/**
+ * The fully-prepared, dialect-specific form of a query, built by
+ * `SqbConnection` from a `QueryExecuteOptions` call and passed to
+ * `Adapter.Connection.execute(...)`. Combines the generated SQL with every
+ * resolved execution option.
+ */
 export interface QueryRequest {
+  /** The dialect this SQL was generated for. */
   dialect?: string;
   dialectVersion?: string;
+  /** The SQL text to execute. */
   sql: string;
+  /** Bind parameter values for `sql`. */
   params?: any;
+  /** Per-parameter type/array metadata, in the same shape (object or array) as `params`. */
   paramOptions?: Record<string, ParamOptions> | ParamOptions[];
+  /** When true, tells the adapter to normalize `:name`-style named parameters in `sql` (set for raw SQL string queries, not `@sqb/builder` queries, which resolve their own parameters). */
   normalizeNamedParams?: boolean;
+  /** The columns requested via `.returning(...)`, if any, with their optional aliases. */
   returningFields?: { field: string; alias?: string }[];
   autoCommit?: boolean;
   cursor?: boolean;
@@ -217,6 +259,8 @@ export interface QueryRequest {
   prettyPrint?: boolean;
   action?: string;
   fetchAsString?: DataType[];
+  /** Listeners from the query's `'execute'` event (only present for a `@sqb/builder` query, not a raw SQL string). */
   executeHooks?: ExecuteHookFunction[];
+  /** Listeners from the query's `'fetch'` event (only present for a `@sqb/builder` query, not a raw SQL string). */
   fetchHooks?: FetchFunction[];
 }

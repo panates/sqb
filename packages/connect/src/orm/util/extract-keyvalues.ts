@@ -1,6 +1,17 @@
 import { EntityMetadata } from '../model/entity-metadata.js';
 import { isColumnField } from './orm.helper.js';
 
+/**
+ * Extracts an entity's primary-key column/value pairs from either a bare
+ * key value (single-column primary key only) or a `{ column: value, ... }`
+ * object, used by `Repository`'s single-record operations
+ * (`findById`/`update`/`delete`/etc.) to build their `WHERE` filter.
+ *
+ * @param entityDef - The entity whose primary key is being extracted.
+ * @param valueOrInstance - The raw key value (single-column key), or an object/entity instance carrying the key column(s).
+ * @param keepOther - When true, also copies through any other own-properties of `valueOrInstance` alongside the key columns.
+ * @throws {Error} If the entity has no primary key, a primary-key column isn't a real data column, or (for a multi-column key) `valueOrInstance` is missing a required key column's value.
+ */
 export function extractKeyValues<T>(
   entityDef: EntityMetadata,
   valueOrInstance: any | Record<string, any> | T,

@@ -2,6 +2,13 @@ import { DataType } from '@sqb/builder';
 import type { FieldMetadata } from '../model/field-metadata.js';
 import { isColumnField } from './orm.helper.js';
 
+/**
+ * Converts a field's in-memory value into a database-writable form
+ * (used by `CreateCommand`/`UpdateCommand` before binding it as a query
+ * parameter): dialect-portable formatting for dates/buffers/numbers on a
+ * column field (see {@link serializeDataValue}), or `.toJSON()` for any
+ * other object that has one.
+ */
 export function serializeColumn(col: FieldMetadata, v: any): any {
   if (isColumnField(col)) {
     if (col.isArray) {
@@ -21,6 +28,12 @@ export function serializeColumn(col: FieldMetadata, v: any): any {
 
 const padZero = (n: number): string => (n < 10 ? '0' : '') + n;
 
+/**
+ * Formats one scalar value for a given {@link DataType}: `DATE`/`TIMESTAMP`
+ * dates as ISO-like date(-time) strings, `Buffer`s as base64, integer types
+ * truncated, `bigint` stringified, and any other object with a `.toJSON()`
+ * via that.
+ */
 function serializeDataValue(dataType: DataType, v: any): any {
   if (v == null) return;
   if (

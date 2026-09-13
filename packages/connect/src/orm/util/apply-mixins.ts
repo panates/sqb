@@ -1,3 +1,10 @@
+/**
+ * Copies `baseCtor`'s own prototype methods/accessors onto `derivedCtor`'s
+ * prototype (skipping `constructor`/`__proto__`/`toJSON`/`toString`, and
+ * anything `filter` rejects) - the runtime half of `Entity.mixin`/`Entity.Pick`/
+ * `Entity.Omit`/`Entity.Union`, which pair this with `EntityMetadata.mixin`
+ * to also merge entity metadata.
+ */
 export function applyMixins(
   derivedCtor: any,
   baseCtor: any,

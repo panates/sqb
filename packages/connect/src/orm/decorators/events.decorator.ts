@@ -1,5 +1,16 @@
 import { EntityMetadata } from '../model/entity-metadata.js';
 
+/**
+ * Registers the decorated method under the entity's `'before-insert'`
+ * lifecycle listeners (`EntityMetadata.eventListeners`).
+ *
+ * Note: as of this version, nothing in `@sqb/connect` (no repository
+ * command) actually invokes these listeners during a create/update/delete -
+ * they're recorded but not currently triggered by insert/update/destroy
+ * operations.
+ *
+ * @throws {Error} If applied to a symbol-keyed property.
+ */
 export function BeforeInsert(): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol): void => {
     if (typeof propertyKey !== 'string')
@@ -10,6 +21,17 @@ export function BeforeInsert(): PropertyDecorator {
   };
 }
 
+/**
+ * Registers the decorated method under the entity's `'before-update'`
+ * lifecycle listeners (`EntityMetadata.eventListeners`).
+ *
+ * Note: as of this version, nothing in `@sqb/connect` (no repository
+ * command) actually invokes these listeners during a create/update/delete -
+ * they're recorded but not currently triggered by insert/update/destroy
+ * operations.
+ *
+ * @throws {Error} If applied to a symbol-keyed property.
+ */
 export function BeforeUpdate(): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol): void => {
     if (typeof propertyKey !== 'string')
@@ -20,6 +42,17 @@ export function BeforeUpdate(): PropertyDecorator {
   };
 }
 
+/**
+ * Registers the decorated method under the entity's `'before-destroy'`
+ * lifecycle listeners (`EntityMetadata.eventListeners`).
+ *
+ * Note: as of this version, nothing in `@sqb/connect` (no repository
+ * command) actually invokes these listeners during a create/update/delete -
+ * they're recorded but not currently triggered by insert/update/destroy
+ * operations.
+ *
+ * @throws {Error} If applied to a symbol-keyed property.
+ */
 export function BeforeDestroy(): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol): void => {
     if (typeof propertyKey !== 'string')
@@ -30,6 +63,17 @@ export function BeforeDestroy(): PropertyDecorator {
   };
 }
 
+/**
+ * Registers the decorated method under the entity's `'after-insert'`
+ * lifecycle listeners (`EntityMetadata.eventListeners`).
+ *
+ * Note: as of this version, nothing in `@sqb/connect` (no repository
+ * command) actually invokes these listeners during a create/update/delete -
+ * they're recorded but not currently triggered by insert/update/destroy
+ * operations.
+ *
+ * @throws {Error} If applied to a symbol-keyed property.
+ */
 export function AfterInsert(): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol): void => {
     if (typeof propertyKey !== 'string')
@@ -40,6 +84,17 @@ export function AfterInsert(): PropertyDecorator {
   };
 }
 
+/**
+ * Registers the decorated method under the entity's `'after-update'`
+ * lifecycle listeners (`EntityMetadata.eventListeners`).
+ *
+ * Note: as of this version, nothing in `@sqb/connect` (no repository
+ * command) actually invokes these listeners during a create/update/delete -
+ * they're recorded but not currently triggered by insert/update/destroy
+ * operations.
+ *
+ * @throws {Error} If applied to a symbol-keyed property.
+ */
 export function AfterUpdate(): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol): void => {
     if (typeof propertyKey !== 'string')
@@ -50,6 +105,17 @@ export function AfterUpdate(): PropertyDecorator {
   };
 }
 
+/**
+ * Registers the decorated method under the entity's `'after-destroy'`
+ * lifecycle listeners (`EntityMetadata.eventListeners`).
+ *
+ * Note: as of this version, nothing in `@sqb/connect` (no repository
+ * command) actually invokes these listeners during a create/update/delete -
+ * they're recorded but not currently triggered by insert/update/destroy
+ * operations.
+ *
+ * @throws {Error} If applied to a symbol-keyed property.
+ */
 export function AfterDestroy(): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol): void => {
     if (typeof propertyKey !== 'string')

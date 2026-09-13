@@ -23,25 +23,53 @@ import type {
 } from './embedded-field-metadata.js';
 import type { IndexMetadata } from './index-metadata.js';
 
+/** Any of the three field-metadata kinds an entity's fields can be. */
 export type AnyFieldMetadata =
   ColumnFieldMetadata | EmbeddedFieldMetadata | AssociationFieldMetadata;
+/** Options accepted by the `@Entity(...)` decorator. */
 export type EntityOptions = Partial<
   Pick<EntityMetadata, 'name' | 'schema' | 'comment' | 'tableName'>
 >;
 
+/**
+ * The full metadata SQB tracks for one `@Entity`-decorated class: its table
+ * mapping, fields (columns/embeds/associations), indexes, foreign keys, and
+ * lifecycle event listeners. Stored via `Reflect.defineMetadata` under
+ * {@link ENTITY_METADATA_KEY} on the class itself - obtained with
+ * `EntityMetadata.get(ctor)`, never constructed directly.
+ */
 export interface EntityMetadata {
+  /** The decorated entity class. */
   readonly ctor: Type;
+  /** The entity's name (defaults to the class name). */
   readonly name: string;
+  /** The mapped table name. */
   tableName?: string;
+  /** The mapped schema name, if any. */
   schema?: string;
   comment?: string;
+  /** This entity's own fields, keyed by lower-cased field name. */
   fields: Record<string, AnyFieldMetadata>;
+  /** Indexes declared on this entity, including its primary key (marked with `primary: true`). */
   indexes: IndexMetadata[];
+  /** Foreign-key associations declared via `@ForeignKey`. */
   foreignKeys: Association[];
+  /** Lifecycle callbacks registered via `@BeforeInsert`/`@AfterInsert`/etc., keyed by event name. */
   eventListeners: Record<string, Function[]>;
 }
 
+/**
+ * Namespace of static operations on {@link EntityMetadata} - the decorators
+ * (`@Entity`, `@Column`, `@Link`, ...) are all thin wrappers around these
+ * functions, and `Entity.getMetadata`/`Entity.getField`/etc. re-export a
+ * subset of them for direct use without importing `EntityMetadata` itself.
+ */
 export namespace EntityMetadata {
+  /**
+   * Gets or creates the metadata for `ctor`, inheriting fields/indexes/
+   * foreign keys/event listeners from its base class's own metadata (if
+   * any) the first time it's created for this class.
+   */
   export function define(ctor: Ctor): EntityMetadata {
     const own = getOwn(ctor);
     if (own) return own;
@@ -63,14 +91,17 @@ export namespace EntityMetadata {
     return meta;
   }
 
+  /** Gets `ctor`'s metadata, inherited from a base class if `ctor` itself has none of its own. */
   export function get(ctor: Ctor): Maybe<EntityMetadata> {
     return Reflect.getMetadata(ENTITY_METADATA_KEY, ctor);
   }
 
+  /** Gets `ctor`'s own metadata, ignoring any inherited from a base class. */
   export function getOwn(ctor: Ctor): Maybe<EntityMetadata> {
     return Reflect.getOwnMetadata(ENTITY_METADATA_KEY, ctor);
   }
 
+  /** Looks up a field by its property name (case-insensitive), regardless of kind. */
   export function getField(
     entity: EntityMetadata,
     fieldName: string,
@@ -78,6 +109,11 @@ export namespace EntityMetadata {
     return fieldName ? entity.fields[fieldName.toLowerCase()] : undefined;
   }
 
+  /**
+   * Looks up a field by name, requiring it to be a column.
+   *
+   * @throws {Error} If the field exists but isn't a column.
+   */
   export function getColumnField(
     entity: EntityMetadata,
     fieldName: string,
@@ -90,6 +126,11 @@ export namespace EntityMetadata {
     return el as ColumnFieldMetadata;
   }
 
+  /**
+   * Looks up a field by name, requiring it to be an embedded field.
+   *
+   * @throws {Error} If the field exists but isn't an embedded field.
+   */
   export function getEmbeddedField(
     entity: EntityMetadata,
     fieldName: string,
@@ -102,6 +143,11 @@ export namespace EntityMetadata {
     return el as EmbeddedFieldMetadata;
   }
 
+  /**
+   * Looks up a field by name, requiring it to be an association.
+   *
+   * @throws {Error} If the field exists but isn't an association.
+   */
   export function getAssociationField(
     entity: EntityMetadata,
     fieldName: string,
@@ -115,6 +161,7 @@ export namespace EntityMetadata {
     return el as AssociationFieldMetadata;
   }
 
+  /** Finds the first field matching `predicate`. */
   export function findField(
     entity: EntityMetadata,
     predicate: (el: AnyFieldMetadata) => boolean,
@@ -122,6 +169,7 @@ export namespace EntityMetadata {
     return Object.values(entity.fields).find(predicate);
   }
 
+  /** Looks up a column field by its mapped table column name (case-insensitive) rather than its entity property name. */
   export function getColumnFieldByFieldName(
     entity: EntityMetadata,
     fieldName: string,
@@ -134,6 +182,11 @@ export namespace EntityMetadata {
     }
   }
 
+  /**
+   * Returns the entity's field names, optionally narrowed by `filter`. With
+   * no filter, the result is cached on the entity (invalidated whenever a
+   * field is added).
+   */
   export function getFieldNames(
     entity: EntityMetadata,
     filter?: (el: AnyFieldMetadata) => boolean,
@@ -157,38 +210,51 @@ export namespace EntityMetadata {
     return (entity as any)._fieldNames as string[];
   }
 
+  /** Names of every column field. */
   export function getColumnFieldNames(entity: EntityMetadata): string[] {
     return getFieldNames(entity, isColumnField);
   }
 
+  /** Names of every embedded field. */
   export function getEmbeddedFieldNames(entity: EntityMetadata): string[] {
     return getFieldNames(entity, isEmbeddedField);
   }
 
+  /** Names of every association field. */
   export function getAssociationFieldNames(entity: EntityMetadata): string[] {
     return getFieldNames(entity, isAssociationField);
   }
 
+  /** Names of every field that isn't an association. */
   export function getNonAssociationFieldNames(
     entity: EntityMetadata,
   ): string[] {
     return getFieldNames(entity, x => !isAssociationField(x));
   }
 
+  /** Names of every column field usable in an `INSERT` (excludes those marked `noInsert`). */
   export function getInsertColumnNames(entity: EntityMetadata): string[] {
     return getFieldNames(entity, x => isColumnField(x) && !x.noInsert);
   }
 
+  /** Names of every column field usable in an `UPDATE` (excludes those marked `noUpdate`). */
   export function getUpdateColumnNames(entity: EntityMetadata): string[] {
     return getFieldNames(entity, x => isColumnField(x) && !x.noUpdate);
   }
 
+  /** Returns the entity's primary-key index, or `undefined` if none is declared. */
   export function getPrimaryIndex(
     entity: EntityMetadata,
   ): Maybe<IndexMetadata> {
     return entity.indexes && entity.indexes.find(idx => idx.primary);
   }
 
+  /**
+   * Returns the column-field metadata for each column in the entity's
+   * primary-key index, in index order.
+   *
+   * @throws {Error} If a primary-key column name doesn't correspond to a real column field.
+   */
   export function getPrimaryIndexColumns(
     entity: EntityMetadata,
   ): ColumnFieldMetadata[] {
@@ -207,6 +273,7 @@ export namespace EntityMetadata {
     return out;
   }
 
+  /** Finds the foreign key declared on `src` that points at `trg`, if any. */
   export async function getForeignKeyFor(
     src: EntityMetadata,
     trg: EntityMetadata,
@@ -217,6 +284,11 @@ export namespace EntityMetadata {
     }
   }
 
+  /**
+   * Adds an index to the entity, normalizing `columns` to an array. Setting
+   * `index.primary` clears `primary` off any existing index (an entity has
+   * at most one primary key).
+   */
   export function addIndex(entity: EntityMetadata, index: IndexMetadata): void {
     entity.indexes = entity.indexes || [];
     index = {
@@ -227,6 +299,7 @@ export namespace EntityMetadata {
     entity.indexes.push(index);
   }
 
+  /** Registers a foreign key from `entity.propertyKey` to `target`, as declared via `@ForeignKey`. */
   export function addForeignKey(
     entity: EntityMetadata,
     propertyKey: string,
@@ -243,6 +316,12 @@ export namespace EntityMetadata {
     entity.foreignKeys.push(fk);
   }
 
+  /**
+   * Registers a lifecycle callback (e.g. `'before-insert'`), as declared
+   * via `@BeforeInsert`/`@AfterInsert`/etc.
+   *
+   * @throws {Error} If `fn` isn't a function.
+   */
   export function addEventListener(
     entity: EntityMetadata,
     event: string,
@@ -255,6 +334,11 @@ export namespace EntityMetadata {
     entity.eventListeners[event].push(fn);
   }
 
+  /**
+   * Defines (or merges options into an existing) column field, as declared
+   * via `@Column`. Infers `type`/`dataType` from each other (or from
+   * `Reflect`-emitted design-time type metadata) when not given explicitly.
+   */
   export function defineColumnField(
     entity: EntityMetadata,
     name: string,
@@ -326,6 +410,7 @@ export namespace EntityMetadata {
     return prop;
   }
 
+  /** Defines (or merges options into an existing) embedded field, as declared via `@Embedded`. */
   export function defineEmbeddedField(
     entity: EntityMetadata,
     name: string,
@@ -346,6 +431,11 @@ export namespace EntityMetadata {
     return prop;
   }
 
+  /**
+   * Defines an association field, as declared via `@Link`. Assigns each
+   * hop in `association`'s chain a unique name
+   * (`<entity>.<propertyKey>#<hop>`).
+   */
   export function defineAssociationField(
     entity: EntityMetadata,
     propertyKey: string,
@@ -370,6 +460,7 @@ export namespace EntityMetadata {
     return prop;
   }
 
+  /** Declares the entity's primary key, as declared via `@PrimaryKey`. Equivalent to `addIndex(entity, { ...options, columns, unique: true, primary: true })`. */
   export function setPrimaryKeys(
     entity: EntityMetadata,
     column: string | string[],
@@ -383,6 +474,15 @@ export namespace EntityMetadata {
     });
   }
 
+  /**
+   * Copies `base`'s table mapping (if `derived` doesn't already have one),
+   * indexes, foreign keys, event listeners, and fields onto `derived` -
+   * used both for class inheritance (`EntityMetadata.define` mixes in a
+   * base class's metadata automatically) and for `Entity.mixin`/`Entity.Pick`/
+   * `Entity.Omit`/`Entity.Union`.
+   *
+   * @param filter - When given, restricts which of `base`'s fields (by name) and index/foreign-key columns are copied.
+   */
   export function mixin(
     derived: EntityMetadata,
     base: EntityMetadata,
