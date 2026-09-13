@@ -17,6 +17,7 @@ import { MigrationStatus } from '../types.js';
 
 const mariadbAdapter = new MariadbAdapter();
 
+/** Quotes a (possibly schema-qualified) MariaDB identifier so reserved words / mixed case / special characters in a migration task's `tableName` or row keys don't break the generated SQL. */
 function quoteIdent(name: string): string {
   return name
     .split('.')
@@ -24,6 +25,18 @@ function quoteIdent(name: string): string {
     .join('.');
 }
 
+/**
+ * {@link MigrationAdapter} for MariaDB, structurally mirroring
+ * `PgMigrationAdapter` with MariaDB-specific differences: `infoSchema` maps
+ * to a real `CREATE SCHEMA` (a MariaDB database, same as MySQL, not a
+ * DBA-provisioned user like Oracle); the event table's `id` uses a native
+ * `AUTO_INCREMENT` column rather than a sequence+trigger; and the
+ * connection is opened with `multipleStatements: true` so a script task
+ * (which may contain several statements, e.g. a `CREATE TABLE` followed by
+ * a `CREATE TRIGGER` with its own internal `;`s) still runs in one call -
+ * the server's own parser correctly treats a trigger/procedure body as one
+ * statement, so no script-splitting like Oracle/MSSQL is needed.
+ */
 export class MariadbMigrationAdapter extends MigrationAdapter {
   declare protected _connection: MariadbDriverConnection;
   protected _infoSchema = '__migration';
@@ -62,6 +75,14 @@ export class MariadbMigrationAdapter extends MigrationAdapter {
     return quoteIdent(this.infoSchema) + '.' + this.eventTable;
   }
 
+  /**
+   * Connects (with `multipleStatements` enabled), creates `infoSchema` and
+   * the bookkeeping tables if they don't already exist, seeds the
+   * package's summary row if missing, and returns a ready-to-use adapter
+   * with `version`/`status` refreshed from it.
+   *
+   * @throws {Error} whatever the driver throws for a failed connection or setup query - the connection is closed first if already open
+   */
   static async create(
     options: StrictOmit<DbMigratorOptions, 'migrationPackage'> & {
       migrationPackage: MigrationPackage;
@@ -154,6 +175,7 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     await this._connection.end();
   }
 
+  /** @throws {Error} if the package's summary row is somehow missing (should not happen once `create()` has run) */
   async refresh(): Promise<void> {
     const rows = await this._connection.query<any>(
       `SELECT current_version, status FROM ${this.summaryTableFull} WHERE package_name = :packageName`,
@@ -209,6 +231,16 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     });
   }
 
+  /**
+   * Runs one task: an SQL-script task's script (resolved from a function
+   * if needed, then `$(name)`-substituted) executes in one call, thanks to
+   * `multipleStatements` on the connection; a custom task's function runs
+   * directly against the raw `mariadb` connection; an insert-data task's
+   * rows are each turned into an `INSERT` via `@sqb/builder`'s
+   * `Insert(...).generate({ dialect: 'mariadb' })` and executed. A
+   * script-task error is annotated with the task's file location before
+   * being rethrown.
+   */
   async executeTask(
     migrationPackage: MigrationPackage,
     migration: Migration,

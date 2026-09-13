@@ -5,6 +5,7 @@ import type { PartialSome, StrictOmit } from 'ts-gems';
 import type { MigrationAdapter } from './migration-adapter.js';
 import { getCallingFilename } from './utils/get-calling-filename.js';
 
+/** A fully-resolved migration package: a name plus an ordered list of {@link Migration}s, ready to hand to {@link DbMigrator.execute}. Produced from a {@link MigrationPackageConfig} by {@link MigrationPackage.load}. */
 export interface MigrationPackage {
   name: string;
   description?: string;
@@ -13,34 +14,42 @@ export interface MigrationPackage {
   informationTableName?: string;
 }
 
+/** One numbered migration step: a target schema `version` plus the ordered {@link MigrationTask}s that get the database there. */
 export interface Migration {
   version: number;
   tasks: MigrationTask[];
   baseDir: string;
+  /** If `true`, {@link DbMigrator.execute} backs up the database (via the adapter's `backupDatabase()`) before running this migration and restores it (`restoreDatabase()`) if any task in the run fails. */
   backup?: boolean;
 }
 
+/** A single migration step: a raw SQL script, a batch of rows to insert, or an arbitrary function - see {@link isSqlScriptMigrationTask}/{@link isInsertDataMigrationTask}/{@link isCustomMigrationTask} to narrow one. */
 export type MigrationTask =
   SqlScriptMigrationTask | CustomMigrationTask | InsertDataMigrationTask;
 
+/** Fields common to every {@link MigrationTask} kind. */
 export interface BaseMigrationTask {
   title?: string;
   filename?: string;
 }
 
+/** A task that runs a raw SQL script (dialect-specific text, with `$(name)` variables substituted before execution) against the target database - or a function producing one, given the current migration context. */
 export interface SqlScriptMigrationTask extends BaseMigrationTask {
   script: string | Function;
 }
 
+/** A task that inserts a fixed set of rows into `tableName`, one `INSERT` per row (built via `@sqb/builder` for the target dialect). */
 export interface InsertDataMigrationTask extends BaseMigrationTask {
   tableName: string;
   rows: Record<string, any>[];
 }
 
+/** A task that runs an arbitrary function against the raw driver connection, for anything the other task kinds can't express. */
 export interface CustomMigrationTask extends BaseMigrationTask {
   fn: (connection: any, adapter: MigrationAdapter) => void | Promise<void>;
 }
 
+/** Narrows a {@link MigrationTask} to {@link SqlScriptMigrationTask}. */
 export function isSqlScriptMigrationTask(x: any): x is SqlScriptMigrationTask {
   return (
     typeof x === 'object' &&
@@ -48,6 +57,7 @@ export function isSqlScriptMigrationTask(x: any): x is SqlScriptMigrationTask {
   );
 }
 
+/** Narrows a {@link MigrationTask} to {@link InsertDataMigrationTask}. */
 export function isInsertDataMigrationTask(
   x: any,
 ): x is InsertDataMigrationTask {
@@ -58,10 +68,19 @@ export function isInsertDataMigrationTask(
   );
 }
 
+/** Narrows a {@link MigrationTask} to {@link CustomMigrationTask}. */
 export function isCustomMigrationTask(x: any): x is CustomMigrationTask {
   return typeof x === 'object' && typeof x.fn === 'function';
 }
 
+/**
+ * The user-authored shape of a migration package, as passed to
+ * {@link DbMigrator.execute} - each entry in `migrations` is either an
+ * inline {@link MigrationConfig}, a function producing one, or a glob
+ * pattern (relative to `baseDir`) matched against `migration.*` files (see
+ * {@link MigrationPackage.load}). Resolved into a {@link MigrationPackage}
+ * before use.
+ */
 export interface MigrationPackageConfig extends PartialSome<
   StrictOmit<MigrationPackage, 'migrations'>,
   'baseDir'
@@ -74,6 +93,12 @@ export interface MigrationPackageConfig extends PartialSome<
   )[];
 }
 
+/**
+ * The user-authored shape of one {@link Migration} - each entry in `tasks`
+ * is either an inline {@link MigrationTask}, a function producing one, or
+ * a glob pattern matched against `*.task.{sql,json,js,ts,cjs,mjs}` files
+ * (see {@link MigrationPackage.load}).
+ */
 export interface MigrationConfig extends StrictOmit<
   Migration,
   'tasks' | 'baseDir'
@@ -87,6 +112,20 @@ export interface MigrationConfig extends StrictOmit<
 }
 
 export namespace MigrationPackage {
+  /**
+   * Resolves a {@link MigrationPackageConfig} into a fully-loaded
+   * {@link MigrationPackage}: expands each `migrations` entry (an inline
+   * config, a factory function, or a glob matched against `migration.*`
+   * files via {@link loadMigrations}) into a {@link Migration}, sorts them
+   * by version, and expands each migration's `tasks` entries the same way
+   * (a glob here instead matches `*.task.sql`/`*.task.json`/`*.task.js`/
+   * `*.task.ts`/`*.task.cjs`/`*.task.mjs` files, sorted by filename).
+   * `baseDir` defaults to the directory of the file that called this
+   * function (via {@link getCallingFilename}) when not given explicitly.
+   *
+   * @throws {TypeError} if `asyncConfig.migrations` isn't an array
+   * @throws {Error} if two migrations declare the same `version`, or a task file fails to load/parse
+   */
   export async function load(
     asyncConfig: MigrationPackageConfig,
   ): Promise<MigrationPackage> {
@@ -209,6 +248,17 @@ export namespace MigrationPackage {
   }
 }
 
+/**
+ * Globs for `migration.{js,ts,cjs,mjs,mts,cts,json}` files matching
+ * `pattern` under `baseDir`, importing (or, for `.json`, parsing) each one
+ * and keeping those that look like a {@link MigrationConfig} (a numeric
+ * `version` plus a `tasks` array). Each result's `baseDir` is set to its
+ * containing directory, relative to the package's own `baseDir`, so a
+ * task glob declared on it resolves relative to where the migration file
+ * itself lives rather than the package root.
+ *
+ * @throws {Error} if a matched `.json` file fails to parse
+ */
 async function loadMigrations(
   baseDir: string,
   pattern: string,

@@ -6,10 +6,24 @@
 // procedure, function, package body, or bare anonymous BEGIN/DECLARE block)
 // is terminated by a lone "/" on its own line; everything else is plain
 // DDL/DML, ";"-separated.
+/** Matches the start of a line beginning a PL/SQL block: a bare `BEGIN`/`DECLARE`, or a `CREATE [OR REPLACE] TRIGGER`/`PROCEDURE`/`FUNCTION`/`PACKAGE [BODY]`. */
 const PLSQL_START_PATTERN =
   /^\s*(BEGIN|DECLARE|CREATE\s+(OR\s+REPLACE\s+)?(TRIGGER|PROCEDURE|FUNCTION|PACKAGE(\s+BODY)?)\b)/i;
+/** Matches a line that is only the `/` PL/SQL block terminator (whitespace-insensitive), the standard SQL*Plus script convention. */
 const SOLO_SLASH_PATTERN = /^\s*\/\s*$/;
 
+/**
+ * Splits an Oracle migration script into individual statements, mirroring
+ * the standard SQL*Plus script convention: a PL/SQL block (a trigger,
+ * procedure, function, package body, or bare anonymous `BEGIN`/`DECLARE`
+ * block) is terminated by a lone `/` on its own line and kept as a single
+ * statement (its own trailing `;` is part of the block's syntax, not a
+ * separator, so it's preserved); everything else is plain DDL/DML, split
+ * further on top-level `;`s via {@link splitTopLevelSemicolons}. Used by
+ * {@link OracleMigrationAdapter.executeTask} because `oracledb`'s
+ * `execute()` runs exactly one SQL/PL-SQL statement per call, unlike most
+ * other drivers this package supports.
+ */
 export function splitOracleScript(script: string): string[] {
   const lines = script.split(/\r?\n/);
   const statements: string[] = [];
@@ -54,10 +68,12 @@ export function splitOracleScript(script: string): string[] {
   return statements;
 }
 
-// Splits on ";" while treating '...'/"..." spans (with '' / "" as an escaped
-// internal quote, standard Oracle SQL string/identifier syntax) as opaque -
-// a ";" inside a string literal must not be treated as a statement
-// separator. Does not special-case comments (-- or /* */).
+/**
+ * Splits on `;` while treating `'...'`/`"..."` spans (with `''`/`""` as an
+ * escaped internal quote, standard Oracle SQL string/identifier syntax) as
+ * opaque - a `;` inside a string literal must not be treated as a
+ * statement separator. Does not special-case comments (`--` or `/* *\/`).
+ */
 function splitTopLevelSemicolons(text: string): string[] {
   const result: string[] = [];
   let current = '';

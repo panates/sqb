@@ -22,6 +22,7 @@ import { splitMssqlScript } from '../utils/split-mssql-script.js';
 
 const mssqlAdapter = new MssqlAdapter();
 
+/** Quotes a (possibly schema-qualified) T-SQL `[bracketed]` identifier so reserved words / mixed case / special characters in a migration task's `tableName` or row keys don't break the generated SQL. */
 function quoteIdent(name: string): string {
   return name
     .split('.')
@@ -29,10 +30,25 @@ function quoteIdent(name: string): string {
     .join('.');
 }
 
+/** Binds each entry of `params` as a named `mssql` request input. */
 function bindParams(request: Request, params: Record<string, any>) {
   for (const k of Object.keys(params)) request.input(k, params[k]);
 }
 
+/**
+ * {@link MigrationAdapter} for Microsoft SQL Server, structurally
+ * mirroring `PgMigrationAdapter` with T-SQL-specific differences:
+ * `infoSchema` maps to a real schema (created via `EXEC('CREATE SCHEMA
+ * ...')` wrapped in dynamic SQL, since `CREATE SCHEMA` must be the first
+ * statement in its own batch); the event table's `id` uses a native
+ * `IDENTITY` column rather than a sequence+trigger; a script task is split
+ * into `GO`-separated batches via {@link splitMssqlScript} before running
+ * (T-SQL requires `CREATE TRIGGER`/`PROCEDURE`/`FUNCTION`/`VIEW` to be the
+ * first statement in their batch); and the schema lock is held by keeping
+ * a dedicated transaction open for the duration of the migration run (see
+ * {@link lockSchema}), rather than a session-scoped advisory lock, since
+ * T-SQL DDL - unlike MySQL/Oracle - does not implicitly commit.
+ */
 export class MssqlMigrationAdapter extends MigrationAdapter {
   declare protected _connection: ConnectionPool;
   protected _infoSchema = '__migration';
@@ -72,6 +88,14 @@ export class MssqlMigrationAdapter extends MigrationAdapter {
     return quoteIdent(this.infoSchema) + '.' + this.eventTable;
   }
 
+  /**
+   * Connects, creates `infoSchema` and the bookkeeping tables if they
+   * don't already exist, seeds the package's summary row if missing, and
+   * returns a ready-to-use adapter with `version`/`status` refreshed from
+   * it.
+   *
+   * @throws {Error} whatever the driver throws for a failed connection or setup query - the connection is closed first if already open
+   */
   static async create(
     options: StrictOmit<DbMigratorOptions, 'migrationPackage'> & {
       migrationPackage: MigrationPackage;
@@ -165,6 +189,7 @@ END`);
     }
   }
 
+  /** Closes the underlying connection, first rolling back the lock transaction (see {@link lockSchema}) if the migration run never got as far as `unlockSchema()`. */
   async close(): Promise<void> {
     if (this._lockTransaction) {
       const tx = this._lockTransaction;
@@ -174,6 +199,7 @@ END`);
     await this._connection.close();
   }
 
+  /** @throws {Error} if the package's summary row is somehow missing (should not happen once `create()` has run) */
   async refresh(): Promise<void> {
     const req = this._connection.request();
     bindParams(req, { packageName: this.packageName });
@@ -231,6 +257,16 @@ END`);
     await req.query(sqlText);
   }
 
+  /**
+   * Runs one task: an SQL-script task's script (resolved from a function
+   * if needed, then `$(name)`-substituted) is split into `GO`-separated
+   * batches via {@link splitMssqlScript} and each run with
+   * `Request#batch()`; a custom task's function runs directly against the
+   * raw `mssql` connection pool; an insert-data task's rows are each
+   * turned into an `INSERT` via `@sqb/builder`'s `Insert(...).generate({
+   * dialect: 'mssql' })` and executed. A script-task error is annotated
+   * with the task's file location before being rethrown.
+   */
   async executeTask(
     migrationPackage: MigrationPackage,
     migration: Migration,
@@ -320,6 +356,7 @@ END`);
     return Promise.resolve(undefined);
   }
 
+  /** Commits the lock transaction opened by {@link lockSchema}, releasing the app lock along with it. A no-op if the lock was never acquired. */
   async unlockSchema(): Promise<void> {
     if (!this._lockTransaction) return;
     const tx = this._lockTransaction;
