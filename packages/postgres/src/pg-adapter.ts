@@ -3,6 +3,11 @@ import { type Adapter, type ClientConfiguration, DataType } from '@sqb/connect';
 import { Connection, type ConnectionConfiguration } from 'postgrejs';
 import { PgConnection } from './pg-connection.js';
 
+/**
+ * `@sqb/connect` {@link Adapter} for PostgreSQL, wrapping the `postgrejs`
+ * npm package. Registered automatically as a side effect of importing
+ * this package - see `index.ts`.
+ */
 export class PgAdapter implements Adapter {
   driver = 'postgrejs';
   dialect = 'postgres';
@@ -13,6 +18,11 @@ export class PgAdapter implements Adapter {
     positionalParams: true,
   };
 
+  /**
+   * Opens a new `postgrejs` connection.
+   *
+   * @throws {Error} whatever the driver throws for a failed connection - the connection is closed first if already open
+   */
   async connect(config: ClientConfiguration): Promise<Adapter.Connection> {
     const cfg: ConnectionConfiguration = { ...config.driverOptions };
     if (config.user) cfg.user = config.user;
