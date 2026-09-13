@@ -1,3 +1,13 @@
+/**
+ * @sqb/mssql - `@sqb/connect` database driver for Microsoft SQL Server,
+ * backed by the `mssql` (tedious) npm package.
+ *
+ * Importing this package (even without using any of its exports) registers
+ * {@link MssqlAdapter} with `@sqb/connect`'s `AdapterRegistry` as a side
+ * effect (and, via `@sqb/mssql-dialect`, `@sqb/builder`'s
+ * `SerializerRegistry`), making `new SqbClient({ dialect: 'mssql', ... })`
+ * work.
+ */
 import '@sqb/mssql-dialect';
 import { AdapterRegistry } from '@sqb/connect';
 import { MssqlAdapter } from './mssql-adapter.js';
