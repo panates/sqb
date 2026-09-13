@@ -7,8 +7,11 @@ import {
   type SerializerExtension,
 } from '@sqb/builder';
 
-// MySQL reserved words (https://dev.mysql.com/doc/refman/8.0/en/keywords.html)
-// that are not already covered by SerializeContext's base reservedWords list.
+/**
+ * MySQL reserved words (https://dev.mysql.com/doc/refman/8.0/en/keywords.html)
+ * that are not already covered by {@link SerializeContext}'s base
+ * reserved-words list.
+ */
 const reservedWords = new Set([
   'accessible',
   'analyze',
@@ -213,14 +216,25 @@ const reservedWords = new Set([
   'zerofill',
 ]);
 
+/**
+ * `@sqb/builder` {@link SerializerExtension} for MySQL, handling the
+ * MySQL-specific quirks the base serializer can't cover: `LIMIT`/`OFFSET`
+ * pagination (including MySQL's "max unsigned bigint" `LIMIT` trick for an
+ * offset-only query), boolean-as-integer literals, array-valued
+ * equality/inequality parameters rewritten as `IN`/`NOT IN`, `= NULL`/`<>
+ * NULL` rewritten as `IS`/`IS NOT NULL`, and ISO-8601 datetime string
+ * literals normalized before being sent as-is.
+ */
 export class MysqlSerializer implements SerializerExtension {
   dialect = 'mysql';
   reservedWords = reservedWords;
 
+  /** Case-insensitive check against MySQL's {@link reservedWords} list. */
   isReservedWord(_: any, s: any): boolean {
     return s && typeof s === 'string' && reservedWords.has(s.toLowerCase());
   }
 
+  /** Dispatches to the dialect-specific serializer for each SQL element type this extension overrides, falling through to `defFn` (the base serializer) for everything else. */
   serialize(
     ctx: SerializeContext,
     type: SerializationType | string,
@@ -245,6 +259,13 @@ export class MysqlSerializer implements SerializerExtension {
     }
   }
 
+  /**
+   * Appends MySQL's `LIMIT`/`OFFSET` pagination clause when the query has a
+   * `limit`/`offset`. MySQL has no bare `OFFSET` without a `LIMIT`, so an
+   * offset-only query is given the maximum unsigned `BIGINT` value
+   * (`18446744073709551615`) as its `LIMIT` - the documented MySQL idiom
+   * for "no real limit".
+   */
   private _serializeSelect(
     ctx: SerializeContext,
     o: any,
@@ -260,6 +281,17 @@ export class MysqlSerializer implements SerializerExtension {
     return out;
   }
 
+  /**
+   * Rewrites two comparison shapes MySQL can't express directly:
+   * - `= :param`/`<> :param` where the bound parameter turns out to hold
+   *   an array is rewritten as `IN (...)`/`NOT IN (...)` (MySQL has no
+   *   array binding, so an array-valued equality would otherwise
+   *   serialize as a single, incorrect scalar comparison).
+   * - `= null`/`<> null` (including an unbound `:param` that resolved to
+   *   `null`) is rewritten as `IS NULL`/`IS NOT NULL`, since MySQL's
+   *   `= NULL`/`<> NULL` never match (per SQL's three-valued-logic
+   *   semantics for `NULL`) rather than raising an error.
+   */
   private _serializeComparison(
     ctx: SerializeContext,
     o: any,
@@ -315,18 +347,23 @@ export class MysqlSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
+  /** MySQL has no native boolean type: renders as the integer literals `1`/`0` (or `null`). */
   private _serializeBooleanValue(_ctx: SerializeContext, o: any): string {
     return o == null ? 'null' : o ? '1' : '0';
   }
 
+  /**
+   * Normalizes an ISO-8601 string carrying a `T` date/time separator (e.g.
+   * from JSON test fixtures) into MySQL's `'yyyy-mm-dd hh:mm:ss'` literal
+   * via {@link SerializeContext.dateToSQL}. A plain `'yyyy-mm-dd'` date
+   * string (no `T`) is accepted by MySQL as-is and falls through to the
+   * base serializer, as does any other string.
+   */
   private _serializeStringValue(
     ctx: SerializeContext,
     o: any,
     defFn: DefaultSerializeFunction,
   ): string {
-    // MySQL accepts 'yyyy-mm-dd' literals as-is for DATE columns, but
-    // datetime strings carrying a timezone offset (e.g. from JSON test
-    // fixtures) must be normalized to 'yyyy-mm-dd hh:mm:ss' first.
     if (typeof o === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(o)) {
       const d = new Date(o);
       if (!isNaN(d.getTime())) return ctx.dateToSQL(d);
@@ -334,10 +371,23 @@ export class MysqlSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
+  /**
+   * Suppresses the base serializer's `RETURNING` clause entirely. MySQL
+   * has no `RETURNING` support at all, so any inserted/deleted rows must
+   * instead be read back at the connection layer (see `@sqb/mysql`).
+   */
   private _serializeReturning(): string {
     return '';
   }
 
+  /**
+   * Rewrites a parameter reference bound to an array (only meaningful for
+   * a `SELECT`/`DELETE` query) into an inline SQL list via
+   * {@link SerializeContext.anyToSQL}, since MySQL has no array parameter
+   * binding; the parameter is then removed from `ctx.params` so it isn't
+   * also sent as a bind value. Any other parameter falls through to the
+   * base serializer's placeholder.
+   */
   private _serializeParameter(
     ctx: SerializeContext,
     o: any,
