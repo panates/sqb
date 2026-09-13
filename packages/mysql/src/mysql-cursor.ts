@@ -1,6 +1,11 @@
 import type { Adapter, RowType } from '@sqb/connect';
 import type { Query as RawQuery } from 'mysql2';
 
+/**
+ * `@sqb/connect` {@link Adapter.Cursor} wrapping the `mysql2` driver's
+ * `Query.stream()` result: consumes it via its async iterator, `fetch(n)`
+ * pulling up to `n` rows at a time.
+ */
 export class MysqlCursor implements Adapter.Cursor {
   private _iterator?: AsyncIterableIterator<any>;
   private readonly _rowType: RowType;
@@ -23,10 +28,12 @@ export class MysqlCursor implements Adapter.Cursor {
     return this._rowType;
   }
 
+  /** Stops consuming the stream by dropping the iterator - `mysql2`'s stream has no `close()`/`destroy()` of its own to call. */
   async close(): Promise<void> {
     this._iterator = undefined;
   }
 
+  /** Pulls up to `nRows` more rows from the stream, or `undefined` once it's exhausted. */
   async fetch(nRows: number): Promise<any[] | undefined> {
     if (!this._iterator) return undefined;
     const rows: any[] = [];

@@ -3,6 +3,11 @@ import type { Adapter, ClientConfiguration } from '@sqb/connect';
 import mysql from 'mysql2/promise';
 import { MysqlConnection } from './mysql-connection.js';
 
+/**
+ * `@sqb/connect` {@link Adapter} for MySQL, wrapping the `mysql2` npm
+ * package. Registered automatically as a side effect of importing this
+ * package - see `index.ts`.
+ */
 export class MysqlAdapter implements Adapter {
   driver = 'mysql2';
   dialect = 'mysql';
@@ -11,6 +16,11 @@ export class MysqlAdapter implements Adapter {
     positionalParams: true,
   };
 
+  /**
+   * Opens a new `mysql2` driver connection, configured for named
+   * placeholders and JS-`number` decimal results (rather than the
+   * driver's default of strings).
+   */
   async connect(config: ClientConfiguration): Promise<Adapter.Connection> {
     const cfg: mysql.ConnectionOptions = { ...config.driverOptions };
     if (config.host) cfg.host = config.host;
