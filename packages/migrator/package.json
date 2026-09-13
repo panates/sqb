@@ -47,7 +47,7 @@
     "mssql": "^12.7.2",
     "mysql2": "^3.24.4",
     "oracledb": "^7.0.1",
-    "postgrejs": "^3.1.0",
+    "postgrejs": "^3.1.3",
     "sql.js": "^1.14.2"
   },
   "type": "module",

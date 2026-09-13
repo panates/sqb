@@ -22,7 +22,7 @@
     "clean:cover": "rimraf ../../coverage/oracle-dialect"
   },
   "dependencies": {
-    "valgen": "^7.0.1",
+    "valgen": "^7.0.3",
     "tslib": "^2.8.1"
   },
   "peerDependencies": {

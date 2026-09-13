@@ -22,7 +22,7 @@
     "clean:cover": "rimraf ../../coverage/postgres"
   },
   "dependencies": {
-    "fast-tokenizer": "^1.10.0",
+    "fast-tokenizer": "^1.10.1",
     "putil-promisify": "^1.10.1",
     "tslib": "^2.8.1"
   },
