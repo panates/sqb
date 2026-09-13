@@ -6,6 +6,11 @@ import { LogicalOperator } from '../operators/logical-operator.js';
 import { Operator } from '../operators/operator.js';
 import { Raw } from './raw.js';
 
+/**
+ * A `CASE WHEN ... THEN ... [ELSE ...] END` expression, built up via
+ * repeated `.when(...).then(...)` pairs. Construct via the exported
+ * {@link Case} factory rather than this class directly.
+ */
 class CaseClass extends SqlElement {
   _expressions!: { condition: SqlElement; value: any }[];
   _elseValue: any;
@@ -17,7 +22,11 @@ class CaseClass extends SqlElement {
   }
 
   /**
-   * Defines "when" part of Case expression.
+   * Starts a new `WHEN` branch. Must be followed by `.then(value)` to
+   * complete the branch - calling `.when()` again without an intervening
+   * `.then()` discards the pending condition.
+   *
+   * @param condition - One or more conditions, combined with `AND` if more than one.
    */
   when(...condition: (Operator | Raw)[]): this {
     if (condition.length) this._condition = new And(...condition);
@@ -26,7 +35,8 @@ class CaseClass extends SqlElement {
   }
 
   /**
-   * Defines "then" part of Case expression.
+   * Completes the most recent `.when(...)` branch with its result value.
+   * A no-op if called without a preceding `.when(...)`.
    */
   then(value: any): this {
     if (this._condition) {
@@ -39,7 +49,7 @@ class CaseClass extends SqlElement {
   }
 
   /**
-   * Defines "else" part of Case expression.
+   * Sets the `ELSE` value, used when no `WHEN` branch matches.
    */
   else(value: any): this {
     this._elseValue = value;
@@ -47,7 +57,7 @@ class CaseClass extends SqlElement {
   }
 
   /**
-   * Sets alias to case expression.
+   * Sets an alias for this expression when used as a `SELECT` column.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -55,11 +65,8 @@ class CaseClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
-   *
-   * @param {Object} ctx
-   * @return {string}
-   * @override
+   * Serializes as `case when ... then ... [else ...] end`. Serializes to an
+   * empty string if no `WHEN` branch was added.
    */
   _serialize(ctx: SerializeContext): string {
     if (!this._expressions.length) return '';
@@ -98,6 +105,15 @@ interface CaseCtor {
   prototype: Case;
 }
 
+/**
+ * Creates a `CASE WHEN ... THEN ... END` expression. Callable with or
+ * without `new`.
+ *
+ * @example
+ * ```ts
+ * Case().when(Gt('age', 18)).then('adult').else('minor').as('category');
+ * ```
+ */
 export const Case = function (this: Case) {
   if (!(this instanceof Case)) return new Case();
   SqlElement.call(this);

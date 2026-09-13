@@ -1,5 +1,14 @@
 /**
- * Prints array with line feeding
+ * Joins an array of already-serialized SQL fragments into one string,
+ * wrapping onto a new line whenever the current line would otherwise exceed
+ * `lfLen` characters. Used by the default serializers (column lists, `IN`
+ * lists, `GROUP BY`/`ORDER BY` lists, etc.) to keep generated SQL readable
+ * without producing one giant unbroken line.
+ *
+ * @param arr - The fragments to join; `undefined` entries are skipped.
+ * @param sep - Separator placed between fragments (default: `,`).
+ * @param lfLen - Approximate line-length threshold that triggers a line break (default: `60`).
+ * @returns The joined text, or an empty string if `arr` has no printable entries.
  */
 export function printArray(
   arr: string[],

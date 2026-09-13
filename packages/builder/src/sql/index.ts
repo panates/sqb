@@ -1,3 +1,9 @@
+/**
+ * The `sql.*` namespace: every query builder, column/expression element, and
+ * operator. Re-exported as a whole from the package root, both flattened
+ * (`import { Select } from '@sqb/builder'`) and namespaced
+ * (`import { sql } from '@sqb/builder'; sql.Select(...)`).
+ */
 export * from './delete.js';
 export * from './elements/index.js';
 export * from './insert.js';

@@ -22,6 +22,13 @@ import { NotIn } from './sql/operators/not-in.js';
 import { NotLike } from './sql/operators/not-like.js';
 import { Or } from './sql/operators/or.js';
 
+/**
+ * Maps every string key a plain-object condition (e.g.
+ * `{ age: { gt: 18 } }` or `Where({ age: { '>': 18 } })`) can use to the
+ * operator constructor it resolves to, including symbolic aliases (`'>'`,
+ * `'!='`, `'!in'`, etc.) alongside the named ones (`'gt'`, `'ne'`, `'notIn'`).
+ * Consulted by {@link LogicalOperator}'s object-condition parsing.
+ */
 export interface OperatorsMap {
   and: typeof And;
   or: typeof Or;
@@ -65,6 +72,10 @@ export interface OperatorsMap {
   match: typeof Match;
 }
 
+/**
+ * Concrete lookup table backing {@link OperatorsMap}, resolving each
+ * supported plain-object condition key/alias to its operator constructor.
+ */
 const Operators: OperatorsMap = {
   and: And,
   or: Or,
@@ -108,6 +119,10 @@ const Operators: OperatorsMap = {
   match: Match,
 };
 
+// Attached onto LogicalOperator itself (rather than imported directly)
+// because logical-operator.ts can't import this module without creating a
+// circular import - LogicalOperator's own object-condition parsing reads it
+// back off `(LogicalOperator as any).Operators` at call time instead.
 (LogicalOperator as any).Operators = Operators;
 
 export { Operators };

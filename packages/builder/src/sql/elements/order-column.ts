@@ -6,6 +6,11 @@ import { BaseField } from './base-field.js';
 const ORDER_COLUMN_PATTERN =
   /^([-+])?((?:[a-zA-Z_][\w$]*\.){0,2})([a-zA-Z_][\w$]*|\*) *(asc|dsc|desc|ascending|descending)?$/i;
 
+/**
+ * A `[schema.][table.]field [desc]` column reference used in an
+ * `ORDER BY` clause. Construct via the exported {@link OrderColumn} factory
+ * rather than this class directly.
+ */
 class OrderColumnClass extends BaseField {
   declare _descending?: boolean;
 
@@ -13,6 +18,7 @@ class OrderColumnClass extends BaseField {
     return SerializationType.ORDER_COLUMN;
   }
 
+  /** Serializes as `[schema.][table.]field [desc]`, escaping the field name if it's a reserved word. */
   _serialize(ctx: SerializeContext): string {
     const o = {
       schema: this._schema,
@@ -39,6 +45,12 @@ interface OrderColumnCtor {
   prototype: OrderColumn;
 }
 
+/**
+ * Creates an `ORDER BY` column reference. Callable with or without `new`.
+ *
+ * @param value - A `[-|+][schema.][table.]field [asc|desc|dsc|ascending|descending]` string. A leading `-` (or a `desc`/`dsc`/`descending` suffix) sorts descending.
+ * @throws {TypeError} If `value` doesn't match the expected column format.
+ */
 export const OrderColumn = function (this: OrderColumn, value: string) {
   if (!(this instanceof OrderColumn)) return new OrderColumn(value);
   SqlElement.call(this);

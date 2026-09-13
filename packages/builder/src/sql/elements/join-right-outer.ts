@@ -4,6 +4,7 @@ import { Join } from './join.js';
 import type { Raw } from './raw.js';
 import { TableName } from './table-name.js';
 
+/** A `RIGHT OUTER JOIN` clause. Construct via the exported {@link RightOuterJoin} factory rather than this class directly. */
 class RightOuterJoinClass extends Join {}
 
 interface RightOuterJoinCtor {
@@ -12,6 +13,12 @@ interface RightOuterJoinCtor {
   prototype: RightOuterJoin;
 }
 
+/**
+ * Creates a `RIGHT OUTER JOIN` clause. Callable with or without `new`.
+ *
+ * @param table - The joined table name, {@link TableName}, sub-`Select` (requires an alias via `.as(...)`), or {@link Raw}.
+ * @throws {TypeError} If `table` isn't a string, `TableName`, `Select`, or `Raw`.
+ */
 export const RightOuterJoin = function (
   this: RightOuterJoin,
   table: string | TableName | Select | Raw,

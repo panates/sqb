@@ -3,6 +3,14 @@ import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import type { ParamOptions } from '../../types.js';
 
+/**
+ * A named bind parameter placeholder (serializes as `:name`). Its value is
+ * looked up from `GenerateOptions.params`/`Query.values(...)` at
+ * serialization time and recorded onto the resulting
+ * `GenerateResult.params`/`paramOptions`, rather than being inlined as a SQL
+ * literal. Construct via the exported {@link Param} factory rather than
+ * this class directly.
+ */
 class ParamClass extends SqlElement {
   _name!: string;
   _dataType?: DataType;
@@ -13,7 +21,9 @@ class ParamClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
+   * Looks up this parameter's value from `ctx.params`, records it (and its
+   * type/array metadata) onto `ctx.preparedParams`/`ctx.paramOptions`, and
+   * serializes as `:name`.
    */
   _serialize(ctx: SerializeContext): string {
     const o = {
@@ -59,6 +69,13 @@ interface ParamCtor {
   prototype: Param;
 }
 
+/**
+ * Creates a named bind parameter placeholder. Callable with or without
+ * `new`, accepting either a single {@link Param.Args} object, or positional
+ * `(name, dataType?, isArray?)` arguments.
+ *
+ * @param varArgs - Either `[{ name, dataType?, isArray? }]` or `[name, dataType?, isArray?]`.
+ */
 export const Param = function (this: Param, ...varArgs: any[]) {
   let args: Param.Args;
   if (varArgs.length === 1 && typeof varArgs[0] === 'object') {
@@ -83,9 +100,13 @@ Param.prototype.constructor = Param;
 export interface Param extends ParamClass {}
 
 export namespace Param {
+  /** Structured form of the arguments accepted by the {@link Param} factory. */
   export interface Args {
+    /** The parameter name (referenced as `:name` in generated SQL and as the key into `GenerateOptions.params`). */
     name: string;
+    /** The parameter's portable data type, if known. */
     dataType?: DataType;
+    /** Whether the bound value is (or should be treated as) an array. */
     isArray?: boolean;
   }
 }

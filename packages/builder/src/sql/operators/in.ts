@@ -4,7 +4,14 @@ import { SerializeContext } from '../../serialize-context.js';
 import { isSqlElement } from '../../type-guards.js';
 import { CompOperator } from './comp-operator.js';
 
+/** An `IN (...)` membership comparison. Construct via the exported {@link In} factory rather than this class directly. */
 class InClass extends CompOperator {
+  /**
+   * Serializes as `<left> in (<list>)`, with one exception: an empty list
+   * serializes as the self-contained literal `1=0` (`IN ()` is invalid SQL,
+   * and always false anyway), or `1=1` for {@link NotIn} (always true) -
+   * see the inline comment for why this can't just drop the condition.
+   */
   _serialize(ctx: SerializeContext): string {
     if (Array.isArray(this._right) && !this._right.length) {
       // Nothing can be IN an empty list (always false), and everything is
@@ -23,6 +30,13 @@ interface InCtor {
   prototype: In;
 }
 
+/**
+ * Creates an `IN (...)` membership comparison. Callable with or without `new`.
+ *
+ * @param left - A `field[]` expression string (`[]` suffix marks it as an array field), or a {@link SqlElement}.
+ * @param right - The candidate values, or a {@link SqlElement} (e.g. a sub-`Select`); a non-array, non-`SqlElement` value is wrapped into a single-element array.
+ * @throws {TypeError} If `left` is a string that doesn't match the expected expression format.
+ */
 export const In = function (this: In, left: string | SqlElement, right: any[]) {
   if (!(this instanceof In)) return new In(left, right);
   CompOperator.call(this, left, right);

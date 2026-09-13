@@ -2,6 +2,11 @@ import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
+/**
+ * A `COALESCE(expr1, expr2, ...)` expression, returning the first non-null
+ * argument. Construct via the exported {@link Coalesce} factory rather than
+ * this class directly.
+ */
 class CoalesceClass extends SqlElement {
   _expressions!: any[];
   _alias?: string;
@@ -11,7 +16,7 @@ class CoalesceClass extends SqlElement {
   }
 
   /**
-   * Sets alias to case expression.
+   * Sets an alias for this expression when used as a `SELECT` column.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -19,11 +24,8 @@ class CoalesceClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
-   *
-   * @param {Object} ctx
-   * @return {string}
-   * @override
+   * Serializes as `coalesce(expr1, expr2, ...)`, or an empty string if no
+   * expressions were given.
    */
   _serialize(ctx: SerializeContext): string {
     if (!this._expressions.length) return '';
@@ -53,6 +55,11 @@ interface CoalesceCtor {
   prototype: Coalesce;
 }
 
+/**
+ * Creates a `COALESCE(...)` expression. Callable with or without `new`.
+ *
+ * @param expressions - The candidate expressions/values, in order; each is converted via `ctx.anyToSQL(...)`.
+ */
 export const Coalesce = function (this: Coalesce, ...expressions: any[]) {
   if (!(this instanceof Coalesce)) return new Coalesce(...expressions);
   SqlElement.call(this);

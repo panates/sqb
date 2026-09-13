@@ -2,6 +2,10 @@ import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
+/**
+ * A `LOWER(expr)` expression. Construct via the exported {@link Lower}
+ * factory rather than this class directly.
+ */
 class LowerClass extends SqlElement {
   _expression: any;
   _alias?: string;
@@ -11,7 +15,7 @@ class LowerClass extends SqlElement {
   }
 
   /**
-   * Sets alias to case expression.
+   * Sets an alias for this expression when used as a `SELECT` column.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -19,11 +23,7 @@ class LowerClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
-   *
-   * @param {Object} ctx
-   * @return {string}
-   * @override
+   * Serializes as `lower(expr)`, or an empty string if no expression was given.
    */
   _serialize(ctx: SerializeContext): string {
     if (!this._expression) return '';
@@ -43,6 +43,11 @@ interface LowerCtor {
   prototype: Lower;
 }
 
+/**
+ * Creates a `LOWER(...)` expression. Callable with or without `new`.
+ *
+ * @param expression - The column/expression to lowercase; converted via `ctx.anyToSQL(...)`.
+ */
 export const Lower = function (this: Lower, expression: any) {
   if (!(this instanceof Lower)) return new Lower(expression);
   SqlElement.call(this);

@@ -2,6 +2,7 @@ import { OperatorType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { CompOperator } from './comp-operator.js';
 
+/** A `>=` (greater than or equal) comparison. Construct via the exported {@link Gte} factory rather than this class directly. */
 class GteClass extends CompOperator {}
 
 interface GteCtor {
@@ -10,6 +11,13 @@ interface GteCtor {
   prototype: Gte;
 }
 
+/**
+ * Creates a `>=` comparison (`left >= right`). Callable with or without `new`.
+ *
+ * @param left - A `field[]` expression string (`[]` suffix marks it as an array field), or a {@link SqlElement}.
+ * @param right - The value (or {@link SqlElement}) to compare against.
+ * @throws {TypeError} If `left` is a string that doesn't match the expected expression format.
+ */
 export const Gte = function (
   this: Gte,
   left: string | SqlElement,

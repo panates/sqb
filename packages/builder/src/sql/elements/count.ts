@@ -2,6 +2,10 @@ import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
+/**
+ * A `COUNT(*)` expression. Construct via the exported {@link Count} factory
+ * rather than this class directly.
+ */
 class CountClass extends SqlElement {
   _alias?: string;
 
@@ -10,7 +14,7 @@ class CountClass extends SqlElement {
   }
 
   /**
-   * Sets alias to case expression.
+   * Sets an alias for this expression when used as a `SELECT` column.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -18,11 +22,7 @@ class CountClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
-   *
-   * @param {Object} ctx
-   * @return {string}
-   * @override
+   * Serializes as `count(*)`.
    */
   _serialize(ctx: SerializeContext): string {
     return ctx.serialize(this._type, undefined, () =>
@@ -47,6 +47,9 @@ interface CountCtor {
   prototype: Count;
 }
 
+/**
+ * Creates a `COUNT(*)` expression. Callable with or without `new`.
+ */
 export const Count = function (this: Count) {
   if (!(this instanceof Count)) return new Count();
   SqlElement.call(this);

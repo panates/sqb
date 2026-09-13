@@ -16,6 +16,17 @@ import { LogicalOperator } from './operators/logical-operator.js';
 import { Query } from './query.js';
 import type { Union } from './union.js';
 
+/**
+ * A `SELECT` query builder. Build one up fluently with `.addColumn()`,
+ * `.from()`, `.join()`, `.where()`, `.groupBy()`, `.orderBy()`,
+ * `.limit()`/`.offset()`, then call `.generate()` (inherited from
+ * {@link Query}) to produce SQL text.
+ *
+ * A `Select` can also be embedded as a sub-select: pass it directly as a
+ * `.from()`/`.join()` table argument or a comparison operator's operand
+ * (call `.as(alias)` first when embedding it as a `FROM`/column
+ * sub-select, since an alias is required there).
+ */
 class SelectClass extends Query {
   _tables?: SqlElement[];
   _columns?: SqlElement[];
@@ -33,7 +44,10 @@ class SelectClass extends Query {
   }
 
   /**
-   * Adds columns to query.
+   * Adds one or more columns to the `SELECT` column list. With no columns
+   * ever added, the query serializes to `select *`.
+   *
+   * @param column - Column names (accepts a single comma-separated string, e.g. `'id, name as n'`), nested arrays of names, or {@link SqlElement} expressions (e.g. a {@link Field}, {@link Count}, sub-`Select`). Falsy entries are ignored.
    */
   addColumn(...column: (string | string[] | SqlElement)[]): this {
     const self = this;
@@ -60,7 +74,10 @@ class SelectClass extends Query {
   }
 
   /**
-   * Defines "from" part of  query.
+   * Defines the `FROM` part of the query, replacing any tables set by a
+   * previous call.
+   *
+   * @param table - Table names (parsed as `[schema.]table [as alias]`), or {@link TableName}/{@link Raw}/sub-`Select`/`Union` instances. A sub-select requires an alias (set via `.as(...)`).
    */
   from(...table: (string | TableName | Raw | SelectClass | Union)[]): this {
     this._tables = [];
@@ -78,7 +95,10 @@ class SelectClass extends Query {
   }
 
   /**
-   * Adds "join" statements to query
+   * Adds one or more `JOIN` clauses (e.g. {@link InnerJoin},
+   * {@link LeftJoin}) to the query, in the order given.
+   *
+   * @throws {TypeError} If an argument isn't a `Join` instance.
    */
   join(...join: Join[]): this {
     this._joins = this._joins || [];
@@ -91,7 +111,10 @@ class SelectClass extends Query {
   }
 
   /**
-   * Defines "where" part of query
+   * Adds conditions to the `WHERE` clause, combined with the existing
+   * conditions (and each other) using `AND`.
+   *
+   * @param condition - One or more {@link Operator}/{@link Raw} instances, or a plain object condition (e.g. `{ age: { gt: 18 } }`) resolved via {@link OperatorsMap}.
    */
   where(...condition: (SqlElement | Object)[]): this {
     this._where = this._where || new And();
@@ -100,7 +123,9 @@ class SelectClass extends Query {
   }
 
   /**
-   * Defines "where" part of query
+   * Adds one or more columns to the `GROUP BY` clause.
+   *
+   * @param field - Column names or {@link SqlElement} expressions.
    */
   groupBy(...field: (string | SqlElement)[]): this {
     this._groupBy = this._groupBy || [];
@@ -112,7 +137,9 @@ class SelectClass extends Query {
   }
 
   /**
-   * Defines "order by" part of query.
+   * Adds one or more columns to the `ORDER BY` clause.
+   *
+   * @param field - Column names (a leading `-`, or a trailing `desc`/`dsc`/`descending`, sorts that column descending), or {@link SqlElement} expressions.
    */
   orderBy(...field: (string | SqlElement)[]): this {
     this._orderBy = this._orderBy || [];
@@ -124,7 +151,8 @@ class SelectClass extends Query {
   }
 
   /**
-   * Sets alias for sub-select queries
+   * Sets the alias this query is embedded under, required whenever it's
+   * used as a sub-select in a `FROM`, `JOIN`, or column position.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -132,7 +160,9 @@ class SelectClass extends Query {
   }
 
   /**
-   * Sets limit for query
+   * Sets the `LIMIT` (maximum row count) for the query.
+   *
+   * @param limit - Coerced to an integer.
    */
   limit(limit: number): this {
     this._limit = coerceToInt(limit);
@@ -140,7 +170,9 @@ class SelectClass extends Query {
   }
 
   /**
-   * Sets offset for query
+   * Sets the `OFFSET` (row skip count) for the query.
+   *
+   * @param offset - Coerced to an integer.
    */
   offset(offset: number): this {
     this._offset = coerceToInt(offset);
@@ -148,25 +180,33 @@ class SelectClass extends Query {
   }
 
   /**
-   * Enables distinct mode
+   * Adds the `DISTINCT` keyword to the query.
    */
   distinct(): this {
     this._distinct = true;
     return this;
   }
 
+  /**
+   * Registers a listener for the `'fetch'` event. This query never emits it
+   * itself - it exists so a consumer (e.g. `@sqb/connect`) executing the
+   * query can notify listeners as rows are fetched.
+   */
   onFetch(listener: (...args: any[]) => void): this {
     this.on('fetch', listener);
     return this;
   }
 
+  /** One-time variant of {@link onFetch}. */
   onceFetch(listener: (...args: any[]) => void): this {
     this.once('fetch', listener);
     return this;
   }
 
   /**
-   * Performs serialization
+   * Serializes this query into a `select ...` statement, assembling the
+   * column/from/join/where/group-by/order-by fragments produced by the
+   * `__serialize*` helpers below.
    */
   _serialize(ctx: SerializeContext): string {
     const o = {
@@ -218,9 +258,7 @@ class SelectClass extends Query {
     });
   }
 
-  /**
-   *
-   */
+  /** Serializes the `SELECT` column list (`* ` if none were added). */
   protected __serializeSelectColumns(ctx: SerializeContext): string {
     const arr: string[] = [];
     if (this._columns) {
@@ -243,9 +281,7 @@ class SelectClass extends Query {
     );
   }
 
-  /**
-   *
-   */
+  /** Serializes the `FROM` clause, requiring an alias on any sub-select table. */
   protected __serializeFrom(ctx: SerializeContext): string {
     const arr: { text: string; source: any }[] = [];
     if (this._tables) {
@@ -274,9 +310,7 @@ class SelectClass extends Query {
     });
   }
 
-  /**
-   *
-   */
+  /** Serializes all `JOIN` clauses, one per line. */
   protected __serializeJoins(ctx: SerializeContext): string {
     const arr: string[] = [];
     if (this._joins) {
@@ -291,9 +325,7 @@ class SelectClass extends Query {
     );
   }
 
-  /**
-   *
-   */
+  /** Serializes the `WHERE` clause, or an empty string if none was set. */
   protected __serializeWhere(ctx: SerializeContext): string {
     if (!this._where) return '';
     const s = this._where._serialize(ctx);
@@ -303,9 +335,7 @@ class SelectClass extends Query {
     );
   }
 
-  /**
-   *
-   */
+  /** Serializes the `GROUP BY` clause, or an empty string if none was set. */
   protected __serializeGroupColumns(ctx: SerializeContext): string {
     const arr: string[] = [];
     if (this._groupBy) {
@@ -321,6 +351,7 @@ class SelectClass extends Query {
     });
   }
 
+  /** Serializes the `ORDER BY` clause, or an empty string if none was set. */
   protected __serializeOrderColumns(ctx: SerializeContext): string {
     const arr: string[] = [];
     if (this._orderBy) {
@@ -343,6 +374,20 @@ interface SelectCtor {
   prototype: Select;
 }
 
+/**
+ * Creates a `SELECT` query builder. Callable with or without `new`.
+ *
+ * @param column - Initial columns to select, same accepted forms as {@link SelectClass.addColumn}; may be omitted and added later via `.addColumn(...)`.
+ *
+ * @example
+ * ```ts
+ * Select('id', 'name')
+ *   .from('users')
+ *   .where({ active: true })
+ *   .orderBy('name')
+ *   .generate({ dialect: 'postgres' });
+ * ```
+ */
 export const Select = function (
   this: Select,
   ...column: (string | string[] | SqlElement)[]

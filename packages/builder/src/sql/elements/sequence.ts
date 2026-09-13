@@ -2,6 +2,12 @@ import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
+/**
+ * A sequence getter expression: `currval('name')` (the sequence's current
+ * value), or `nextval('name')` when `.next(true)` is set (advances the
+ * sequence and returns its new value). Construct via the exported
+ * {@link Sequence} factory rather than this class directly.
+ */
 class SequenceClass extends SqlElement {
   _expression!: string;
   _next!: boolean;
@@ -11,13 +17,17 @@ class SequenceClass extends SqlElement {
     return SerializationType.SEQUENCE_GETTER_STATEMENT;
   }
 
+  /**
+   * Selects between `nextval` (`true`, advances the sequence) and `currval`
+   * (`false`, reads without advancing).
+   */
   next(value: boolean): this {
     this._next = value;
     return this;
   }
 
   /**
-   * Sets alias to case expression.
+   * Sets an alias for this expression when used as a `SELECT` column.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -25,11 +35,8 @@ class SequenceClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
-   *
-   * @param {Object} ctx
-   * @return {string}
-   * @override
+   * Serializes as `nextval('name')`/`currval('name')`, or an empty string
+   * if no sequence name was given.
    */
   _serialize(ctx: SerializeContext): string {
     if (!this._expression) return '';
@@ -59,6 +66,12 @@ interface SequenceCtor {
   prototype: Sequence;
 }
 
+/**
+ * Creates a sequence getter expression. Callable with or without `new`.
+ *
+ * @param expression - The sequence name.
+ * @param next - `true` for `nextval(...)`; omitted/`false` for `currval(...)`.
+ */
 export const Sequence = function (
   this: Sequence,
   expression: string,

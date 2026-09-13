@@ -8,6 +8,13 @@ import type { Select } from '../select.js';
 import type { Raw } from './raw.js';
 import { TableName } from './table-name.js';
 
+/**
+ * A `JOIN` clause. Rather than constructing this directly with a
+ * {@link JoinType}, prefer one of the fixed-type subclasses -
+ * {@link InnerJoin}, {@link LeftJoin}, {@link LeftOuterJoin},
+ * {@link RightJoin}, {@link RightOuterJoin}, {@link OuterJoin},
+ * {@link FullOuterJoin}, {@link CrossJoin}.
+ */
 class JoinClass extends SqlElement {
   _joinType!: JoinType;
   _table!: TableName | Select | Raw;
@@ -17,11 +24,19 @@ class JoinClass extends SqlElement {
     return SerializationType.JOIN;
   }
 
+  /**
+   * Adds `ON` conditions, combined with the existing conditions (and each
+   * other) using `AND`.
+   */
   on(...conditions: SqlElement[]): this {
     this._conditions.add(...conditions);
     return this;
   }
 
+  /**
+   * Serializes as `<join type> join <table> [on <conditions>]`. A sub-select
+   * join target requires an alias (set via `.as(...)`).
+   */
   _serialize(ctx: SerializeContext): string {
     const o = {
       joinType: this._joinType,
@@ -75,6 +90,7 @@ class JoinClass extends SqlElement {
     });
   }
 
+  /** Serializes the `ON` clause, or an empty string if no conditions were added. */
   protected __serializeConditions(ctx, join: JoinClass) {
     if (join._conditions._items.length) {
       const s = join._conditions._serialize(ctx);
@@ -92,6 +108,15 @@ interface JoinCtor {
   prototype: Join;
 }
 
+/**
+ * Creates a `JOIN` clause of an arbitrary {@link JoinType}. Callable with or
+ * without `new`. Prefer a fixed-type subclass such as {@link InnerJoin} or
+ * {@link LeftJoin} unless the join type is only known dynamically.
+ *
+ * @param joinType - The kind of join to serialize.
+ * @param table - The joined table name, {@link TableName}, sub-`Select` (requires an alias via `.as(...)`), or {@link Raw}.
+ * @throws {TypeError} If `table` isn't a string, `TableName`, `Select`, or `Raw`.
+ */
 export const Join = function (
   this: Join,
   joinType: JoinType,

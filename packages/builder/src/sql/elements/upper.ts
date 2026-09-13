@@ -2,6 +2,10 @@ import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
+/**
+ * An `UPPER(expr)` expression. Construct via the exported {@link Upper}
+ * factory rather than this class directly.
+ */
 class UpperClass extends SqlElement {
   _expression: any;
   _alias?: string;
@@ -11,7 +15,7 @@ class UpperClass extends SqlElement {
   }
 
   /**
-   * Sets alias to case expression.
+   * Sets an alias for this expression when used as a `SELECT` column.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -19,11 +23,7 @@ class UpperClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
-   *
-   * @param {Object} ctx
-   * @return {string}
-   * @override
+   * Serializes as `upper(expr)`, or an empty string if no expression was given.
    */
   _serialize(ctx: SerializeContext): string {
     if (!this._expression) return '';
@@ -42,6 +42,11 @@ interface UpperCtor {
   prototype: Upper;
 }
 
+/**
+ * Creates an `UPPER(...)` expression. Callable with or without `new`.
+ *
+ * @param expression - The column/expression to uppercase; converted via `ctx.anyToSQL(...)`.
+ */
 export const Upper = function (this: Upper, expression: any) {
   if (!(this instanceof Upper)) return new Upper(expression);
   SqlElement.call(this);
