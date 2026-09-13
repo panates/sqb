@@ -8,9 +8,11 @@ import type {
   SqliteDriver,
 } from './types.js';
 
+/** {@link NativeStatement} implementation wrapping `bun:sqlite`'s `Statement`. */
 class BunStatement implements NativeStatement {
   constructor(private _stmt: Statement) {}
 
+  /** Runs the statement, normalizing the result to {@link NativeRunResult}'s shape. */
   run(params?: Record<string, any>) {
     const r = params ? this._stmt.run(params) : this._stmt.run();
     return {
@@ -31,6 +33,7 @@ class BunStatement implements NativeStatement {
     return params ? this._stmt.iterate(params) : this._stmt.iterate();
   }
 
+  /** Converts `bun:sqlite`'s column metadata into {@link NativeColumnInfo}. */
   columns(): NativeColumnInfo[] {
     const names = this._stmt.columnNames;
     let types: (string | null)[] = [];
@@ -47,6 +50,7 @@ class BunStatement implements NativeStatement {
   }
 }
 
+/** {@link NativeDatabase} implementation wrapping `bun:sqlite`'s `Database`. */
 class BunDatabase implements NativeDatabase {
   constructor(private _db: Database) {}
 
@@ -67,6 +71,7 @@ class BunDatabase implements NativeDatabase {
   }
 }
 
+/** {@link SqliteDriver} backed by Bun's built-in `bun:sqlite` module. */
 export const bunDriver: SqliteDriver = {
   open(filename: string): NativeDatabase {
     return new BunDatabase(new Database(filename));

@@ -12,9 +12,11 @@ import type {
   SqliteDriver,
 } from './types.js';
 
+/** {@link NativeStatement} implementation wrapping `node:sqlite`'s `StatementSync`. */
 class NodeStatement implements NativeStatement {
   constructor(private _stmt: StatementSync) {}
 
+  /** Runs the statement, converting `node:sqlite`'s `bigint` result fields to plain `number`s (see {@link NativeRunResult}). */
   run(params?: Record<string, any>) {
     const r = params ? this._stmt.run(params) : this._stmt.run();
     return {
@@ -37,6 +39,7 @@ class NodeStatement implements NativeStatement {
     ) as IterableIterator<Record<string, any>>;
   }
 
+  /** Converts `node:sqlite`'s column metadata into {@link NativeColumnInfo}. */
   columns(): NativeColumnInfo[] {
     return this._stmt.columns().map((c: StatementColumnMetadata) => ({
       name: c.name,
@@ -45,6 +48,7 @@ class NodeStatement implements NativeStatement {
   }
 }
 
+/** {@link NativeDatabase} implementation wrapping `node:sqlite`'s `DatabaseSync`. */
 class NodeDatabase implements NativeDatabase {
   constructor(private _db: DatabaseSync) {}
 
@@ -65,6 +69,7 @@ class NodeDatabase implements NativeDatabase {
   }
 }
 
+/** {@link SqliteDriver} backed by Node's built-in `node:sqlite` module. */
 export const nodeDriver: SqliteDriver = {
   open(filename: string): NativeDatabase {
     return new NodeDatabase(new DatabaseSync(filename));
