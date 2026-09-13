@@ -7,12 +7,19 @@ import oracledb from 'oracledb';
 import { clientConfigurationToDriver } from './helpers.js';
 import { OraConnection } from './ora-connection.js';
 
+/** `@sqb/connect` {@link ClientConfiguration} plus the Oracle-specific driver options `@sqb/oracle` understands. */
 export interface OraClientConfiguration extends ClientConfiguration {
   driverOptions?: {
+    /** Skips {@link initOracleClient} (locating and loading Oracle's native client libraries) when set, e.g. when the driver's Thin mode is used instead. */
     direct?: boolean;
   };
 }
 
+/**
+ * `@sqb/connect` {@link Adapter} for Oracle Database, wrapping the
+ * `oracledb` npm package. Registered automatically as a side effect of
+ * importing this package - see `index.ts`.
+ */
 export class OraAdapter implements Adapter {
   driver = 'oracledb';
   dialect = 'oracle';
@@ -22,6 +29,14 @@ export class OraAdapter implements Adapter {
     // fetchAsString: [DataType.DATE, DataType.TIMESTAMP, DataType.TIMESTAMPTZ]
   };
 
+  /**
+   * Opens a new `oracledb` connection (initializing Oracle's native client
+   * libraries first, unless `driverOptions.direct` is set), reads back its
+   * session id (`v$mystat.sid`) for {@link OraConnection.sessionId}, and
+   * switches to `config.schema` if one was given.
+   *
+   * @throws {Error} whatever the driver throws for a failed connection or schema switch - the connection is closed first if already open
+   */
   async connect(config: OraClientConfiguration): Promise<Adapter.Connection> {
     if (!config.driverOptions?.direct) initOracleClient();
     const cfg = clientConfigurationToDriver(config);
@@ -49,6 +64,15 @@ export class OraAdapter implements Adapter {
 }
 
 let oracleClientInitialized = false;
+
+/**
+ * Locates Oracle's native client libraries (`libclntsh.so`/`.dylib`/
+ * `oci.dll`, depending on platform) under any directory listed in
+ * `LD_LIBRARY_PATH` or `ORA_HOME`, and initializes `oracledb`'s Thick mode
+ * with the first one found. A no-op after the first successful call, and
+ * a no-op entirely if no matching library is found (leaving the driver in
+ * its default Thin mode).
+ */
 function initOracleClient() {
   if (oracleClientInitialized) return;
   const libDirs = [

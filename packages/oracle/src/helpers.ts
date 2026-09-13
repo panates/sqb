@@ -2,6 +2,17 @@ import type { ClientConfiguration } from '@sqb/connect';
 import type { ConnectionAttributes } from 'oracledb';
 import url from 'url';
 
+/**
+ * Converts a `@sqb/connect` {@link ClientConfiguration} into `oracledb`'s
+ * `ConnectionAttributes`, building the driver's single `connectString`
+ * (`host:port/database`) from the separate `host`/`port`/`database`
+ * fields - `config.host` is parsed as a URL (defaulting to an `oracle://`
+ * scheme if none is given) so it can alternatively carry the port,
+ * database, and even embedded `user:password` credentials all in one
+ * string. Any explicit `user`/`password`/`port`/`database` option takes
+ * precedence over what's embedded in `host`, and embedded credentials are
+ * ignored entirely when `externalAuth` is set.
+ */
 export function clientConfigurationToDriver(
   config: ClientConfiguration,
 ): ConnectionAttributes {

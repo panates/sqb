@@ -4,6 +4,14 @@ import oracledb from 'oracledb';
 import { fetchTypeMap } from './constants.js';
 import { OraCursor } from './ora-cursor.js';
 
+/**
+ * `@sqb/connect` {@link Adapter.Connection} wrapping a raw `oracledb`
+ * driver connection: translates `QueryRequest`s into driver calls
+ * (including cursor-mode result sets and `RETURNING`-on-`INSERT`/`UPDATE`
+ * emulation, since Oracle's own `RETURNING ... INTO` needs out-bind
+ * variables this layer doesn't set up) and normalizes results/column
+ * metadata back into SQB's portable shape.
+ */
 export class OraConnection implements Adapter.Connection {
   private intlcon?: oracledb.Connection;
   public serverVersion: string;
@@ -17,16 +25,25 @@ export class OraConnection implements Adapter.Connection {
     this.serverVersion = '' + conn.oracleServerVersion;
   }
 
+  /** Closes the underlying `oracledb` connection. */
   async close() {
     if (!this.intlcon) return;
     await this.intlcon.close();
     this.intlcon = undefined;
   }
 
+  /** Rolls back any open transaction, readying the connection to be pooled/reused. */
   async reset() {
     return this.rollback();
   }
 
+  /**
+   * Marks a transaction as open. Oracle has no explicit `BEGIN`
+   * statement - every DML implicitly starts a transaction - so this only
+   * flips {@link getInTransaction}'s internal flag rather than issuing SQL.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async startTransaction(): Promise<void> {
     assert.ok(
       this.intlcon,
@@ -35,6 +52,11 @@ export class OraConnection implements Adapter.Connection {
     this._inTransaction = true;
   }
 
+  /**
+   * Commits the current transaction.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async commit(): Promise<void> {
     assert.ok(
       this.intlcon,
@@ -44,17 +66,29 @@ export class OraConnection implements Adapter.Connection {
     this._inTransaction = false;
   }
 
+  /** Rolls back the current transaction. A no-op if the connection is already closed. */
   async rollback(): Promise<void> {
     if (!this.intlcon) return;
     await this.intlcon.rollback();
     this._inTransaction = false;
   }
 
+  /**
+   * Validates the connection with a trivial `SELECT 1 FROM dual`.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async test(): Promise<void> {
     assert.ok(this.intlcon, 'DB session is closed');
     await this.intlcon.execute('select 1 from dual', [], {});
   }
 
+  /**
+   * Reads the session's current schema via
+   * `SYS_CONTEXT('userenv', 'current_schema')`.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async getSchema(): Promise<string> {
     assert.ok(this.intlcon, 'DB session is closed');
     const r = await this.intlcon.execute(
@@ -68,6 +102,12 @@ export class OraConnection implements Adapter.Connection {
     return '';
   }
 
+  /**
+   * Switches the session's current schema via `ALTER SESSION SET
+   * CURRENT_SCHEMA`.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async setSchema(schema: string): Promise<void> {
     assert.ok(this.intlcon, 'Can not set schema of a closed db session');
     await this.intlcon.execute(
@@ -81,11 +121,26 @@ export class OraConnection implements Adapter.Connection {
     return this._inTransaction;
   }
 
+  /** Stamps the outgoing `QueryRequest` with `dialect: 'oracle'` and this connection's `serverVersion`, so `@sqb/oracle-dialect` can pick the right pagination syntax for the server's Oracle version. */
   onGenerateQuery(prepared: QueryRequest): void {
     prepared.dialect = 'oracle';
     prepared.dialectVersion = this.serverVersion;
   }
 
+  /**
+   * Executes one query. For an `INSERT`/`UPDATE` with `returningFields`,
+   * runs a synthesized follow-up `SELECT` to emulate `RETURNING` (an
+   * `INSERT` is matched back by the row's `ROWID`, an `UPDATE` by reusing
+   * the original `WHERE` clause) - `DELETE` isn't emulated here since
+   * there's nothing left to re-select afterward. Reads result rows or, in
+   * cursor mode, wraps the driver's `ResultSet` in an {@link OraCursor}.
+   * A synthetic `row$number` column injected by `@sqb/oracle-dialect`'s
+   * `ROWNUM`-based pagination rewrite (used on Oracle versions without
+   * native `OFFSET`/`FETCH`) is stripped from both the field list and
+   * every row before the response is returned.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async execute(request: QueryRequest): Promise<Adapter.Response> {
     assert.ok(this.intlcon, 'Can not execute query with a closed db session');
 

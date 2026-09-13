@@ -1,5 +1,6 @@
 import oracledb from 'oracledb';
 
+/** Maps the `oracledb` driver's `DB_TYPE_*` names to SQB's portable Oracle data type name strings. */
 export const dataTypeNames = {
   [oracledb.DB_TYPE_BFILE.name]: 'BFILE',
   [oracledb.DB_TYPE_BINARY_DOUBLE.name]: 'BINARY_DOUBLE',
@@ -28,6 +29,7 @@ export const dataTypeNames = {
   [oracledb.DB_TYPE_VARCHAR.name]: 'VARCHAR',
 };
 
+/** Maps the `oracledb` driver's `DB_TYPE_*` names to the portable JS type name a fetched column value of that type should be reported as. */
 export const fetchTypeMap = {
   [oracledb.DB_TYPE_BFILE.name]: 'object',
   [oracledb.DB_TYPE_BINARY_DOUBLE.name]: 'number',
