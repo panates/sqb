@@ -22,7 +22,12 @@ export class OraConnection implements Adapter.Connection {
     public sessionId: string,
   ) {
     this.intlcon = conn;
-    this.serverVersion = '' + conn.oracleServerVersion;
+    // oracleServerVersion is a single encoded number (a.b.c.d.e becomes
+    // 100000000*a + 1000000*b + ...), not a dotted string - @sqb/oracle-dialect's
+    // `ctx.dialectVersion.split('.')[0]` version check needs the dotted
+    // oracleServerVersionString ("11.2.0.4.0") instead, or every server
+    // (whose encoded number is always >= 12) would be misdetected as 12c+.
+    this.serverVersion = conn.oracleServerVersionString;
   }
 
   /** Closes the underlying `oracledb` connection. */
