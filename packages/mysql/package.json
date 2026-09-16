@@ -5,22 +5,6 @@
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
-  "scripts": {
-    "compile": "tsc --noEmit",
-    "prebuild": "npm run check && npm run lint && npm run clean",
-    "build": "tsc -b tsconfig-build.json",
-    "postbuild": "node ../../support/postbuild.cjs",
-    "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --max-warnings=0 --fix",
-    "format": "prettier . --write --log-level=warn",
-    "check": "dpdm -T --no-warning --no-tree --skip-dynamic-imports circular --exit-code circular:1 ./src/index.ts",
-    "test": "mocha",
-    "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
-    "clean:src": "ts-cleanup -s src --all",
-    "clean:test": "ts-cleanup -s test --all",
-    "clean:build": "rimraf build *.tsbuildinfo",
-    "clean:cover": "rimraf ../../coverage/mysql"
-  },
   "dependencies": {
     "tslib": "^2.8.1"
   },

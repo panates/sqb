@@ -41,10 +41,10 @@
     "dpdm": "^4.3.0",
     "mocha": "^12.0.1",
     "npm-check-updates": "^23.1.0",
-    "postgrejs": "^3.1.3",
+    "postgrejs": "^3.3.0",
     "prettier": "^3.9.6",
     "rimraf": "^6.1.3",
-    "rman": "^1.0.5",
+    "rman": "^1.0.12",
     "ts-cleanup": "^1.4.1",
     "tslib": "^2.8.1",
     "typescript": "^5.6.0 || ^6.0.0"

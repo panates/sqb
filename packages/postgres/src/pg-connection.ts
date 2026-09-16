@@ -8,6 +8,7 @@ import {
   type OID,
   type QueryOptions,
 } from 'postgrejs';
+import { PgCursor } from './pg-cursor.js';
 
 /** Maps SQB's portable {@link DataType} enum to the `postgrejs` driver's scalar and array OIDs (`[scalarOID, arrayOID]`), used to bind a parameter as its intended PostgreSQL type rather than relying on the driver's own type inference. */
 const SqbDataTypToOIDMap = {
@@ -220,8 +221,9 @@ export class PgConnection implements Adapter.Connection {
     const out: Adapter.Response = {};
     if (resp.fields) out.fields = this._convertFields(resp.fields);
     if (resp.rows) out.rows = resp.rows;
-    if (resp.cursor) out.cursor = resp.cursor;
-    if (resp.rowType) out.rowType = resp.rowType;
+    if (resp.cursor) out.cursor = PgCursor.create(resp.cursor);
+    if (resp.rowType)
+      out.rowType = resp.rowType === 'array' ? 'array' : 'object';
     if (resp.rowsAffected) out.rowsAffected = resp.rowsAffected;
     return out;
   }

@@ -18,6 +18,7 @@ export * from './client/sqb-client.js';
 export * from './client/sqb-connection.js';
 export * from './client/sqb-error.js';
 export * from './client/types.js';
+export * from './constants.js';
 export * from './orm/base-entity.js';
 export * from './orm/decorators/column.decorator.js';
 export * from './orm/decorators/embedded.decorator.js';

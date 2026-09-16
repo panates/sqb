@@ -7,6 +7,7 @@
  * database dialect. The `sql` namespace re-export lets consumers write
  * `sql.Select(...)` etc. as an alternative to importing each name directly.
  */
+export * from './constants.js';
 export * from './enums.js';
 export * from './extensions.js';
 export * from './helpers.js';

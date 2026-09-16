@@ -1,5 +1,9 @@
 import oracledb from 'oracledb';
 
+/** This package's own version, kept in step with its `package.json` by `rman version`
+ *  (see `.rmanrc` `version.stamp`) - never edit it by hand. */
+export const version = '6.0.9';
+
 /** Maps the `oracledb` driver's `DB_TYPE_*` names to SQB's portable Oracle data type name strings. */
 export const dataTypeNames = {
   [oracledb.DB_TYPE_BFILE.name]: 'BFILE',

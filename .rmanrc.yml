@@ -1,2 +1,42 @@
 $schema: ./node_modules/rman/rmanrc.schema.json
 group: true
+
+# clean command
+clean:
+  include: [coverage]
+
+"[*]":
+  # publish command
+  publish:
+    directory: build
+
+  # version command
+  version:
+    stamp: ["src/constants.ts"]
+
+  # clean command
+  clean:
+    include: ["build", "*.tsbuildinfo", "../../coverage/${{pkg.basename}}"]
+
+  # run command
+  run:
+    # build script
+    build:
+      exec: "tsc -b tsconfig-build.json"
+      before:
+        - "rman run check"
+        - "rman run lint"
+        - "rman clean"
+      after:
+        - "cp README.md build/"
+        - "cp ../../LICENSE build/"
+    # circular dependency check
+    check: "dpdm -T --no-warning --no-tree --skip-dynamic-imports circular --exit-code circular:1 ./src/index.ts"
+    # compile with tsc
+    compile: "tsc --noEmit"
+    # reformat code
+    format: "prettier . --write --log-level=warn"
+    # lint check
+    lint: "eslint . --max-warnings=0"
+    # lint fix
+    "lint:fix": "eslint . --max-warnings=0 --fix"

@@ -11,8 +11,8 @@ on:
 
   # on git push
   push:
-    branches:
-      - dev
+    branches-ignore:
+      - main
     paths:
       - 'packages/*/src/**'
       - 'packages/*/test/**'

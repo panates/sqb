@@ -14,4 +14,6 @@ import { PgAdapter } from './pg-adapter.js';
 
 AdapterRegistry.register(new PgAdapter());
 
+export * from './constants.js';
 export * from './pg-adapter.js';
+export * from './pg-cursor.js';

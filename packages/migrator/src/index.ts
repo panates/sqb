@@ -9,6 +9,7 @@
  * dialect (see `db-migrator.ts`) and tracks applied versions in a per-
  * database bookkeeping table that adapter creates and maintains.
  */
+export * from './constants.js';
 export * from './db-migrator.js';
 export * from './migration-adapter.js';
 export * from './migration-package.js';
