@@ -19,52 +19,50 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Answers "did this commit arrive through a pull request, and from which branch?" - which the
+  # `test` job's own `if:` cannot ask, because a job condition is evaluated before any job runs and
+  # a push payload says nothing about a pull request. Parsing the commit message recognised only the
+  # merge-commit button, and its `contains('/dev')` was a substring test that also caught `develop`.
+  source:
+    uses: panates/github-actions/.github/workflows/pr-source.yaml@v3
+    permissions:
+      contents: read
+      pull-requests: read
+
   test:
+    needs: source
     if: >
       !contains(github.event.head_commit.message, 'no-release') &&
       (
         (github.event_name == 'workflow_dispatch' && github.event.inputs.skip-tests != 'true') ||
         (
           github.event_name == 'push' &&
-          !(
-            contains(github.event.head_commit.message, 'no-test') ||
-            ( 
-              startsWith(github.event.head_commit.message, 'Merge pull request') &&
-              contains(github.event.head_commit.message, '/dev')
-            )
-          )
+          !contains(github.event.head_commit.message, 'no-test') &&
+          needs.source.outputs.head-ref != 'dev'
         )
       )
     uses: ./.github/workflows/test.yml
-    secrets:
-      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
-
-  release_after_test:
-    # Wait for "test" job
-    needs: test
-    uses: panates/github-actions/.github/workflows/node-release.yaml@v1
-    secrets:
-      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   release:
+    needs: [source, test]
+    # `always()` because `needs` alone would block this whenever `test` is *skipped*, which is the
+    # normal path for a `no-test` commit or a pull request merged from dev. One condition replaces
+    # the pair of mirror-image jobs that used to be here - `release_after_test` and `release` with
+    # the test condition negated - which meant the release call was written twice.
+    #
+    # `needs.source.result == 'success'` is the second lock on the same door: this job accepts `test`
+    # being skipped, and `test` is skipped whenever `source` fails.
     if: >
-      !contains(github.event.head_commit.message, 'no-release') &&
-      !(
-        (github.event_name == 'workflow_dispatch' && github.event.inputs.skip-tests != 'true') ||
-        (
-          github.event_name == 'push' &&
-          !(
-            contains(github.event.head_commit.message, 'no-test') ||
-            ( 
-              startsWith(github.event.head_commit.message, 'Merge pull request') &&
-              contains(github.event.head_commit.message, '/dev')
-            )
-          )
-        )
-      )
-    uses: panates/github-actions/.github/workflows/node-release.yaml@v1
+      always() && !cancelled() &&
+      needs.source.result == 'success' &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
+      !contains(github.event.head_commit.message, 'no-release')
+    uses: panates/github-actions/.github/workflows/node-release.yaml@v3
+    # Declared on the calling job, because that is what governs a reusable workflow's permissions.
+    permissions:
+      id-token: write
+      contents: write
     secrets:
-      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      # PERSONAL_ACCESS_TOKEN is gone: measured, no manifest in this repository - root or package -
+      # carries a private scope, and there is no .npmrc, so the token had nothing to authenticate.
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

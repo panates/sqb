@@ -1,42 +1,23 @@
-$schema: ./node_modules/rman/rmanrc.schema.json
-group: true
+# The `$schema` line is gone: rman 2 ships no JSON Schema for this file, so
+# `./node_modules/rman/rmanrc.schema.json` had stopped resolving to anything. Autocomplete comes
+# from the `RmanConfig` type now, which reaches the JS config forms only.
+extends: '@panates/rman-preset'
 
-# clean command
-clean:
-  include: [coverage]
+# **Quoted, and it has to be.** `@` is a reserved indicator in YAML, so a bare
+# `extends: @panates/...` is not a document - measured here before this: js-yaml refused the file
+# with `bad indentation of a mapping entry (2:10)` and every rman command in this repository failed
+# on it. (The name was also wrong: the package is `@panates/rman-preset`; `@panates/rman-monorepo`
+# is a 404 on npm.)
 
-"[*]":
-  # publish command
-  publish:
-    directory: build
-
-  # version command
-  version:
-    stamp: ["src/constants.ts"]
-
-  # clean command
-  clean:
-    include: ["build", "*.tsbuildinfo", "../../coverage/${{pkg.basename}}"]
-
-  # run command
-  run:
-    # build script
-    build:
-      exec: "tsc -b tsconfig-build.json"
-      before:
-        - "rman run check"
-        - "rman run lint"
-        - "rman clean"
-      after:
-        - "cp README.md build/"
-        - "cp ../../LICENSE build/"
-    # circular dependency check
-    check: "dpdm -T --no-warning --no-tree --skip-dynamic-imports circular --exit-code circular:1 ./src/index.ts"
-    # compile with tsc
-    compile: "tsc --noEmit"
-    # reformat code
-    format: "prettier . --write --log-level=warn"
-    # lint check
-    lint: "eslint . --max-warnings=0"
-    # lint fix
-    "lint:fix": "eslint . --max-warnings=0 --fix"
+'[platform:node]':
+  '[*]':
+    # **One version line for all seventeen packages, which is what this repository has always
+    # done** - they sit at 6.0.9 together and release together under a single repo-wide `v*` tag.
+    #
+    # Declared here rather than unmarked at the root, and the level is the whole point: the preset
+    # sets `group: false` inside its own `"[platform:node]" > "[*]"`, and a selector block beats an
+    # unmarked key however close to the package it is written. Left unmarked, this would lose to the
+    # preset silently - and the consequences are not small: seventeen independent version lines, a
+    # tag pattern derived as `{name}@*` instead of `v*`, and a root that switches to a calendar
+    # identity because a repository releasing along several lines has no shared number to report.
+    group: true

@@ -48,3 +48,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# doctest scratch file, written with absolute paths into this checkout
+__doctest.mjs
