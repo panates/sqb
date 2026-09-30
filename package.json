@@ -1,7 +1,7 @@
 {
   "name": "sqb",
   "private": true,
-  "version": "6.0.10",
+  "version": "6.0.11",
   "license": "BSD-3-Clause",
   "contributors": [
     "Eray Hanoglu <e.hanoglu@panates.com>",
