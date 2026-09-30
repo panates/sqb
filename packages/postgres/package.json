@@ -14,7 +14,7 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "expect": "^30.5.1",
+    "expect": "^30.5.2",
     "postgrejs": "^3.12.1"
   },
   "peerDependencies": {

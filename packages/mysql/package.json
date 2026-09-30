@@ -12,14 +12,14 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "expect": "^30.5.1",
-    "mysql2": "^3.24.4"
+    "expect": "^30.5.2",
+    "mysql2": "^3.24.5"
   },
   "peerDependencies": {
     "@sqb/builder": "^6.0.10",
     "@sqb/connect": "^6.0.10",
     "@sqb/mysql-dialect": "^6.0.10",
-    "mysql2": "^3.24.4"
+    "mysql2": "^3.24.5"
   },
   "type": "module",
   "module": "./index.js",

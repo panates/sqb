@@ -2,8 +2,15 @@ import { DataType, SerializationType } from '../../enums.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { BaseField } from './base-field.js';
 
+// No space is allowed between the schema/table prefix and the field name,
+// and the alias segment's leading whitespace is mandatory (not `*`), so
+// the engine can't backtrack over the ambiguous split points a run of
+// plain word characters (or spaces) would otherwise create between the
+// adjacent groups - that ambiguity is what made the previous version of
+// this regex vulnerable to polynomial-time backtracking (ReDoS) on
+// adversarial input.
 const TABLE_COLUMN_PATTERN =
-  /^ *((?:[a-zA-Z_][\w$_]*\.){0,2}) *([0-9a-zA-Z_][\w$_]*|\*) *(?:as)? *([a-zA-Z_][\w$_]*)?$/;
+  /^ *((?:[a-zA-Z_][\w$_]*\.){0,2})([0-9a-zA-Z_][\w$_]*|\*)(?: +(?:as +)?([a-zA-Z_][\w$_]*))? *$/;
 
 /**
  * A `[schema.][table.]field [as alias]` column reference, used as a
