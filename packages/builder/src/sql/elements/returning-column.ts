@@ -3,7 +3,13 @@ import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { BaseField } from './base-field.js';
 
-const RETURNING_COLUMN_PATTERN = /^([a-zA-Z_]\w*) *(?:as)? *(\w+)?$/;
+// The alias segment's leading whitespace is mandatory (not `*`) so the
+// engine can't backtrack over the ambiguous split point between the field
+// name and this group on a run of plain word characters with no real
+// separator - that ambiguity is what made the previous version of this
+// regex vulnerable to polynomial-time backtracking (ReDoS) on adversarial
+// input.
+const RETURNING_COLUMN_PATTERN = /^([a-zA-Z_]\w*)(?: +(?:as +)?(\w+))?$/;
 
 /**
  * A `field [as alias]` column reference used in a `RETURNING` clause.

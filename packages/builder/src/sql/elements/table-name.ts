@@ -58,8 +58,14 @@ export const TableName = function (
   if (!(this instanceof TableName)) return new TableName(tableName);
   SqlElement.call(this);
   if (typeof tableName === 'string') {
+    // The alias segment's leading whitespace is mandatory (not `*`) so the
+    // engine can't backtrack over the ambiguous split point between the
+    // table-name group and this one on a run of plain word characters with
+    // no real separator - that ambiguity is what made the previous version
+    // of this regex vulnerable to polynomial-time backtracking (ReDoS) on
+    // adversarial input.
     const m = tableName.match(
-      /^(?:([a-zA-Z][\w$]*)\.)? *([a-zA-Z][\w$]*) *(?:as)? *(\w+)?$/,
+      /^(?:([a-zA-Z][\w$]*)\.)? *([a-zA-Z][\w$]*)(?: +(?:as +)?(\w+))? *$/,
     );
     if (!m)
       throw new TypeError(`(${tableName}) does not match table name format`);
