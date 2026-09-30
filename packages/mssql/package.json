@@ -5,6 +5,9 @@
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "fast-tokenizer": "^1.10.1",
     "tslib": "^2.8.1"

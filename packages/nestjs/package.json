@@ -5,6 +5,9 @@
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "@jsopen/objects": "^2.3.3",
     "ansi-colors": "^4.1.3",
