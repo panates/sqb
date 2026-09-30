@@ -13,9 +13,9 @@ describe('migrator:DbMigrator (oracle)', () => {
   }/${process.env.ORADATABASE || 'FREEPDB1'}`;
   const connectionConfig: ClientConfiguration = {
     dialect: 'oracle',
-    host: process.env.ORAHOST,
-    port: process.env.ORAPORT ? parseInt(process.env.ORAPORT, 10) : undefined,
-    database: process.env.ORADATABASE,
+    host: process.env.ORAHOST || 'localhost',
+    port: process.env.ORAPORT ? parseInt(process.env.ORAPORT, 10) : 1521,
+    database: process.env.ORADATABASE || 'FREEPDB1',
     user: schema,
     password: schemaPassword,
   };
