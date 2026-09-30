@@ -44,6 +44,7 @@
     "postgrejs": "^3.12.1",
     "prettier": "^3.9.9",
     "putil-varhelpers": "^1.7.0",
+    "rman": "^2.6.0",
     "ts-cleanup": "^1.4.1",
     "tslib": "^2.8.1",
     "typescript": "^5.6.0 || ^6.0.0"
