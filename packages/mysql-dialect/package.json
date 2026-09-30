@@ -1,7 +1,7 @@
 {
   "name": "@sqb/mysql-dialect",
   "description": "SQB serialization extension for MySQL database",
-  "version": "6.0.9",
+  "version": "6.0.10",
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
@@ -12,7 +12,7 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.0.9"
+    "@sqb/builder": "^6.0.10"
   },
   "devDependencies": {
     "expect": "^30.5.1"
