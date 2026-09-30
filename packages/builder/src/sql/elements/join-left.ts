@@ -4,6 +4,7 @@ import { Join } from './join.js';
 import type { Raw } from './raw.js';
 import { TableName } from './table-name.js';
 
+/** A `LEFT JOIN` clause. Construct via the exported {@link LeftJoin} factory rather than this class directly. */
 class LeftJoinClass extends Join {}
 
 interface LeftJoinCtor {
@@ -12,6 +13,12 @@ interface LeftJoinCtor {
   prototype: LeftJoin;
 }
 
+/**
+ * Creates a `LEFT JOIN` clause. Callable with or without `new`.
+ *
+ * @param table - The joined table name, {@link TableName}, sub-`Select` (requires an alias via `.as(...)`), or {@link Raw}.
+ * @throws {TypeError} If `table` isn't a string, `TableName`, `Select`, or `Raw`.
+ */
 export const LeftJoin = function (
   this: LeftJoin,
   table: string | TableName | Select | Raw,

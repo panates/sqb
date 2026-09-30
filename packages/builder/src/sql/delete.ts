@@ -7,6 +7,10 @@ import { And } from './operators/and.js';
 import { LogicalOperator } from './operators/logical-operator.js';
 import { Query } from './query.js';
 
+/**
+ * A `DELETE FROM ...` query builder. Construct via the exported
+ * {@link Delete} factory rather than this class directly.
+ */
 class DeleteClass extends Query {
   _table!: TableName | Raw;
   _where?: LogicalOperator;
@@ -16,7 +20,10 @@ class DeleteClass extends Query {
   }
 
   /**
-   * Defines "where" part of query
+   * Adds conditions to the `WHERE` clause, combined with the existing
+   * conditions (and each other) using `AND`.
+   *
+   * @param operator - One or more {@link Operator}/{@link Raw} instances, or a plain object condition resolved via {@link OperatorsMap}.
    */
   where(...operator: any[]): this {
     this._where = this._where || new And();
@@ -25,7 +32,7 @@ class DeleteClass extends Query {
   }
 
   /**
-   * Performs serialization
+   * Serializes this query into a `delete from ...` statement.
    */
   _serialize(ctx: SerializeContext): string {
     const o = {
@@ -39,9 +46,7 @@ class DeleteClass extends Query {
     return 'delete from ' + o.table + (o.where ? '\n' + o.where : '');
   }
 
-  /**
-   *
-   */
+  /** Serializes the `WHERE` clause, or an empty string if none was set. */
   _serializeWhere(ctx: SerializeContext): string {
     if (!this._where) return '';
     const s = this._where._serialize(ctx);
@@ -58,6 +63,17 @@ interface DeleteCtor {
   prototype: Delete;
 }
 
+/**
+ * Creates a `DELETE` query builder. Callable with or without `new`.
+ *
+ * @param tableName - The target table name, {@link TableName}, or a {@link Raw} expression.
+ * @throws {TypeError} If `tableName` isn't a string, `TableName`, or `Raw`.
+ *
+ * @example
+ * ```ts
+ * Delete('users').where({ id: 5 }).generate({ dialect: 'postgres' });
+ * ```
+ */
 export const Delete = function (
   this: Delete,
   tableName: string | TableName | Raw,

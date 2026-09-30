@@ -5,6 +5,11 @@ import { BaseField } from './base-field.js';
 const TABLE_COLUMN_PATTERN =
   /^ *((?:[a-zA-Z_][\w$_]*\.){0,2}) *([0-9a-zA-Z_][\w$_]*|\*) *(?:as)? *([a-zA-Z_][\w$_]*)?$/;
 
+/**
+ * A `[schema.][table.]field [as alias]` column reference, used as a
+ * `SELECT` column. Construct via the exported {@link Field} factory rather
+ * than this class directly.
+ */
 class FieldClass extends BaseField {
   _alias?: string;
 
@@ -12,6 +17,7 @@ class FieldClass extends BaseField {
     return SerializationType.FIELD_NAME;
   }
 
+  /** Serializes this field, escaping the bare field name if it's a reserved word and appending the alias, if any. */
   _serialize(ctx: SerializeContext): string {
     const o = {
       schema: this._schema,
@@ -45,6 +51,14 @@ interface FieldCtor {
   prototype: Field;
 }
 
+/**
+ * Creates a column reference. Callable with or without `new`.
+ *
+ * @param arg0 - Either an `expression` string in `[schema.][table.]field [as alias]` form (`*` allowed for the field), or an `{ expression, dataType?, isArray? }` object.
+ * @param arg1 - The column's portable data type (only used with the string-expression overload).
+ * @param arg2 - Whether the column value is an array (only used with the string-expression overload).
+ * @throws {TypeError} If the expression doesn't match the expected column format.
+ */
 export const Field = function (this: Field, arg0: any, arg1?: any, arg2?: any) {
   if (!(this instanceof Field)) return new Field(arg0, arg1, arg2);
   BaseField.call(this);

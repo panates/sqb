@@ -2,6 +2,7 @@ import { OperatorType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { CompOperator } from './comp-operator.js';
 
+/** A `<=` (less than or equal) comparison. Construct via the exported {@link Lte} factory rather than this class directly. */
 class LteClass extends CompOperator {}
 
 interface LteCtor {
@@ -10,6 +11,13 @@ interface LteCtor {
   prototype: Lte;
 }
 
+/**
+ * Creates a `<=` comparison (`left <= right`). Callable with or without `new`.
+ *
+ * @param left - A `field[]` expression string (`[]` suffix marks it as an array field), or a {@link SqlElement}.
+ * @param right - The value (or {@link SqlElement}) to compare against.
+ * @throws {TypeError} If `left` is a string that doesn't match the expected expression format.
+ */
 export const Lte = function (
   this: Lte,
   left: string | SqlElement,

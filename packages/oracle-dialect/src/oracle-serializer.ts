@@ -8,9 +8,11 @@ import {
 } from '@sqb/builder';
 import { toDateString } from 'valgen';
 
-// Oracle reserved words (Oracle Database SQL Language Reference, "Oracle SQL
-// Reserved Words") that are not already covered by SerializeContext's base
-// reservedWords list.
+/**
+ * Oracle reserved words (Oracle Database SQL Language Reference, "Oracle
+ * SQL Reserved Words") that are not already covered by
+ * {@link SerializeContext}'s base reserved-words list.
+ */
 const reservedWords = new Set([
   'comment',
   'dual',
@@ -83,14 +85,29 @@ const reservedWords = new Set([
   'whenever',
 ]);
 
+/**
+ * `@sqb/builder` {@link SerializerExtension} for Oracle Database, handling
+ * the Oracle-specific quirks the base serializer can't cover: `/*+ ... *\/`
+ * optimizer hints, version-dependent pagination (native `OFFSET`/`FETCH`
+ * on 12c+, a `ROWNUM`-based rewrite on older versions), a `FROM`-less
+ * `SELECT` needing `FROM dual`, date/timestamp string and `Date` literals
+ * rendered through `TO_DATE`/`TO_TIMESTAMP_TZ` (with a `TO_DATE`-over-
+ * `TO_TIMESTAMP` bind-parameter rewrite for query performance), boolean-
+ * as-number literals, array-valued equality/inequality parameters
+ * rewritten as `IN`/`NOT IN`, `= NULL`/`<> NULL` rewritten as `IS`/`IS NOT
+ * NULL`, and `LISTAGG`/sequence-getter syntax for @sqb/builder's portable
+ * string-aggregation and sequence-value SQL elements.
+ */
 export class OracleSerializer implements SerializerExtension {
   dialect = 'oracle';
   reservedWords = reservedWords;
 
+  /** Case-insensitive check against Oracle's {@link reservedWords} list. */
   isReservedWord(_: any, s: any) {
     return s && typeof s === 'string' && reservedWords.has(s.toLowerCase());
   }
 
+  /** Dispatches to the dialect-specific serializer for each SQL element type this extension overrides, falling through to `defFn` (the base serializer) for everything else. */
   serialize(
     ctx: SerializeContext,
     type: SerializationType | string,
@@ -123,6 +140,15 @@ export class OracleSerializer implements SerializerExtension {
     }
   }
 
+  /**
+   * Injects any `/*+ ... *\/` optimizer hints declared on the query's
+   * table references, then appends pagination for a `limit`/`offset`:
+   * on Oracle 12c and later, native `OFFSET ... ROWS FETCH NEXT ... ROWS
+   * ONLY` / `FETCH FIRST ... ROWS ONLY`; on older versions (or when
+   * `ctx.dialectVersion` isn't known), a `ROWNUM`-based subquery rewrite
+   * instead, since those don't support the standard `OFFSET`/`FETCH`
+   * syntax.
+   */
   private _serializeSelect(
     ctx: SerializeContext,
     o: any,
@@ -178,6 +204,7 @@ export class OracleSerializer implements SerializerExtension {
     return out;
   }
 
+  /** Falls back to `FROM dual` when the query has no table references - Oracle, unlike most dialects, requires a `FROM` clause even for a table-less `SELECT`. */
   private _serializeFrom(
     ctx: SerializeContext,
     arr: any,
@@ -186,6 +213,16 @@ export class OracleSerializer implements SerializerExtension {
     return defFn(ctx, arr) || 'from dual';
   }
 
+  /**
+   * Rewrites two comparison shapes Oracle can't express directly:
+   * - `= :param`/`<> :param` where the bound parameter turns out to hold
+   *   an array is rewritten as `IN (...)`/`NOT IN (...)` (Oracle has no
+   *   array binding, so an array-valued equality would otherwise
+   *   serialize as a single, incorrect scalar comparison).
+   * - `= null`/`<> null` (including an unbound `:param` that resolved to
+   *   `null`) is rewritten as `IS NULL`/`IS NOT NULL`, since Oracle's
+   *   `= NULL`/`<> NULL` never match rather than raising an error.
+   */
   private _serializeComparison(
     ctx: SerializeContext,
     o: any,
@@ -241,6 +278,13 @@ export class OracleSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
+  /**
+   * Renders a `'yyyy-mm-dd'` string literal through `TO_DATE` and a
+   * `'yyyy-mm-ddThh:mm:ss...'` (ISO-8601-with-`T`) string literal through
+   * `TO_TIMESTAMP_TZ`, since Oracle has no implicit string-to-date/
+   * timestamp conversion matching either format by default. Any other
+   * string falls through to the base serializer.
+   */
   private _serializeStringValue(
     ctx: SerializeContext,
     o: any,
@@ -255,6 +299,7 @@ export class OracleSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
+  /** Wraps a `Date` value's base-serialized literal in `TO_DATE`, using a date-only or date-and-time format mask depending on whether the serialized string carries a time component. */
   private _serializeDateValue(
     ctx: SerializeContext,
     o: any,
@@ -269,10 +314,12 @@ export class OracleSerializer implements SerializerExtension {
     );
   }
 
+  /** Oracle has no native boolean type: renders as the numeric literals `1`/`0` (or `null`). */
   private _serializeBooleanValue(_ctx: SerializeContext, o: any): string {
     return o == null ? 'null' : o ? '1' : '0';
   }
 
+  /** Renders `@sqb/builder`'s portable string-aggregation element as Oracle's `LISTAGG(...) WITHIN GROUP (...)`. */
   // noinspection JSUnusedLocalSymbols
   private _serializeStringAGG(
     ctx: SerializeContext,
@@ -292,6 +339,7 @@ export class OracleSerializer implements SerializerExtension {
     );
   }
 
+  /** Renders `@sqb/builder`'s portable sequence-value element as Oracle's `SEQUENCE.NEXTVAL`/`SEQUENCE.CURRVAL` syntax. */
   // noinspection JSUnusedLocalSymbols
   private _serializeSequenceGetter(
     ctx: SerializeContext,
@@ -307,10 +355,33 @@ export class OracleSerializer implements SerializerExtension {
     );
   }
 
+  /**
+   * Suppresses the base serializer's `RETURNING` clause entirely. Oracle's
+   * own `RETURNING ... INTO` needs out-bind variables that must be
+   * declared and read at the connection layer, not composed as plain SQL
+   * text, so it's produced there instead (see `@sqb/oracle`).
+   */
   private _serializeReturning(): string {
     return '';
   }
 
+  /**
+   * Rewrites two parameter shapes Oracle needs special handling for (only
+   * meaningful for a `SELECT`/`DELETE` query, where the bound value is
+   * already known):
+   * - A `Date`-valued parameter is rebound as a formatted string and
+   *   wrapped in `TO_DATE(...)` rather than left for the driver's default
+   *   `TO_TIMESTAMP`-based binding, since date-typed columns compared via
+   *   `TO_TIMESTAMP` run substantially slower in Oracle - sub-second
+   *   precision is deliberately dropped, which is fine for date/timestamp
+   *   equality comparisons at this precision.
+   * - An array-valued parameter is rewritten as an inline SQL list via
+   *   {@link SerializeContext.anyToSQL} and removed from `ctx.params`,
+   *   since Oracle has no array parameter binding.
+   *
+   * Any other parameter falls through to the base serializer's
+   * placeholder.
+   */
   private _serializeParameter(
     ctx: SerializeContext,
     o: any,

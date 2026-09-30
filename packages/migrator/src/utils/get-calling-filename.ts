@@ -1,5 +1,17 @@
+/** Strips a `file://` prefix (present when the stack trace reports an ESM module URL) off a stack frame's filename. */
 const PATH_PATTERN = /^(?:file:\/\/)?(.+)$/;
 
+/**
+ * Returns the filename of the call site `position` frames above this
+ * function's own caller, by temporarily overriding `Error.prepareStackTrace`
+ * to get structured `CallSite` objects instead of a formatted stack string.
+ * Used by {@link MigrationPackage.load} to default a migration package's
+ * `baseDir` to the directory of the file that defined it, when no explicit
+ * `baseDir` was given.
+ *
+ * @param position - how many frames above the immediate caller to look; `0` (the default) is the immediate caller itself
+ * @returns the resolved filename, or `''` if it can't be determined
+ */
 export function getCallingFilename(position = 0): string {
   position++;
 

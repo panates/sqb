@@ -34,20 +34,43 @@ import type {
 
 const debug = _debug('sqb:connection');
 
+/** Events emitted by a {@link SqbConnection}. */
 interface SqbConnectionEvents {
+  /** Emitted once this connection is actually returned to the pool (refCount reached 0). */
   close: () => void;
+  /** Emitted whenever a query is executed on this connection. */
   execute: (request: QueryRequest) => void;
+  /** Emitted when query execution fails. */
   error: (error: Error) => void;
+  /** Emitted when the reference count is incremented via `retain()`. */
   retain: (refCount: number) => void;
+  /** Emitted when the reference count is decremented via `release()`. */
   release: (refCount: number) => void;
+  /** Emitted after `startTransaction()` succeeds. */
   'start-transaction': () => void;
+  /** Emitted after `setSavepoint()` succeeds. */
   'set-savepoint': () => void;
+  /** Emitted after `releaseSavepoint()` succeeds. */
   'release-savepoint': () => void;
+  /** Emitted after `rollbackSavepoint()` succeeds. */
   'rollback-savepoint': () => void;
+  /** Emitted after `commit()` succeeds. */
   commit: () => void;
+  /** Emitted after `rollback()` succeeds. */
   rollback: () => void;
 }
 
+/**
+ * A logical handle on one pooled {@link Adapter.Connection}, obtained via
+ * `SqbClient.acquire()`/`SqbClient.execute()`. Adds reference counting
+ * (`retain()`/`release()` - a query executed in cursor mode retains the
+ * connection until its cursor is closed), transaction/savepoint control, and
+ * query preparation (dialect selection, parameter/default resolution) on top
+ * of the raw adapter connection.
+ *
+ * A connection starts with a reference count of 1; calling `release()`
+ * without a matching `retain()` returns it to the pool immediately.
+ */
 export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
   AsyncEventEmitter,
 ) {
@@ -57,6 +80,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
   private _inTransaction: boolean = false;
   private _refCount = 1;
 
+  /**
+   * @param client - The `SqbClient` this connection was acquired from.
+   * @param adapterConnection - The underlying driver connection, obtained from the client's pool.
+   * @param options - Per-acquisition connection options (e.g. `autoCommit`).
+   */
   constructor(
     public readonly client: SqbClient,
     adapterConnection: Adapter.Connection,
@@ -134,6 +162,14 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     debug('[%s] closed', intlcon.sessionId);
   }
 
+  /**
+   * Executes one query/statement on this connection.
+   *
+   * @param query - A raw SQL string, or a `@sqb/builder` query.
+   * @param options - Execution options (params, `cursor`, `autoCommit`, etc.); unset options fall back to this connection's/the client's defaults.
+   * @throws {Error} If the connection has already been released.
+   * @throws {SQBError} If the driver reports an error - the query, options, and prepared request are attached for context.
+   */
   async execute(
     query: string | Query,
     options?: QueryExecuteOptions,
@@ -162,6 +198,15 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     }
   }
 
+  /**
+   * Creates a {@link Repository} for the given `@Entity`-decorated class,
+   * pinned to this specific connection (so its queries share this
+   * connection's transaction, if one is open).
+   *
+   * @param entity - An `@Entity`-decorated class, or the name of one registered on `this.client`.
+   * @param opts - `schema` overrides the schema this repository's queries run against.
+   * @throws {Error} If `entity` is a name that isn't registered, or resolves to a class without `@Entity` metadata.
+   */
   getRepository<T>(
     entity: Type<T> | string,
     opts?: { schema?: string },
@@ -177,6 +222,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     return new Repository<T>(entityDef, this, opts?.schema);
   }
 
+  /**
+   * Reads the active schema/search-path for this connection.
+   *
+   * @throws {Error} If the connection has been released, or the driver doesn't support schema switching.
+   */
   async getSchema(): Promise<string> {
     assert.ok(
       this._intlcon,
@@ -189,6 +239,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     return await this._intlcon.getSchema();
   }
 
+  /**
+   * Sets the active schema/search-path for this connection.
+   *
+   * @throws {Error} If the connection has been released, or the driver doesn't support schema switching.
+   */
   async setSchema(schema: string): Promise<void> {
     assert.ok(
       this._intlcon,
@@ -202,7 +257,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
   }
 
   /**
-   * Executes a query
+   * Prepares and runs one query against the driver, normalizing the raw
+   * {@link Adapter.Response} into a {@link QueryResult} (wrapping fields,
+   * normalizing rows, and building a {@link Cursor} in cursor mode). Wraps
+   * any failure into an {@link SQBError} and emits `'error'` before
+   * rethrowing. Not intended to be called directly - use `execute()`.
    */
   protected async _execute(
     query: string | Query,
@@ -290,6 +349,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     }
   }
 
+  /**
+   * Begins a transaction on this connection.
+   *
+   * @throws {Error} If the connection has already been released.
+   */
   async startTransaction(): Promise<void> {
     if (!this._intlcon)
       throw new Error(
@@ -300,6 +364,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     this.emit('start-transaction');
   }
 
+  /**
+   * Commits the current transaction.
+   *
+   * @throws {Error} If the connection has already been released.
+   */
   async commit(): Promise<void> {
     if (!this._intlcon)
       throw new Error('Can not call commit() on a released connection');
@@ -308,6 +377,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     this.emit('commit');
   }
 
+  /**
+   * Rolls back the current transaction.
+   *
+   * @throws {Error} If the connection has already been released.
+   */
   async rollback(): Promise<void> {
     if (!this._intlcon)
       throw new Error('Can not call rollback() on a released connection');
@@ -316,6 +390,12 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     this.emit('rollback');
   }
 
+  /**
+   * Creates a savepoint within the current transaction, starting one first
+   * if none is open yet.
+   *
+   * @throws {Error} If the connection has already been released, or the driver doesn't support savepoints.
+   */
   async setSavepoint(savepoint: string): Promise<void> {
     if (!this._intlcon)
       throw new Error('Can not call setSavepoint() on a released connection');
@@ -329,6 +409,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     this.emit('set-savepoint');
   }
 
+  /**
+   * Releases a previously created savepoint.
+   *
+   * @throws {Error} If the connection has already been released, or the driver doesn't support savepoints.
+   */
   async releaseSavepoint(savepoint: string): Promise<void> {
     if (!this._intlcon)
       throw new Error(
@@ -343,6 +428,11 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     this.emit('release-savepoint');
   }
 
+  /**
+   * Rolls back to a previously created savepoint.
+   *
+   * @throws {Error} If the connection has already been released, or the driver doesn't support savepoints.
+   */
   async rollbackSavepoint(savepoint: string): Promise<void> {
     if (!this._intlcon)
       throw new Error(
@@ -357,12 +447,26 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
     this.emit('rollback-savepoint');
   }
 
+  /**
+   * Validates that the connection is still usable.
+   *
+   * @throws {Error} If the connection has already been released.
+   */
   async test(): Promise<void> {
     if (!this._intlcon)
       throw new Error('Can not call test() on a released connection');
     await this._intlcon.test();
   }
 
+  /**
+   * Builds the {@link QueryRequest} passed to the driver: resolves every
+   * option against its call-level/connection-level/client-level default (in
+   * that priority order), and - for a `@sqb/builder` query - calls
+   * `generate()` for the target dialect and captures its `'execute'`/
+   * `'fetch'` event listeners as hooks.
+   *
+   * @throws {Error} If the connection has already been released, or no SQL resulted from `query`/`options`.
+   */
   private _prepareQueryRequest(
     query: string | Query,
     options: QueryExecuteOptions = {},

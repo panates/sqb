@@ -2,8 +2,14 @@ import { SerializationType } from '../enums.js';
 import { SerializeContext } from '../serialize-context.js';
 import { Query } from './query.js';
 
+/** `'all'` selects `UNION ALL` (keep duplicate rows); omitted means a plain `UNION` (deduplicated). */
 export type UnionQueryType = 'all';
 
+/**
+ * A `UNION` (or `UNION ALL`) query builder that joins multiple queries'
+ * result sets together. Construct via the exported {@link Union} factory
+ * rather than this class directly.
+ */
 class UnionClass extends Query {
   _queries!: Query[];
   _unionType?: UnionQueryType;
@@ -13,7 +19,7 @@ class UnionClass extends Query {
   }
 
   /**
-   * Performs serialization
+   * Serializes each sub-query and joins them with `UNION`/`UNION ALL`.
    */
   _serialize(ctx: SerializeContext): string {
     const queries = this._queries.map(q => q._serialize(ctx));
@@ -37,6 +43,13 @@ interface UnionCtor {
   prototype: Union;
 }
 
+/**
+ * Creates a `UNION`/`UNION ALL` query builder. Callable with or without
+ * `new`.
+ *
+ * @param queries - The queries to union together (typically `Select` instances).
+ * @param unionType - `'all'` for `UNION ALL`; omitted for a deduplicated `UNION`.
+ */
 export const Union = function (
   this: Union,
   queries: Query[],

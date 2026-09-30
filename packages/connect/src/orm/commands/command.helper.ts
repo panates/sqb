@@ -23,15 +23,25 @@ import {
   resolveEntityForEmbeddedField,
 } from '../util/orm.helper.js';
 
+/** One resolved `JOIN` clause added to a query for a hop of an association chain, cached in a command's `joinInfos` list so the same hop is never joined twice for the same parent alias. */
 export interface JoinInfo {
+  /** The association hop this join implements. */
   association: AssociationNode;
   sourceEntity: EntityMetadata;
   targetEntity: EntityMetadata;
+  /** The alias assigned to the joined table (`J1`, `J2`, ...). */
   joinAlias: string;
+  /** The alias of the table this join's `ON` condition references as its "parent" side. */
   parentAlias: string;
+  /** The actual `@sqb/builder` `Join` element. */
   join: Join;
 }
 
+/**
+ * Resolves (adding to `joinInfos`/the query as needed) every hop of
+ * `association`'s chain, starting at `parentAlias`, and returns the first
+ * hop's {@link JoinInfo}.
+ */
 export async function joinAssociationGetFirst(
   joinInfos: JoinInfo[],
   association: AssociationNode,
@@ -47,6 +57,11 @@ export async function joinAssociationGetFirst(
   return joins[0];
 }
 
+/**
+ * Resolves (adding to `joinInfos`/the query as needed) every hop of
+ * `association`'s chain, starting at `parentAlias`, and returns the last
+ * hop's {@link JoinInfo}.
+ */
 export async function joinAssociationGetLast(
   joinInfos: JoinInfo[],
   association: AssociationNode,
@@ -62,6 +77,15 @@ export async function joinAssociationGetLast(
   return joins[joins.length - 1];
 }
 
+/**
+ * Walks `association`'s chain from `parentAlias`, reusing an already-joined
+ * hop from `joinInfos` where possible and otherwise adding a new `JOIN`
+ * (`LEFT OUTER JOIN` by default, `INNER JOIN` when `innerJoin` is set) with
+ * its key columns matched and any hop-level `.where(...)` conditions
+ * applied, mutating `joinInfos` as it goes.
+ *
+ * @returns Every hop's {@link JoinInfo}, in chain order.
+ */
 export async function joinAssociation(
   joinInfos: JoinInfo[],
   association: AssociationNode,
@@ -125,6 +149,23 @@ export async function joinAssociation(
   return result;
 }
 
+/**
+ * Translates an entity-level `filter` (a plain-object condition, a
+ * `@sqb/builder` operator/operator tree, or an array of either) into
+ * `@sqb/builder` operators appended onto `trgOp`, resolving each dotted
+ * field path against the entity's metadata: a plain column becomes a
+ * qualified `Field` reference; an embedded field's prefix/suffix is
+ * threaded through; and an association field becomes either a `JOIN`
+ * (to-one, adding to `trgOp`'s owning query via side effects on shared
+ * state the caller must join in) or a correlated `EXISTS` sub-query
+ * (to-many).
+ *
+ * @param entityDef - The entity `filter`'s field paths are resolved against.
+ * @param filter - The filter to translate.
+ * @param trgOp - The operator (matching `filter`'s own logical operator type, if any) that translated conditions are added to.
+ * @param tableAlias - The SQL alias of `entityDef`'s own table in the query being built.
+ * @throws {Error} If a filter key doesn't name a real field, or names one of the wrong kind for its position in the path.
+ */
 export async function prepareFilter(
   entityDef: EntityMetadata,
   filter: any,

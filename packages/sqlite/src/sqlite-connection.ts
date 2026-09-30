@@ -6,6 +6,15 @@ import type {
 } from './drivers/types.js';
 import { SqliteCursor } from './sqlite-cursor.js';
 
+/**
+ * `@sqb/connect` {@link Adapter.Connection} wrapping a {@link
+ * NativeDatabase} (Node's `node:sqlite` or Bun's `bun:sqlite`, behind a
+ * common driver interface - see `./drivers/types.ts`): translates
+ * `QueryRequest`s into driver calls (including cursor-mode iteration and
+ * `RETURNING`-on-`INSERT`/`UPDATE` emulation, since this layer's SQL
+ * generation doesn't rely on SQLite's own `RETURNING` support) and
+ * normalizes results/column metadata back into SQB's portable shape.
+ */
 export class SqliteConnection implements Adapter.Connection {
   private intlcon?: NativeDatabase;
 
@@ -16,10 +25,12 @@ export class SqliteConnection implements Adapter.Connection {
     this.intlcon = db;
   }
 
+  /** SQLite has no server-side session concept - always `0`. */
   get sessionId(): any {
     return 0;
   }
 
+  /** Releases this connection's reference to the underlying native database via the closer passed to the constructor (see {@link SqliteAdapter.connect}), closing the file once no connection references it. */
   async close() {
     if (this.intlcon) {
       this.intlcon = undefined;
@@ -27,10 +38,12 @@ export class SqliteConnection implements Adapter.Connection {
     }
   }
 
+  /** Rolls back any open transaction, readying the connection to be pooled/reused. */
   async reset() {
     return this.rollback();
   }
 
+  /** Begins a transaction (`BEGIN`), swallowing the driver's error for a transaction already being open rather than throwing. */
   async startTransaction(): Promise<void> {
     assertDefined(this.intlcon);
     try {
@@ -41,6 +54,7 @@ export class SqliteConnection implements Adapter.Connection {
     }
   }
 
+  /** Commits the current transaction, swallowing the driver's error for no transaction being open rather than throwing. */
   async commit(): Promise<void> {
     assertDefined(this.intlcon);
     try {
@@ -51,6 +65,7 @@ export class SqliteConnection implements Adapter.Connection {
     }
   }
 
+  /** Rolls back the current transaction, swallowing the driver's error for no transaction being open rather than throwing. */
   async rollback(): Promise<void> {
     assertDefined(this.intlcon);
     try {
@@ -65,11 +80,22 @@ export class SqliteConnection implements Adapter.Connection {
     return !!this.intlcon?.inTransaction;
   }
 
+  /** Validates the connection with a trivial `SELECT 1`. */
   async test(): Promise<void> {
     assertDefined(this.intlcon);
     this.intlcon.exec('select 1');
   }
 
+  /**
+   * Executes one query. For an `INSERT`/`UPDATE` with `returningFields`,
+   * runs the statement then a synthesized follow-up `SELECT` to emulate
+   * `RETURNING` (an `INSERT` is matched back by `ROWID`, an `UPDATE` by
+   * reusing the original `WHERE` clause) - `DELETE` isn't emulated here
+   * since there's nothing left to re-select afterward. Otherwise prepares
+   * and iterates the statement, wrapping it in a {@link SqliteCursor}
+   * (returned directly in cursor mode, or eagerly drained up to
+   * `fetchRows` rows otherwise).
+   */
   async execute(query: QueryRequest): Promise<Adapter.Response> {
     assertDefined(this.intlcon);
     const intlcon = this.intlcon;
@@ -127,6 +153,7 @@ export class SqliteConnection implements Adapter.Connection {
     return out;
   }
 
+  /** Copies a synthesized `SELECT` statement's rows/fields onto `out` - used to emulate `RETURNING` on `INSERT`/`UPDATE`. */
   private _fillSelectResult(
     out: Adapter.Response,
     stmt: NativeStatement,
@@ -142,6 +169,7 @@ export class SqliteConnection implements Adapter.Connection {
         : rows;
   }
 
+  /** Converts the driver's column metadata into SQB's portable {@link Adapter.Field} shape via {@link mapDeclaredType}. */
   private _convertFields(columns: NativeColumnInfo[]) {
     const result: Adapter.Field[] = [];
     for (const c of columns) {
@@ -157,10 +185,12 @@ export class SqliteConnection implements Adapter.Connection {
   }
 }
 
+/** Throws if the connection has already been closed. */
 function assertDefined(d: unknown): asserts d {
   if (d == null) throw new Error('DB session is closed');
 }
 
+/** Rewrites SQB's plain-named params (`{ name: value }`) into the `:name`-prefixed keys both `node:sqlite` and `bun:sqlite` require for named binding. */
 function mapParams(params: Record<string, any>): Record<string, any> {
   const out: Record<string, any> = {};
   for (const k of Object.keys(params)) out[':' + k] = params[k];

@@ -13,6 +13,11 @@ import type {
   ValueTransformFunction,
 } from './types.js';
 
+/**
+ * Applies a {@link FieldNaming} strategy to a single field name - a
+ * built-in case transform, a custom mapping function, or (for
+ * `'original'`/omitted) no change.
+ */
 export function applyNamingStrategy(
   value: string,
   namingStrategy?: FieldNaming,
@@ -37,6 +42,11 @@ export function applyNamingStrategy(
   return value;
 }
 
+/**
+ * Converts a driver's raw {@link Adapter.Field} list into a
+ * {@link FieldInfoMap}, applying the given naming strategy to each field
+ * name (a field is dropped if the strategy maps it to a falsy name).
+ */
 export function wrapAdapterFields(
   oldFields: Adapter.Field[],
   fieldNaming?: FieldNaming,
@@ -53,6 +63,11 @@ export function wrapAdapterFields(
   return result;
 }
 
+/**
+ * Converts a driver's raw result rows into object rows (`{ field: value }`),
+ * converting from array rows if that's what the driver returned, applying
+ * `transform`/`ignoreNulls` along the way.
+ */
 export function normalizeRowsToObjectRows(
   fields: FieldInfoMap,
   rowType: 'array' | 'object',
@@ -65,6 +80,11 @@ export function normalizeRowsToObjectRows(
   }) as Record<string, any>[];
 }
 
+/**
+ * Converts a driver's raw result rows into array rows (values in column
+ * order), converting from object rows if that's what the driver returned,
+ * applying `transform` along the way.
+ */
 export function normalizeRowsToArrayRows(
   fields: FieldInfoMap,
   rowType: 'array' | 'object',
@@ -77,6 +97,7 @@ export function normalizeRowsToArrayRows(
   }) as any[][];
 }
 
+/** Shared implementation behind {@link normalizeRowsToObjectRows}/{@link normalizeRowsToArrayRows}. */
 function normalizeRows(
   fields: FieldInfoMap,
   rowType: 'array' | 'object',
@@ -152,6 +173,7 @@ function normalizeRows(
   }) as ArrayRowset;
 }
 
+/** Invokes a query's `'fetch'` event listeners for each row already fetched (used for both non-cursor result rows and cursor-fetched batches). */
 export function callFetchHooks(
   rows: ObjectRowset | ArrayRowset,
   request: QueryRequest,

@@ -1,6 +1,14 @@
 import type { Adapter, RowType } from '@sqb/connect';
 import type { ResultSet } from 'oracledb';
 
+/**
+ * `@sqb/connect` {@link Adapter.Cursor} wrapping an `oracledb`
+ * `ResultSet`: `fetch(n)` pulls up to `n` rows via the result set's
+ * callback-based `getRows()`, and - when the query was rewritten for
+ * `ROWNUM`-based pagination (see {@link OraConnection.onGenerateQuery}) -
+ * strips the synthetic `row$number` column from each row before returning
+ * it.
+ */
 export class OraCursor implements Adapter.Cursor {
   private _resultSet?: ResultSet<any>;
   private readonly _rowType: RowType;
@@ -29,6 +37,7 @@ export class OraCursor implements Adapter.Cursor {
     return this._rowType;
   }
 
+  /** Closes the underlying `ResultSet`. A no-op if already closed. */
   async close(): Promise<void> {
     if (!this._resultSet) return;
     const resultSet = this._resultSet;
@@ -41,6 +50,7 @@ export class OraCursor implements Adapter.Cursor {
     });
   }
 
+  /** Pulls up to `nRows` more rows from the result set, or `undefined` once it's exhausted or already closed. */
   fetch(nRows: number): Promise<any[] | undefined> {
     return new Promise((resolve, reject) => {
       if (!this._resultSet) return resolve(undefined);

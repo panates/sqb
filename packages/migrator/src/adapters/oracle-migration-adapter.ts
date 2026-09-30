@@ -18,9 +18,12 @@ import { splitOracleScript } from '../utils/split-oracle-script.js';
 
 const oraAdapter = new OraAdapter();
 
-// Swallows ORA-00955 ("name is already used by an existing object"), the
-// Oracle equivalent of "IF NOT EXISTS" - Oracle has no such clause on
-// CREATE TABLE/SEQUENCE/INDEX.
+/**
+ * Wraps `sql` in a PL/SQL block that swallows `ORA-00955` ("name is
+ * already used by an existing object") - the Oracle equivalent of `IF NOT
+ * EXISTS`, which Oracle has no direct clause for on `CREATE TABLE`/
+ * `SEQUENCE`/`INDEX`.
+ */
 function ifNotExistsGuard(sql: string): string {
   return `BEGIN
   EXECUTE IMMEDIATE '${sql.replace(/'/g, "''")}';
@@ -29,6 +32,23 @@ EXCEPTION
 END;`;
 }
 
+/**
+ * {@link MigrationAdapter} for Oracle Database, structurally mirroring
+ * `PgMigrationAdapter` with Oracle-specific differences: `infoSchema` is
+ * only ever used as a table-name prefix rather than a schema this adapter
+ * creates - an Oracle schema *is* a user, and provisioning one is a
+ * DBA-level operation deliberately left out of scope, so that schema/user
+ * must already exist; `CREATE TABLE`/`SEQUENCE` are wrapped in
+ * {@link ifNotExistsGuard} since Oracle has no `IF NOT EXISTS`; the event
+ * table's auto-incrementing `id` is emulated with a sequence plus a
+ * `BEFORE INSERT` trigger, since Oracle has no `AUTO_INCREMENT`/`serial`
+ * column type; a script task is split into individual statements via
+ * {@link splitOracleScript} before running (`oracledb`'s `execute()` runs
+ * exactly one statement per call, unlike every other driver this package
+ * supports); and the schema lock uses `DBMS_LOCK` (see {@link
+ * lockSchema}), degrading to no locking at all if that package isn't
+ * grantable in the target environment.
+ */
 export class OracleMigrationAdapter extends MigrationAdapter {
   declare protected _connection: oracledb.Connection;
   protected _infoSchemaPrefix = '';
@@ -71,6 +91,14 @@ export class OracleMigrationAdapter extends MigrationAdapter {
     return this.infoSchemaPrefix + this.eventTable;
   }
 
+  /**
+   * Connects, creates the bookkeeping tables (and the event table's
+   * id-generating sequence and trigger) if they don't already exist, seeds
+   * the package's summary row if missing, and returns a ready-to-use
+   * adapter with `version`/`status` refreshed from it.
+   *
+   * @throws {Error} whatever the driver throws for a failed connection or setup statement - the connection is closed first if already open
+   */
   static async create(
     options: StrictOmit<DbMigratorOptions, 'migrationPackage'> & {
       migrationPackage: MigrationPackage;
@@ -168,6 +196,7 @@ END;`);
     await this._connection.close();
   }
 
+  /** @throws {Error} if the package's summary row is somehow missing (should not happen once `create()` has run) */
   async refresh(): Promise<void> {
     const r = await this._connection.execute<any>(
       `SELECT current_version, status FROM ${this.summaryTableFull} WHERE package_name = :1`,
@@ -226,6 +255,18 @@ END;`);
     );
   }
 
+  /**
+   * Runs one task: an SQL-script task's script (resolved from a function
+   * if needed, then `$(name)`-substituted) is split into individual
+   * statements via {@link splitOracleScript} and each executed with
+   * `autoCommit: true` (Oracle DDL implicitly commits anyway, and there is
+   * no ambient transaction spanning the whole migration run); a custom
+   * task's function runs directly against the raw `oracledb` connection;
+   * an insert-data task's rows are each turned into an `INSERT` via
+   * `@sqb/builder`'s `Insert(...).generate({ dialect: 'oracle' })` and
+   * executed. A script-task error is annotated with the task's file
+   * location before being rethrown.
+   */
   async executeTask(
     migrationPackage: MigrationPackage,
     migration: Migration,
@@ -320,6 +361,7 @@ END;`);
     return Promise.resolve(undefined);
   }
 
+  /** Releases the lock acquired by {@link lockSchema} via `DBMS_LOCK.RELEASE`, again swallowing an insufficient-privilege error rather than throwing (matching {@link lockSchema}'s degrade-to-no-locking behavior). */
   async unlockSchema(): Promise<void> {
     try {
       await this._connection.execute(

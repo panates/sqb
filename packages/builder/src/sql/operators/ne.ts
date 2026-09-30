@@ -2,6 +2,7 @@ import { OperatorType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { CompOperator } from './comp-operator.js';
 
+/** A `!=` (not equals) comparison. Construct via the exported {@link Ne} factory rather than this class directly. */
 class NeClass extends CompOperator {}
 
 interface NeCtor {
@@ -10,6 +11,13 @@ interface NeCtor {
   prototype: Ne;
 }
 
+/**
+ * Creates a `!=` comparison (`left != right`). Callable with or without `new`.
+ *
+ * @param left - A `field[]` expression string (`[]` suffix marks it as an array field), or a {@link SqlElement}.
+ * @param right - The value (or {@link SqlElement}) to compare against.
+ * @throws {TypeError} If `left` is a string that doesn't match the expected expression format.
+ */
 export const Ne = function (this: Ne, left: string | SqlElement, right?: any) {
   if (!(this instanceof Ne)) return new Ne(left, right);
   CompOperator.call(this, left, right);

@@ -19,25 +19,36 @@ import { UpdateCommand } from './commands/update.command.js';
 import { EntityMetadata } from './model/entity-metadata.js';
 import { extractKeyValues } from './util/extract-keyvalues.js';
 
+/** Options controlling which fields a `create`/`find`/`update` operation returns. */
 interface Projection {
+  /** Fields to include (or, prefixed with `-`, exclude) in the result - see `parseFieldsProjection`. */
   projection?: string | string[];
 }
 
+/** Options controlling which rows an operation applies to. */
 interface Filtering {
+  /** Condition(s) narrowing which rows the operation applies to (a `@sqb/builder` operator, or a plain object condition). */
   filter?: LogicalOperator | LogicalOperator[] | object | object[];
+  /** Bind parameter values for `filter`. */
   params?: any;
 }
 
+/** Namespace of option types accepted by {@link Repository}'s methods. */
 export namespace Repository {
+  /** Callback invoked once per raw result row as `FindCommand` converts it into an output object, letting a caller observe (not modify) the raw row alongside the converted one. */
   export type TransformRowFunction = (
     fields: FieldInfoMap,
     row: object,
     obj: object,
   ) => void;
 
+  /** Options shared by every {@link Repository} command. */
   export interface CommandOptions {
+    /** Runs the command on this connection instead of acquiring a new one from the client (and, if given, doesn't release it afterward). */
     connection?: SqbConnection;
+    /** Formats the generated SQL across multiple indented lines instead of a single compact line. */
     prettyPrint?: boolean;
+    /** SQL comment(s) to attach to the generated query. */
     comment?:
       | string
       | string[]
@@ -49,52 +60,86 @@ export namespace Repository {
           comment: string;
           dialect?: string[];
         }[];
+    /** Dialect-specific optimizer hint(s) to attach to the generated query's table reference. */
     optimizerHint?:
       string | string[] | TableName.OptimizerHint | TableName.OptimizerHint[];
   }
 
+  /** Options for {@link Repository.create}/{@link Repository.createOnly}. */
   export interface CreateOptions extends CommandOptions, Projection {}
 
+  /** Options for {@link Repository.count}. */
   export interface CountOptions extends CommandOptions, Filtering {}
 
+  /** Options for {@link Repository.exists}/{@link Repository.existsOne}. */
   export interface ExistsOptions extends CommandOptions, Filtering {}
 
+  /** Options for {@link Repository.delete}. */
   export interface DeleteOptions extends CommandOptions, Filtering {}
 
+  /** Options for {@link Repository.deleteMany}. */
   export interface DeleteManyOptions extends CommandOptions, Filtering {}
 
+  /** Options for {@link Repository.findById}. */
   export interface FindOptions extends CommandOptions, Projection, Filtering {}
 
+  /** Options for {@link Repository.findOne}. */
   export interface FindOneOptions extends FindOptions {
+    /** Column(s) to sort by (a leading `-` sorts descending); see `Select.orderBy`. */
     sort?: string[];
+    /** Number of matching rows to skip before returning results. */
     offset?: number;
   }
 
+  /** Options for {@link Repository.findMany}. */
   export interface FindManyOptions extends FindOneOptions {
+    /** Maximum number of rows to return. */
     limit?: number;
+    /** Adds `DISTINCT` to the generated query. */
     distinct?: boolean;
+    /** Caps how many rows a to-many eager-loaded association may fetch before throwing, per parent row batch (default: 100000). */
     maxEagerFetch?: number;
+    /** Caps how many levels of to-many eager-loaded associations are followed (default: 5); deeper associations are simply omitted rather than erroring. */
     maxSubQueries?: number;
+    /** Observes each raw row alongside its converted output object. */
     onTransformRow?: TransformRowFunction;
   }
 
+  /** Options for {@link Repository.update}. */
   export interface UpdateOptions
     extends CommandOptions, Projection, Filtering {}
 
+  /** Options for {@link Repository.updateOnly}. */
   export interface UpdateOnlyOptions extends CommandOptions, Filtering {}
 
+  /** Options for {@link Repository.updateMany}. */
   export interface UpdateManyOptions extends CommandOptions, Filtering {}
 }
 
+/** Events emitted by a {@link Repository}. */
 interface RepositoryEvents {
+  /** Emitted whenever this repository executes a query. */
   execute: (request: QueryRequest) => void;
+  /** Emitted when a command fails. */
   error: (error: Error) => void;
+  /** Emitted whenever this repository acquires a connection (only relevant when constructed with an `SqbClient`, not a fixed `SqbConnection`). */
   acquire: (connection: SqbConnection) => Promise<void>;
 }
 
 /**
- * @class Repository
- * @template T - The data type class type of the record
+ * A high-level CRUD interface over one `@Entity`-decorated class - the
+ * primary way application code reads and writes entity rows, obtained via
+ * `SqbClient.getRepository(...)`/`SqbConnection.getRepository(...)` rather
+ * than constructed directly.
+ *
+ * Every method here handles its own connection acquisition/release when
+ * constructed with an `SqbClient` (or reuses a fixed `SqbConnection`/
+ * per-call `options.connection` when given one), and translates entity-level
+ * concepts (projections, filters, associations) into `@sqb/builder` queries
+ * executed through `FindCommand`/`CreateCommand`/`UpdateCommand`/`DeleteCommand`/
+ * `CountCommand`.
+ *
+ * @template T - The entity class type this repository operates on.
  */
 export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
   AsyncEventEmitter,
@@ -103,6 +148,11 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
   private readonly _entity: EntityMetadata;
   private readonly _schema?: string;
 
+  /**
+   * @param entityDef - The entity this repository operates on.
+   * @param executor - Either a pooled `SqbClient` (each command acquires and releases its own connection) or a fixed `SqbConnection` (every command shares it, and thus any open transaction).
+   * @param schema - Overrides the schema this repository's queries run against.
+   */
   constructor(
     entityDef: EntityMetadata,
     executor: SqbClient | SqbConnection,
@@ -114,10 +164,12 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     this._schema = schema;
   }
 
+  /** The entity metadata this repository operates on. */
   get entity(): EntityMetadata {
     return this._entity;
   }
 
+  /** The entity class this repository operates on. */
   get type(): Type<T> {
     return this._entity.ctor;
   }
@@ -383,6 +435,13 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     );
   }
 
+  /**
+   * Runs `fn` with a connection: `opts.connection` if given, else this
+   * repository's own fixed connection (if constructed with one), else a
+   * freshly acquired-and-auto-released connection from the client. Applies
+   * `this._schema` to the connection before calling `fn`, and emits
+   * `'acquire'` when a new connection was acquired.
+   */
   protected async _execute(
     fn: TransactionFunction,
     opts?: Repository.CommandOptions,
@@ -402,6 +461,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     });
   }
 
+  /** Inserts a new row via `CreateCommand`, returning its primary key value(s) when `options.returning` is set. */
   protected async _create(
     values: PartialDTO<T>,
     options: Repository.CreateOptions & {
@@ -420,6 +480,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     return keyValues;
   }
 
+  /** Checks whether a row matching `keyValue` (plus any `options.filter`) exists. */
   protected async _exists(
     keyValue: any | Record<string, any>,
     options: Repository.ExistsOptions & {
@@ -437,6 +498,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     });
   }
 
+  /** Checks whether any row matching `options.filter` exists, via `FindCommand` (limited to one row). */
   protected async _existsOne(
     options: Repository.ExistsOptions & {
       connection: SqbConnection;
@@ -455,6 +517,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     return resp.length > 0;
   }
 
+  /** Counts rows matching `options.filter`, via `CountCommand`. */
   protected async _count(
     options: Repository.CountOptions & { connection: SqbConnection },
   ): Promise<number> {
@@ -464,6 +527,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     });
   }
 
+  /** Runs a find query via `FindCommand`, returning all matching (converted) rows. */
   protected async _findMany(
     options: Repository.FindManyOptions & {
       connection: SqbConnection;
@@ -475,6 +539,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     });
   }
 
+  /** Runs {@link Repository._findMany} limited to one row, returning it (or `undefined`). */
   protected async _findOne(
     options: Repository.FindOneOptions & {
       connection: SqbConnection;
@@ -487,6 +552,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     return rows && rows[0];
   }
 
+  /** Finds the single row matching `keyValue` (plus any `options.filter`). */
   protected async _find(
     keyValue: any | Record<string, any>,
     options: Repository.FindOptions & {
@@ -501,6 +567,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     return await this._findOne({ ...options, filter, offset: 0 });
   }
 
+  /** Deletes the single row matching `keyValue` (plus any `options.filter`), via `DeleteCommand`. */
   protected async _delete(
     keyValue: any | Record<string, any>,
     options: Repository.DeleteOptions & {
@@ -519,6 +586,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     }));
   }
 
+  /** Deletes every row matching `options.filter`, via `DeleteCommand`. */
   protected async _deleteMany(
     options: Repository.DeleteManyOptions & {
       connection: SqbConnection;
@@ -532,6 +600,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     });
   }
 
+  /** Updates the single row matching `keyValue` (plus any `options.filter`), via `UpdateCommand`; returns the row's key values if a row was actually updated. */
   protected async _update(
     keyValue: any | Record<string, any>,
     values: PatchDTO<T>,
@@ -557,6 +626,7 @@ export class Repository<T> extends TypedEventEmitterClass<RepositoryEvents>(
     return rowsAffected ? keyValues : undefined;
   }
 
+  /** Updates every row matching `options.filter`, via `UpdateCommand`. */
   protected async _updateMany(
     values: PartialDTO<T>,
     options: Repository.UpdateManyOptions & {

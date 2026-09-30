@@ -3,6 +3,7 @@ import { SqlElement } from '../../serializable.js';
 import { CompOperator } from './comp-operator.js';
 import { Like } from './like.js';
 
+/** A case-insensitive `ILIKE` pattern-match comparison. Construct via the exported {@link ILike} factory rather than this class directly. */
 class ILikeClass extends Like {}
 
 interface ILikeCtor {
@@ -11,6 +12,18 @@ interface ILikeCtor {
   prototype: ILike;
 }
 
+/**
+ * Creates a case-insensitive `ILIKE` pattern-match comparison
+ * (`left ilike right`). Callable with or without `new`.
+ *
+ * `ILIKE` isn't standard SQL (it's a Postgres extension) - dialects without
+ * native support for it should provide a `SerializerExtension` to emit an
+ * equivalent (e.g. wrapping both sides in `LOWER(...)`).
+ *
+ * @param left - A `field[]` expression string (`[]` suffix marks it as an array field), or a {@link SqlElement}.
+ * @param right - The pattern to match against, or a {@link SqlElement}.
+ * @throws {TypeError} If `left` is a string that doesn't match the expected expression format.
+ */
 export const ILike = function (
   this: ILike,
   left: string | SqlElement,

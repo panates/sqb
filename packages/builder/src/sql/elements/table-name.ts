@@ -2,16 +2,26 @@ import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
+/**
+ * A `[schema.]table [alias]` table reference, used in `FROM`/`JOIN` clauses
+ * and as an `INSERT`/`UPDATE`/`DELETE` target. Construct via the exported
+ * {@link TableName} factory rather than this class directly.
+ */
 class TableNameClass extends SqlElement {
+  /** The schema name, if the reference was qualified with one. */
   schema?: string;
+  /** The bare table name. */
   table?: string;
+  /** The table's alias, if any. */
   alias?: string;
+  /** Optimizer hints to render alongside the table name (dialect-specific; a plain serializer emits none). */
   optimizerHint?: TableName.OptimizerHint[];
 
   get _type(): SerializationType {
     return SerializationType.TABLE_NAME;
   }
 
+  /** Serializes as `[schema.]table [alias]`. */
   _serialize(ctx: SerializeContext): string {
     return ctx.serialize(
       this._type,
@@ -35,6 +45,12 @@ interface TableNameCtor {
   prototype: TableName;
 }
 
+/**
+ * Creates a table reference. Callable with or without `new`.
+ *
+ * @param tableName - Either a `[schema.]table [as alias]` string, or a {@link TableName.Args} object.
+ * @throws {TypeError} If the string form doesn't match the expected table name format.
+ */
 export const TableName = function (
   this: TableName,
   tableName: string | TableName.Args,
@@ -77,15 +93,23 @@ TableName.prototype.constructor = TableName;
 export interface TableName extends TableNameClass {}
 
 export namespace TableName {
+  /** A single dialect-specific optimizer hint attached to a table reference. */
   export interface OptimizerHint {
+    /** The hint text. */
     hint: string;
+    /** Restricts the hint to these dialects; omitted means all dialects. */
     dialect?: string[];
   }
 
+  /** Structured form of the arguments accepted by the {@link TableName} factory. */
   export interface Args {
+    /** The schema name, if qualified. */
     schema?: string;
+    /** The bare table name. */
     table: string;
+    /** The table's alias, if any. */
     alias?: string;
+    /** Optimizer hint(s); a bare string/string-array is wrapped into `{ hint }` with no dialect restriction. */
     optimizerHint?: string | string[] | OptimizerHint | OptimizerHint[];
   }
 }

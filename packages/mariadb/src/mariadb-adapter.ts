@@ -3,6 +3,11 @@ import type { Adapter, ClientConfiguration } from '@sqb/connect';
 import { type ConnectionConfig, createConnection } from 'mariadb';
 import { MariadbConnection } from './mariadb-connection.js';
 
+/**
+ * `@sqb/connect` {@link Adapter} for MariaDB, wrapping the `mariadb` npm
+ * package. Registered automatically as a side effect of importing this
+ * package - see `index.ts`.
+ */
 export class MariadbAdapter implements Adapter {
   driver = 'mariadb';
   dialect = 'mariadb';
@@ -11,6 +16,12 @@ export class MariadbAdapter implements Adapter {
     positionalParams: true,
   };
 
+  /**
+   * Opens a new `mariadb` driver connection, configured for named
+   * placeholders and JS-`number` results for decimal/bigint/insert-id
+   * values (rather than the driver's default of strings/`BigInt`, for
+   * result-shape parity with `@sqb/mysql`).
+   */
   async connect(config: ClientConfiguration): Promise<Adapter.Connection> {
     const cfg: ConnectionConfig = { ...config.driverOptions };
     if (config.host) cfg.host = config.host;

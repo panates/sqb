@@ -2,6 +2,15 @@ import { EntityMetadata } from '../model/entity-metadata.js';
 import type { IndexMetadata } from '../model/index-metadata.js';
 import { Column } from './column.decorator.js';
 
+/**
+ * Declares the entity's primary key: as a class decorator, on one or more
+ * named columns; as a property decorator, on the decorated column alone
+ * (which it also implicitly marks `@Column({ notNull: true })`).
+ *
+ * @param fields - Column name(s) making up the primary key (class-decorator form only).
+ * @param options - Index options (`name`); `columns`/`unique`/`primary` are supplied automatically.
+ * @throws {Error} If used as a class decorator without column name(s), or as a property decorator on a symbol-keyed or non-property target.
+ */
 export function PrimaryKey(
   fields: string | string[],
   options?: Omit<IndexMetadata, 'columns' | 'unique' | 'primary'>,

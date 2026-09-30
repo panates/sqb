@@ -23,12 +23,19 @@ type CreateCommandContext = {
   colCount: number;
 };
 
+/** Static-only implementation of `Repository.create()`/`createOnly()`: builds and executes an `INSERT INTO ... VALUES (...)` query. */
 export class CreateCommand {
   // istanbul ignore next
   protected constructor() {
     throw new Error('This class is abstract');
   }
 
+  /**
+   * Builds and executes the insert query.
+   *
+   * @returns The inserted row's primary-key column values, when `args.returning` was set and the entity has a primary key; otherwise `undefined`.
+   * @throws {Error} If the entity isn't `@Entity`-decorated, or no insertable field had a value.
+   */
   static async execute(args: CreateCommandArgs): Promise<any> {
     const { entity } = args;
     const tableName = entity.tableName;
@@ -81,6 +88,14 @@ export class CreateCommand {
     }
   }
 
+  /**
+   * Walks `entity`'s fields, converting each column value present in
+   * `values` into a bound {@link Param} (applying defaults, `serialize`,
+   * enum validation, and required-ness checks along the way) and recursing
+   * into embedded fields with their name prefix/suffix applied.
+   *
+   * @throws {Error} If a `notNull` (and not auto-generated) column has no value.
+   */
   protected static async _prepareParams(
     ctx: CreateCommandContext,
     entity: EntityMetadata,

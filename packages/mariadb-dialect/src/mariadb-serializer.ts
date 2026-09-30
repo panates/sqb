@@ -7,11 +7,14 @@ import {
   type SerializerExtension,
 } from '@sqb/builder';
 
-// MariaDB shares almost its entire reserved-word list with MySQL
-// (https://dev.mysql.com/doc/refman/8.0/en/keywords.html), so this list
-// mirrors @sqb/mysql-dialect's, plus a supplemental set of words MariaDB
-// reserves on top of that
-// (https://mariadb.com/kb/en/reserved-words/#mariadb-keywords-not-reserved-by-mysql).
+/**
+ * MariaDB reserved words that must be quoted when used as a bare identifier.
+ * MariaDB shares almost its entire reserved-word list with MySQL
+ * (https://dev.mysql.com/doc/refman/8.0/en/keywords.html), so this list
+ * mirrors @sqb/mysql-dialect's, plus a supplemental set of words MariaDB
+ * reserves on top of that
+ * (https://mariadb.com/kb/en/reserved-words/#mariadb-keywords-not-reserved-by-mysql).
+ */
 const reservedWords = new Set([
   'accessible',
   'analyze',
@@ -236,14 +239,24 @@ const reservedWords = new Set([
   'stats_sample_pages',
 ]);
 
+/**
+ * `@sqb/builder` dialect extension producing MariaDB-correct SQL:
+ * `LIMIT`/`OFFSET` clause syntax, `IS`/`IS NOT`/`IN`/`NOT IN` rewriting for
+ * `NULL`/array-valued comparisons, `0`/`1` boolean literals, `RETURNING`
+ * emulation on `UPDATE` (unsupported natively), and the MariaDB reserved
+ * word list. Registered automatically as a side effect of importing this
+ * package - see `index.ts`.
+ */
 export class MariadbSerializer implements SerializerExtension {
   dialect = 'mariadb';
   reservedWords = reservedWords;
 
+  /** Checks `s` (case-insensitively) against the MariaDB {@link reservedWords} list. */
   isReservedWord(_: any, s: any): boolean {
     return s && typeof s === 'string' && reservedWords.has(s.toLowerCase());
   }
 
+  /** Dispatches each fragment type this extension overrides to its dedicated `_serialize*` method; everything else falls through to `@sqb/builder`'s default. */
   serialize(
     ctx: SerializeContext,
     type: SerializationType | string,
@@ -268,6 +281,11 @@ export class MariadbSerializer implements SerializerExtension {
     }
   }
 
+  /**
+   * Strips the `RETURNING` clause from an `UPDATE` (unsupported by
+   * MariaDB), leaving `Insert`/`Delete`'s native support untouched - see
+   * the inline comment for how the adapter is expected to compensate.
+   */
   private _serializeReturning(
     ctx: SerializeContext,
     o: any,
@@ -281,6 +299,12 @@ export class MariadbSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
+  /**
+   * Appends MariaDB's `LIMIT`/`OFFSET` clause syntax. An offset with no
+   * limit needs a `LIMIT` anyway (MariaDB has no bare `OFFSET`), so it's
+   * given the maximum representable `BIGINT UNSIGNED` value as a
+   * practically-unlimited limit.
+   */
   private _serializeSelect(
     ctx: SerializeContext,
     o: any,
@@ -296,6 +320,13 @@ export class MariadbSerializer implements SerializerExtension {
     return out;
   }
 
+  /**
+   * Rewrites a comparison whose right-hand side resolves to an array value
+   * from `eq`/`ne` into `in`/`not in` (MariaDB's `=`/`!=` don't accept an
+   * array operand), and a comparison against a `null` value from `eq`/`ne`
+   * into `is`/`is not` (`= NULL` is never true in SQL, even for a `NULL`
+   * value) - stripping the now-unused bind parameter in the latter case.
+   */
   private _serializeComparison(
     ctx: SerializeContext,
     o: any,
@@ -351,10 +382,16 @@ export class MariadbSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
+  /** Serializes a boolean as MariaDB's `1`/`0` literals (it has no native boolean type). */
   private _serializeBooleanValue(_ctx: SerializeContext, o: any): string {
     return o == null ? 'null' : o ? '1' : '0';
   }
 
+  /**
+   * Detects an ISO-8601 datetime string (as opposed to a plain
+   * `'yyyy-mm-dd'` date, which MariaDB accepts as-is) and reformats it via
+   * `dateToSQL` - see the inline comment for why.
+   */
   private _serializeStringValue(
     ctx: SerializeContext,
     o: any,
@@ -370,6 +407,13 @@ export class MariadbSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
+  /**
+   * In a `SELECT`/`DELETE` query, inlines an array-valued bind parameter as
+   * a literal list instead of binding it (needed for it to work as the
+   * operand of the `IN`/`NOT IN` rewrite in {@link _serializeComparison},
+   * since a single bind parameter can't stand in for a variable-length SQL
+   * list) - removing it from `ctx.params` since it's no longer bound.
+   */
   private _serializeParameter(
     ctx: SerializeContext,
     o: any,

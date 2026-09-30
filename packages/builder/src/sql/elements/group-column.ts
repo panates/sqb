@@ -4,11 +4,17 @@ import { BaseField } from './base-field.js';
 
 const GROUP_COLUMN_PATTERN = /^((?:[a-zA-Z][\w$]*\.){0,2})([\w$]*)$/;
 
+/**
+ * A `[schema.][table.]field` column reference used in a `GROUP BY` clause.
+ * Construct via the exported {@link GroupColumn} factory rather than this
+ * class directly.
+ */
 class GroupColumnClass extends BaseField {
   get _type(): SerializationType {
     return SerializationType.GROUP_COLUMN;
   }
 
+  /** Serializes as `[schema.][table.]field`, escaping the field name if it's a reserved word. */
   _serialize(ctx: SerializeContext): string {
     const o = {
       schema: this._schema,
@@ -33,6 +39,12 @@ interface GroupColumnCtor {
   prototype: GroupColumn;
 }
 
+/**
+ * Creates a `GROUP BY` column reference. Callable with or without `new`.
+ *
+ * @param value - A `[schema.][table.]field` string.
+ * @throws {TypeError} If `value` doesn't match the expected column format.
+ */
 export const GroupColumn = function (this: GroupColumn, value: string) {
   if (!(this instanceof GroupColumn)) return new GroupColumn(value);
   BaseField.call(this);

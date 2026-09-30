@@ -1,6 +1,12 @@
 import type { Adapter, RowType } from '@sqb/connect';
 import type { NativeColumnInfo } from './drivers/types.js';
 
+/**
+ * `@sqb/connect` {@link Adapter.Cursor} wrapping a `NativeStatement`'s
+ * synchronous `iterate()` result: `fetch(n)` pulls up to `n` rows at a
+ * time, converting each row to an array (column-ordered via the
+ * statement's column metadata) when `rowType` is `'array'`.
+ */
 export class SqliteCursor implements Adapter.Cursor {
   private _iterator?: IterableIterator<Record<string, any>>;
   private readonly _rowType: RowType;
@@ -26,10 +32,12 @@ export class SqliteCursor implements Adapter.Cursor {
     return this._rowType;
   }
 
+  /** Stops consuming the iterator by dropping it - SQLite's synchronous iterator has no `close()`/`return()` of its own that needs calling. */
   async close(): Promise<void> {
     this._iterator = undefined;
   }
 
+  /** Pulls up to `nRows` more rows from the iterator, or `undefined` once it's exhausted. */
   async fetch(nRows: number): Promise<any[] | undefined> {
     if (!this._iterator) return undefined;
     const rows: any[] = [];

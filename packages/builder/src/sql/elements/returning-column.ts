@@ -5,6 +5,11 @@ import { BaseField } from './base-field.js';
 
 const RETURNING_COLUMN_PATTERN = /^([a-zA-Z_]\w*) *(?:as)? *(\w+)?$/;
 
+/**
+ * A `field [as alias]` column reference used in a `RETURNING` clause.
+ * Construct via the exported {@link ReturningColumn} factory rather than
+ * this class directly.
+ */
 class ReturningColumnClass extends BaseField {
   _alias!: string;
 
@@ -12,6 +17,10 @@ class ReturningColumnClass extends BaseField {
     return SerializationType.RETURNING_COLUMN;
   }
 
+  /**
+   * Serializes as `field [as alias]`, escaping the field name if it's a
+   * reserved word, and records this column onto `ctx.returningFields`.
+   */
   _serialize(ctx: SerializeContext): string {
     const o = {
       field: this._field,
@@ -35,6 +44,12 @@ interface ReturningColumnCtor {
   prototype: ReturningColumn;
 }
 
+/**
+ * Creates a `RETURNING` column reference. Callable with or without `new`.
+ *
+ * @param field - A `field [as alias]` string.
+ * @throws {TypeError} If `field` doesn't match the expected column format.
+ */
 export const ReturningColumn = function (this: ReturningColumn, field: string) {
   if (!(this instanceof ReturningColumn)) return new ReturningColumn(field);
   SqlElement.call(this);

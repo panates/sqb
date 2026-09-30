@@ -4,6 +4,7 @@ import { Join } from './join.js';
 import type { Raw } from './raw.js';
 import { TableName } from './table-name.js';
 
+/** An `INNER JOIN` clause. Construct via the exported {@link InnerJoin} factory rather than this class directly. */
 class InnerJoinClass extends Join {}
 
 interface InnerJoinCtor {
@@ -12,6 +13,12 @@ interface InnerJoinCtor {
   prototype: InnerJoin;
 }
 
+/**
+ * Creates an `INNER JOIN` clause. Callable with or without `new`.
+ *
+ * @param table - The joined table name, {@link TableName}, sub-`Select` (requires an alias via `.as(...)`), or {@link Raw}.
+ * @throws {TypeError} If `table` isn't a string, `TableName`, `Select`, or `Raw`.
+ */
 export const InnerJoin = function (
   this: InnerJoin,
   table: string | TableName | Select | Raw,

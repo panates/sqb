@@ -2,6 +2,10 @@ import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 
+/**
+ * A `MIN(expr)` aggregate expression. Construct via the exported
+ * {@link Min} factory rather than this class directly.
+ */
 class MinClass extends SqlElement {
   _expression: any;
   _alias?: string;
@@ -11,7 +15,7 @@ class MinClass extends SqlElement {
   }
 
   /**
-   * Sets alias to case expression.
+   * Sets an alias for this expression when used as a `SELECT` column.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -19,11 +23,7 @@ class MinClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
-   *
-   * @param {Object} ctx
-   * @return {string}
-   * @override
+   * Serializes as `min(expr)`, or an empty string if no expression was given.
    */
   _serialize(ctx: SerializeContext): string {
     if (!this._expression) return '';
@@ -43,6 +43,11 @@ interface MinCtor {
   prototype: Min;
 }
 
+/**
+ * Creates a `MIN(...)` aggregate expression. Callable with or without `new`.
+ *
+ * @param expression - The column/expression to aggregate; converted via `ctx.anyToSQL(...)`.
+ */
 export const Min = function (this: Min, expression: any) {
   if (!(this instanceof Min)) return new Min(expression);
   SqlElement.call(this);

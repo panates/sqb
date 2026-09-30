@@ -9,12 +9,14 @@ export type CountCommandArgs = {
   connection: SqbConnection;
 } & Repository.CountOptions;
 
+/** Static-only implementation of `Repository.count()`: builds and executes a `SELECT count(*) ... WHERE ...` query. */
 export class CountCommand {
   // istanbul ignore next
   protected constructor() {
     throw new Error('This class is abstract');
   }
 
+  /** Builds and executes the count query, returning the resulting row count. */
   static async execute(args: CountCommandArgs): Promise<number> {
     const { connection, entity, filter, params } = args;
     let where: LogicalOperator | undefined;

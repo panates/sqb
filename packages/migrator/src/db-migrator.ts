@@ -15,17 +15,51 @@ import {
 } from './migration-package.js';
 import { MigrationStatus } from './types.js';
 
+/** Options for {@link DbMigrator.execute}. */
 export interface DbMigratorOptions {
+  /** Target database connection, including `dialect` (required, used to select a {@link MigrationAdapter}) and `driver` (needed only to disambiguate SQLite's `sqlite` vs `sqljs` drivers, which share the same dialect). */
   connection: ClientConfiguration;
+  /** The migrations to apply - either an already-loaded {@link MigrationPackage} or a raw {@link MigrationPackageConfig} (loaded internally via `MigrationPackage.load`). */
   migrationPackage: MigrationPackage | MigrationPackageConfig;
+  /** Schema (or, for dialects with no true schema concept, a table-name prefix) the adapter's bookkeeping tables live under. Defaults to `'__migration'`. */
   infoSchema?: string;
+  /** Additional `$(name)` variables available for substitution in SQL-script tasks, beyond the adapter's own dialect-specific defaults (`$(schema)`, `$(tablespace)`, `$(owner)`). */
   scriptVariables?: Record<string, string>;
+  /** Highest migration version to apply. Migrations above it are skipped; defaults to the package's highest version (apply everything). */
   targetVersion?: number;
 }
 
+/**
+ * Applies a {@link MigrationPackage} to a target database, dispatching to
+ * the {@link MigrationAdapter} implementation matching the connection's
+ * dialect. Emits `start`, `backup` (only if some migration in the run is
+ * flagged `backup: true`), `migration-start`/`migration-finish` per
+ * migration, `task-start`/`task-finish` per task, `restore` (only if a
+ * task fails and a backup had been taken), and `finish` - see
+ * `AsyncEventEmitter` from `strict-typed-events` for how to listen.
+ */
 export class DbMigrator extends AsyncEventEmitter {
   declare protected adapter: MigrationAdapter;
 
+  /**
+   * Loads the migration package (if not already loaded), validates
+   * `options.targetVersion` against the package's version range, then
+   * acquires the dialect adapter's schema lock and applies every
+   * migration from the adapter's currently tracked version up to the
+   * target version, in order - each task within a migration runs in
+   * sequence, with a `writeEvent` bookkeeping entry logged before and
+   * after (or instead of, on failure). The tracked version is only
+   * advanced after all of a migration's tasks succeed, so a later run
+   * resumes from the last fully-applied migration rather than a partially
+   * applied one. If any task throws and the run included a migration
+   * flagged `backup: true`, the adapter's `restoreDatabase()` is invoked
+   * before the error propagates. The schema lock and connection are always
+   * released, whether the run succeeds or fails.
+   *
+   * @throws {TypeError} if `options.connection.dialect` is missing, or is a dialect with no registered adapter
+   * @throws {Error} if `options.targetVersion` is lower than the package's minimum migration version, or if the adapter's currently tracked version is more than one below that minimum (meaning some earlier migration was never applied)
+   * @returns `true` once every applicable migration has been applied
+   */
   async execute(options: DbMigratorOptions): Promise<boolean> {
     if (!options.connection.dialect)
       throw new TypeError(`You must provide connection.dialect`);

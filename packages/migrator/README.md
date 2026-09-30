@@ -115,5 +115,5 @@ SQB is available under [MIT](LICENSE) license.
 [downloads-url]: https://npmjs.org/package/@sqb/migrator
 [ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
 [ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
-[coveralls-image]: https://coveralls.io/repos/github/sqbjs/sqb/badge.svg?branch=master
+[coveralls-image]: https://coveralls.io/repos/github/panates/sqb/badge.svg?branch=dev
 [coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master

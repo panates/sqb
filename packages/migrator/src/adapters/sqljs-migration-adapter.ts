@@ -19,6 +19,7 @@ import { MigrationStatus } from '../types.js';
 
 const sqljsAdapter = new SqljsAdapter();
 
+/** Quotes a (possibly schema-qualified, e.g. `"main.mytable"`) SQLite identifier so reserved words / mixed case / special characters in a migration task's `tableName` or row keys don't break the generated SQL. */
 function quoteIdent(name: string): string {
   return name
     .split('.')
@@ -26,12 +27,27 @@ function quoteIdent(name: string): string {
     .join('.');
 }
 
+/** `sql.js`-style named parameters must be bound with their sigil included in the object key (`":name"`, not `"name"`). */
 function withColonKeys(params: Record<string, any>): Record<string, any> {
   const out: Record<string, any> = {};
   for (const k of Object.keys(params)) out[':' + k] = params[k];
   return out;
 }
 
+/**
+ * {@link MigrationAdapter} for SQLite via the pure-WASM `@sqb/sqljs`
+ * driver, structurally mirroring `SqliteMigrationAdapter` (SQLite has no
+ * schema/catalog object to create, so `infoSchema` is only ever used as a
+ * table-name prefix and `$(schema)` resolves to `'main'`; a script task
+ * runs in one call; both {@link lockSchema}/{@link unlockSchema} are
+ * no-ops, since there's no server process to arbitrate a lock between
+ * clients) with one addition: `sql.js` loads a whole database file into
+ * memory up front and never writes it back on its own, so for a
+ * file-backed (non-`:memory:`) database, `close()` explicitly exports the
+ * in-memory database and writes it back to disk - without that, every
+ * migration applied in the run would be silently lost the moment the
+ * process exits.
+ */
 export class SqljsMigrationAdapter extends MigrationAdapter {
   declare protected _connection: Database;
   declare protected _adapterConnection: Adapter.Connection;
@@ -79,6 +95,15 @@ export class SqljsMigrationAdapter extends MigrationAdapter {
     return this.infoSchema + '_events';
   }
 
+  /**
+   * Connects via `@sqb/sqljs`, records whether the database is file-backed
+   * (so {@link close} knows whether to persist it), creates the
+   * bookkeeping tables if they don't already exist, seeds the package's
+   * summary row if missing, and returns a ready-to-use adapter with
+   * `version`/`status` refreshed from it.
+   *
+   * @throws {Error} whatever the driver throws for a failed connection or setup statement - the connection is closed first if already open
+   */
   static async create(
     options: StrictOmit<DbMigratorOptions, 'migrationPackage'> & {
       migrationPackage: MigrationPackage;
@@ -145,6 +170,7 @@ CREATE TABLE IF NOT EXISTS ${quoteIdent(adapter.eventTable)}
     }
   }
 
+  /** For a file-backed database, exports the in-memory database and writes it back to `_persistPath` before closing - `sql.js` never persists changes on its own. A no-op export step for an in-memory database. */
   async close(): Promise<void> {
     if (this._persistPath) {
       const data = this._connection.export();
@@ -153,6 +179,7 @@ CREATE TABLE IF NOT EXISTS ${quoteIdent(adapter.eventTable)}
     await this._adapterConnection.close();
   }
 
+  /** @throws {Error} if the package's summary row is somehow missing (should not happen once `create()` has run) */
   async refresh(): Promise<void> {
     const result = this._connection.exec(
       `SELECT current_version, status FROM ${quoteIdent(this.summaryTable)} WHERE package_name = :packageName`,
@@ -208,6 +235,16 @@ CREATE TABLE IF NOT EXISTS ${quoteIdent(adapter.eventTable)}
     );
   }
 
+  /**
+   * Runs one task: an SQL-script task's script (resolved from a function
+   * if needed, then `$(name)`-substituted) executes in one call, since
+   * `sql.js` has no restriction on statement order or count per call; a
+   * custom task's function runs directly against the raw `sql.js`
+   * `Database`; an insert-data task's rows are each turned into an
+   * `INSERT` via `@sqb/builder`'s `Insert(...).generate({ dialect:
+   * 'sqlite' })` and run. A script-task error is annotated with the
+   * task's file location before being rethrown.
+   */
   async executeTask(
     migrationPackage: MigrationPackage,
     migration: Migration,

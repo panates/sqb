@@ -2,14 +2,24 @@ import _debug from 'debug';
 import { Readable } from 'stream';
 import type { Cursor } from './cursor.js';
 
+/** Options for {@link Cursor.toStream}. */
 export interface CursorStreamOptions {
+  /** When true, the stream pushes row objects directly; otherwise it emits a streamed JSON array (`[row,row,...]`) as text chunks. */
   objectMode?: boolean;
+  /** Maximum number of rows to stream before ending, regardless of how many the cursor has left. */
   limit?: number;
 }
 
 const inspect = Symbol.for('nodejs.util.inspect.custom');
 const debug = _debug('sqb:cursorstream');
 
+/**
+ * A Node `Readable` stream over a {@link Cursor}'s rows, created via
+ * `cursor.toStream(...)`. In non-object mode, produces a valid streamed JSON
+ * array of rows (`[`, each row, `,`-separated, then `]`); in object mode,
+ * pushes each row as-is. Closing the stream (or it reaching EOF) closes the
+ * underlying cursor.
+ */
 export class CursorStream extends Readable {
   private readonly _cursor: Cursor;
   private readonly _objectMode?: boolean;

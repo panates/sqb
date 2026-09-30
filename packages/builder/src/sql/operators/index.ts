@@ -1,3 +1,9 @@
+/**
+ * Comparison operators (`Eq`, `Ne`, `Gt`, `Gte`, `Lt`, `Lte`, `Like`,
+ * `ILike`, `Is`, `Between`, `In`, `Exists`, `Match`, and their `Not*`
+ * negated variants) and logical combinators (`And`, `Or`, `Not`) used to
+ * build `WHERE`/`ON`/`HAVING`/`CASE WHEN` conditions.
+ */
 export * from './and.js';
 export * from './between.js';
 export * from './comp-operator.js';

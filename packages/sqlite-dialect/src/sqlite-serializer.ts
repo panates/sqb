@@ -5,8 +5,10 @@ import {
   type SerializerExtension,
 } from '@sqb/builder';
 
-// SQLite keywords (https://www.sqlite.org/lang_keywords.html) that are not
-// already covered by SerializeContext's base reservedWords list.
+/**
+ * SQLite keywords (https://www.sqlite.org/lang_keywords.html) that are not
+ * already covered by {@link SerializeContext}'s base reserved-words list.
+ */
 const reservedWords = new Set([
   'abort',
   'action',
@@ -98,14 +100,22 @@ const reservedWords = new Set([
   'without',
 ]);
 
+/**
+ * `@sqb/builder` {@link SerializerExtension} for SQLite, handling the
+ * SQLite-specific quirks the base serializer can't cover: `LIMIT`/`OFFSET`
+ * pagination, and suppressing the base serializer's `RETURNING` clause
+ * (see {@link _serializeReturning}).
+ */
 export class SqliteSerializer implements SerializerExtension {
   dialect = 'sqlite';
   reservedWords = reservedWords;
 
+  /** Case-insensitive check against SQLite's {@link reservedWords} list. */
   isReservedWord(_: any, s: any): boolean {
     return s && typeof s === 'string' && reservedWords.has(s.toLowerCase());
   }
 
+  /** Dispatches to the dialect-specific serializer for each SQL element type this extension overrides, falling through to `defFn` (the base serializer) for everything else. */
   serialize(
     ctx: SerializeContext,
     type: SerializationType | string,
@@ -122,6 +132,7 @@ export class SqliteSerializer implements SerializerExtension {
     }
   }
 
+  /** Appends SQLite's `LIMIT`/`OFFSET` pagination clause when the query has a `limit`/`offset` - both are supported independently, so no extra rewriting is needed for an offset-only query. */
   private _serializeSelect(
     ctx: SerializeContext,
     o: any,
@@ -135,6 +146,14 @@ export class SqliteSerializer implements SerializerExtension {
     return out;
   }
 
+  /**
+   * Suppresses the base serializer's `RETURNING` clause entirely, even
+   * though SQLite does support a `RETURNING` clause natively: `@sqb/sqlite`
+   * emulates it at the connection layer instead (matching the approach
+   * used for dialects that lack native support), so this hook only runs
+   * the base serializer for its side effects (e.g. registering the
+   * requested columns) and discards the text it would have produced.
+   */
   // noinspection JSUnusedLocalSymbols
   private _serializeReturning(
     ctx: SerializeContext,

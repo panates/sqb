@@ -16,15 +16,32 @@ import type { ObjectRow, QueryRequest } from './types.js';
 
 const debug = _debug('sqb:cursor');
 
+/** Events emitted by a {@link Cursor}. */
 interface CursorEvents {
+  /** Emitted once the cursor is closed. */
   close: () => void;
+  /** Emitted when fetching rows from the driver fails. */
   error: (error: unknown) => void;
+  /** Emitted when the cursor reaches the end of the result set. */
   eof: () => void;
+  /** Emitted when the cursor is moved back before the first row via `reset()`. */
   reset: () => void;
+  /** Emitted after the cursor's position changes (unless the move was silent). */
   move: (row: any, rowNum: number) => void;
+  /** Emitted once per row as new rows are fetched from the driver. */
   fetch: (row: any, rowNum: number) => void;
 }
 
+/**
+ * A unidirectional (optionally cache-backed bidirectional) result-set
+ * cursor, returned when a query is executed with `{ cursor: true }`. Wraps
+ * the driver-level {@link Adapter.Cursor}, adding row prefetching/caching,
+ * seeking, and (via {@link Cursor.toStream}) a Node `Readable` stream.
+ *
+ * A cursor keeps its owning connection open (or, if acquired through
+ * `SqbClient.execute()`, keeps the pooled connection retained) until it's
+ * closed - always `close()` a cursor once done with it.
+ */
 export class Cursor extends TypedEventEmitterClass<CursorEvents>(
   AsyncEventEmitter,
 ) {
@@ -113,7 +130,12 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
   }
 
   /**
-   * Enables cache
+   * Enables the in-memory row cache, which is what makes backward seeking
+   * (`prev()`, a negative `seek()`/`moveTo()` step, or `reset()`) possible -
+   * without it, the cursor can only move forward. Must be called before any
+   * rows have been fetched.
+   *
+   * @throws {Error} If rows have already been fetched.
    */
   cached(): void {
     if (this.fetchedRows)
@@ -143,6 +165,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
    * Otherwise it throws error. Once all all records fetched,
    * you can close Cursor safely and can continue to use it in memory.
    * Returns number of fetched rows
+   *
+   * @throws {Error} If the cache wasn't enabled via {@link Cursor.cached}.
    */
   async fetchAll(): Promise<number> {
     if (!this._cache)
@@ -157,6 +181,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
    * Moves cursor to given row number.
    * cursor can move both forward and backward if cache enabled.
    * Otherwise it throws error.
+   *
+   * @throws {Error} If moving backward is required but the cache wasn't enabled via {@link Cursor.cached}.
    */
   async moveTo(rowNum: number): Promise<ObjectRow> {
     await this._seek(rowNum - this.rowNum);
@@ -176,6 +202,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
   /**
    *  Moves cursor back by one row and returns that row.
    *  And also it allows iterating over rows easily.
+   *
+   * @throws {Error} If the cache wasn't enabled via {@link Cursor.cached}.
    */
   async prev(): Promise<ObjectRow> {
     await this._seek(-1);
@@ -184,6 +212,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
 
   /**
    * Moves cursor before first row. (Required cache enabled)
+   *
+   * @throws {Error} If the cache wasn't enabled via {@link Cursor.cached}.
    */
   reset() {
     if (!this._cache)
@@ -196,6 +226,9 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
   /**
    * Moves cursor by given step. If caching is enabled,
    * cursor can move both forward and backward. Otherwise it throws error.
+   *
+   * @param step - Number of rows to move; positive moves forward, negative moves backward (requires the cache to be enabled).
+   * @throws {Error} If moving backward is required but the cache wasn't enabled via {@link Cursor.cached}.
    */
   async seek(step: number): Promise<ObjectRow> {
     await this._seek(step);
@@ -203,7 +236,8 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
   }
 
   /**
-   * Creates and returns a readable stream.
+   * Wraps this cursor in a Node `Readable` stream, emitting either row
+   * objects (`objectMode: true`) or a streamed JSON array of rows.
    */
   toStream(options?: CursorStreamOptions): CursorStream {
     return new CursorStream(this, options);
@@ -218,7 +252,13 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
   }
 
   /**
+   * Internal implementation of row movement, shared by `moveTo`/`next`/
+   * `prev`/`seek`: walks the cache (if enabled), then the prefetch buffer,
+   * fetching more rows from the driver via {@link Cursor._fetchRows} as
+   * needed. Not intended to be called directly - use the public movement
+   * methods instead.
    *
+   * @param silent - When true, suppresses the `'move'` event for this step (used by `fetchAll()`'s own bookkeeping).
    */
   async _seek(step: number, silent?: boolean): Promise<number> {
     step = coerceToInt(step, 0);
@@ -275,7 +315,12 @@ export class Cursor extends TypedEventEmitterClass<CursorEvents>(
   }
 
   /**
+   * Fetches the next batch of rows (up to `_prefetchRows`) from the driver
+   * cursor, normalizes and caches them, and emits a `'fetch'` event per
+   * row - or marks the cursor exhausted and closes it once the driver
+   * returns no more rows. Not intended to be called directly.
    *
+   * @throws {Error} If the cursor is already closed.
    */
   async _fetchRows(): Promise<void> {
     if (!this._intlcur) throw new Error('Cursor is closed');

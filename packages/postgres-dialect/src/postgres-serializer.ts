@@ -6,11 +6,14 @@ import {
   type SerializerExtension,
 } from '@sqb/builder';
 
-// PostgreSQL "reserved" and "reserved (can be function or type)" keywords
-// (https://www.postgresql.org/docs/current/sql-keywords-appendix.html)
-// that are not already covered by SerializeContext's base reservedWords list.
-// Keywords common to all SQL dialects (case, check, union, ...) live in
-// SerializeContext.reservedWords instead of being duplicated here.
+/**
+ * PostgreSQL "reserved" and "reserved (can be function or type)" keywords
+ * (https://www.postgresql.org/docs/current/sql-keywords-appendix.html)
+ * that are not already covered by {@link SerializeContext}'s base
+ * reserved-words list. Keywords common to all SQL dialects (`case`,
+ * `check`, `union`, ...) live in `SerializeContext.reservedWords` instead
+ * of being duplicated here.
+ */
 const reservedWords = new Set([
   'analyse',
   'analyze',
@@ -67,14 +70,26 @@ const reservedWords = new Set([
   'window',
 ]);
 
+/**
+ * `@sqb/builder` {@link SerializerExtension} for PostgreSQL, handling the
+ * PostgreSQL-specific quirks the base serializer can't cover: `LIMIT`/
+ * `OFFSET` pagination, `= NULL`/`<> NULL` rewritten as `IS`/`IS NOT NULL`
+ * (removing the now-unused positional parameter), `IN`/`NOT IN` against a
+ * PostgreSQL array column rewritten as `= ANY(...)`/`!= ANY(...)` or the
+ * `&&` overlap operator, `MATCH` rewritten as full-text search via `@@`/
+ * `plainto_tsquery`, and PostgreSQL's positional `$1, $2, ...` parameter
+ * placeholders (rather than named binds).
+ */
 export class PostgresSerializer implements SerializerExtension {
   dialect = 'postgres';
   reservedWords = reservedWords;
 
+  /** Case-insensitive check against PostgreSQL's {@link reservedWords} list. */
   isReservedWord(_: any, s: any): boolean {
     return s && typeof s === 'string' && reservedWords.has(s.toLowerCase());
   }
 
+  /** Dispatches to the dialect-specific serializer for each SQL element type this extension overrides, falling through to `defFn` (the base serializer) for everything else. */
   serialize(
     ctx: SerializeContext,
     type: SerializationType | string,
@@ -93,6 +108,7 @@ export class PostgresSerializer implements SerializerExtension {
     }
   }
 
+  /** Appends PostgreSQL's `LIMIT`/`OFFSET` pagination clause when the query has a `limit`/`offset` - both are supported independently, so unlike some other dialects no extra rewriting is needed for an offset-only query. */
   private _serializeSelect(
     ctx: SerializeContext,
     o: any,
@@ -106,6 +122,29 @@ export class PostgresSerializer implements SerializerExtension {
     return out;
   }
 
+  /**
+   * Rewrites several comparison shapes PostgreSQL needs special handling
+   * for:
+   * - `= null`/`<> null` (including an unbound `$n` positional placeholder
+   *   that resolved to `null`) is rewritten as `IS NULL`/`IS NOT NULL`;
+   *   the now-unused positional parameter is spliced out of
+   *   `ctx.preparedParams`/`ctx.paramOptions` (tracked in
+   *   `ctx.removedParams` so the same index isn't spliced out twice).
+   * - A scalar value bound to a param flagged `isArray` (an array-typed
+   *   column compared against a single value) is wrapped in a one-element
+   *   array first, since PostgreSQL array columns need an actual array
+   *   bind even for a single value.
+   * - `IN`/`NOT IN` against a PostgreSQL array is rewritten: array column
+   *   vs. a scalar param becomes `= ANY(...)`/`!= ANY(...)` (either side,
+   *   whichever is the array); array column vs. an array param becomes
+   *   the `&&` overlap operator instead (with the array side negated via
+   *   a leading `not` for `NOT IN`) - PostgreSQL has no direct `IN`
+   *   syntax against an array type.
+   * - `MATCH` is rewritten to full-text search via the `@@` operator and
+   *   `plainto_tsquery(config, ...)`, `config` coming from the operator's
+   *   custom args (defaulting to the `'simple'` text search
+   *   configuration).
+   */
   private _serializeComparison(
     ctx: SerializeContext,
     o: any,
@@ -210,6 +249,7 @@ export class PostgresSerializer implements SerializerExtension {
     return defFn(ctx, o);
   }
 
+  /** Renders a parameter as PostgreSQL's positional `$n` placeholder, `n` being the parameter's 1-based position in `ctx.preparedParams` after `defFn` appends it. */
   private _serializeParameter(
     ctx: SerializeContext,
     o: any,

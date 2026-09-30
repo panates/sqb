@@ -2,6 +2,7 @@ import type { Adapter, QueryRequest } from '@sqb/connect';
 import type { Connection as MysqlDriverConnection } from 'mysql2/promise';
 import { MysqlCursor } from './mysql-cursor.js';
 
+/** Maps the `mysql2` driver's numeric column type codes to SQB's portable `{ dataType, jsType }` pair. */
 const typeCodeMap: Record<number, { dataType: string; jsType: string }> = {
   0: { dataType: 'DECIMAL', jsType: 'number' },
   1: { dataType: 'TINYINT', jsType: 'number' },
@@ -30,11 +31,21 @@ const typeCodeMap: Record<number, { dataType: string; jsType: string }> = {
   255: { dataType: 'GEOMETRY', jsType: 'Buffer' },
 };
 
-// Table -> AUTO_INCREMENT column name, used to emulate "INSERT ... RETURNING"
-// (MySQL has no ROWID/rowid equivalent, so the PK column name must be known
-// to re-select the row that was just inserted).
+/**
+ * Table name -> `AUTO_INCREMENT` column name cache, used to emulate
+ * `INSERT ... RETURNING` (MySQL has no `ROWID`/rowid equivalent, so the PK
+ * column name must be known to re-select the row that was just inserted).
+ * Populated by {@link MysqlConnection._getAutoIncrementColumn}.
+ */
 const autoIncrementColumnCache = new Map<string, string>();
 
+/**
+ * `@sqb/connect` {@link Adapter.Connection} wrapping a raw `mysql2` driver
+ * connection: translates `QueryRequest`s into driver calls (including
+ * cursor-mode streaming and `RETURNING`-on-`INSERT`/`UPDATE` emulation,
+ * since MySQL supports neither natively) and normalizes results/column
+ * metadata back into SQB's portable shape.
+ */
 export class MysqlConnection implements Adapter.Connection {
   private intlcon?: MysqlDriverConnection;
   private _inTransaction = false;
@@ -47,6 +58,7 @@ export class MysqlConnection implements Adapter.Connection {
     return (this.intlcon as any)?.connection?.threadId;
   }
 
+  /** Forcibly destroys the underlying connection - see the inline comment for why not a graceful `end()`. */
   async close() {
     if (!this.intlcon) return;
     const conn = this.intlcon;
@@ -57,10 +69,12 @@ export class MysqlConnection implements Adapter.Connection {
     conn.destroy();
   }
 
+  /** Rolls back any open transaction, readying the connection to be pooled/reused. */
   async reset() {
     return this.rollback();
   }
 
+  /** Begins a transaction (`BEGIN`). */
   async startTransaction(): Promise<void> {
     assertDefined(this.intlcon);
     // MySQL implicitly commits any already-active transaction when BEGIN is
@@ -69,6 +83,7 @@ export class MysqlConnection implements Adapter.Connection {
     this._inTransaction = true;
   }
 
+  /** Commits the current transaction. */
   async commit(): Promise<void> {
     assertDefined(this.intlcon);
     // COMMIT outside of an active transaction is a no-op in MySQL.
@@ -76,6 +91,7 @@ export class MysqlConnection implements Adapter.Connection {
     this._inTransaction = false;
   }
 
+  /** Rolls back the current transaction. */
   async rollback(): Promise<void> {
     assertDefined(this.intlcon);
     await this.intlcon.rollback();
@@ -86,11 +102,24 @@ export class MysqlConnection implements Adapter.Connection {
     return this._inTransaction;
   }
 
+  /** Validates the connection with a trivial `SELECT 1`. */
   async test(): Promise<void> {
     assertDefined(this.intlcon);
     await this.intlcon.query('select 1');
   }
 
+  /**
+   * Executes one query. For an `INSERT`/`UPDATE` with `returningFields`,
+   * runs the statement then a synthesized follow-up `SELECT` to emulate
+   * `RETURNING` (MySQL has none): an `INSERT` is matched back by its
+   * `AUTO_INCREMENT` id (looked up once per table via
+   * {@link _getAutoIncrementColumn} and cached), an `UPDATE` by reusing
+   * the original `WHERE` clause - `DELETE` isn't emulated here since
+   * there's nothing left to re-select afterward. In cursor mode, wraps
+   * the driver's streaming query in a {@link MysqlCursor}. Otherwise
+   * executes directly, reading result rows/metadata off the driver's
+   * response.
+   */
   async execute(query: QueryRequest): Promise<Adapter.Response> {
     assertDefined(this.intlcon);
     const intlcon = this.intlcon;
@@ -172,6 +201,7 @@ export class MysqlConnection implements Adapter.Connection {
     return out;
   }
 
+  /** Looks up (and caches, in {@link autoIncrementColumnCache}) the `AUTO_INCREMENT` column name for `table`, used to re-select a just-inserted row when emulating `RETURNING`. */
   private async _getAutoIncrementColumn(
     table: string,
   ): Promise<string | undefined> {
@@ -189,6 +219,7 @@ export class MysqlConnection implements Adapter.Connection {
     return column;
   }
 
+  /** Runs a synthesized `SELECT` and copies its rows/fields onto `out` - used to emulate `RETURNING` on `INSERT`/`UPDATE`. */
   private async _fillSelectResult(
     out: Adapter.Response,
     sql: string,
@@ -206,6 +237,7 @@ export class MysqlConnection implements Adapter.Connection {
     out.rows = rows;
   }
 
+  /** Converts the driver's column metadata into SQB's portable {@link Adapter.Field} shape via {@link typeCodeMap}. */
   private _convertFields(fields: any[]) {
     const result: Adapter.Field[] = [];
     for (const f of fields) {
@@ -221,6 +253,7 @@ export class MysqlConnection implements Adapter.Connection {
   }
 }
 
+/** Throws if the connection has already been closed. */
 function assertDefined(d: unknown): asserts d {
   if (d == null) throw new Error('DB session is closed');
 }

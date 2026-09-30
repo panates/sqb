@@ -14,9 +14,28 @@ import { Operator } from './operator.js';
 // noinspection RegExpUnnecessaryNonCapturingGroup
 const COMPARE_LEFT_PATTERN = /^([\w\\.$]+(?:\[])?) *(.*)$/;
 
+/**
+ * Abstract base for `AND`/`OR` operators ({@link And}, {@link Or}),
+ * combining a list of conditions with its operator's keyword. Construct via
+ * a concrete subclass rather than this class directly.
+ *
+ * Beyond {@link Operator}/{@link Raw} instances, `.add(...)` also accepts a
+ * plain object condition (e.g. `{ age: { gt: 18 }, name: 'John' }`), which
+ * is expanded into one operator per own-property via {@link OperatorsMap}:
+ * a nested object/array value picks the operator from its own key(s) (or
+ * `'and'`/`'or'` for `{ and: [...] }`/`{ or: [...] }`), a bare array value
+ * picks `in`, and anything else picks `eq`.
+ */
 export interface LogicalOperator extends Operator {
+  /** The condition elements combined by this operator, in the order added. */
   _items: SqlElement[];
 
+  /**
+   * Adds one or more conditions.
+   *
+   * @param expressions - {@link Operator}/{@link Raw} instances, nested `LogicalOperator`s, or plain object conditions.
+   * @throws {TypeError} If an argument isn't an `Operator`, `Raw`, `LogicalOperator`, or plain object; or if an object condition's key isn't a recognized operator/expression format.
+   */
   add(...expressions: (LogicalOperator | any)[]): this;
   _serialize(ctx: SerializeContext): string;
 }
@@ -27,6 +46,14 @@ interface LogicalOperatorCtor {
   prototype: LogicalOperator;
 }
 
+/**
+ * Expands a plain object condition (e.g. `{ age: { gt: 18 } }`) into one
+ * operator instance per own-property, resolving each key against the
+ * operator table attached to `LogicalOperator` (see `op.ns.ts`).
+ *
+ * @throws {Error} If a key resolves to an unknown operator.
+ * @throws {TypeError} If a key isn't a recognized operator/expression format.
+ */
 function wrapObject(obj: any): SqlElement[] {
   const registeredOperators = (LogicalOperator as any).Operators;
   const result: SqlElement[] = [];
@@ -59,6 +86,13 @@ function wrapObject(obj: any): SqlElement[] {
   return result;
 }
 
+/**
+ * Abstract constructor for `AND`/`OR` operators. Not meant to be
+ * constructed directly - use {@link And} or {@link Or}.
+ *
+ * @param expressions - Initial conditions, same accepted forms as {@link LogicalOperator.add}.
+ * @throws {TypeError} If instantiated directly rather than through a subclass, or given an invalid condition.
+ */
 export const LogicalOperator = function (
   this: LogicalOperator,
   ...expressions: any[]
@@ -84,6 +118,7 @@ Object.defineProperty(LogicalOperator.prototype, '_type', {
   },
 });
 
+/** @see {@link LogicalOperator.add} */
 LogicalOperator.prototype.add = function (
   this: LogicalOperator,
   ...expressions: (LogicalOperator | any)[]
@@ -101,6 +136,7 @@ LogicalOperator.prototype.add = function (
   return this;
 };
 
+/** Serializes each item and joins them with this operator's keyword (`and`/`or`). */
 LogicalOperator.prototype._serialize = function (
   this: LogicalOperator,
   ctx: SerializeContext,

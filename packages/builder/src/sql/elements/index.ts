@@ -1,3 +1,10 @@
+/**
+ * Column references (`Field`, `TableName`, `GroupColumn`, `OrderColumn`,
+ * `ReturningColumn`), expressions (`Case`, `Coalesce`, `Count`, `Max`,
+ * `Min`, `Lower`, `Upper`, `Sequence`, `StringAgg`, `Raw`, `Param`), and
+ * `JOIN` clauses (`Join` and its fixed-type subclasses) - the building
+ * blocks queries are assembled from.
+ */
 export * from './base-field.js';
 export * from './case.js';
 export * from './coalesce.js';

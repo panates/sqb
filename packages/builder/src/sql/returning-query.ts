@@ -4,11 +4,18 @@ import { SerializeContext } from '../serialize-context.js';
 import { ReturningColumn } from './elements/returning-column.js';
 import { Query } from './query.js';
 
+/**
+ * Abstract base for queries that support a `RETURNING` clause
+ * ({@link Insert} and {@link Update}). Not meant to be constructed directly.
+ */
 class ReturningQueryClass extends Query {
   _returningColumns?: ReturningColumn[];
 
   /**
+   * Sets the `RETURNING` column list, requesting the given columns of each
+   * affected row back from the database.
    *
+   * @param columns - Column names, each parsed as `field [as alias]`.
    */
   returning(...columns: string[]): this {
     if (!columns) return this;
@@ -23,7 +30,9 @@ class ReturningQueryClass extends Query {
   }
 
   /**
-   *
+   * Serializes the `RETURNING` clause, or an empty string if `.returning(...)`
+   * was never called. Also records the requested fields onto
+   * `ctx.returningFields` for the caller to read back off `GenerateResult`.
    */
   protected __serializeReturning(ctx: SerializeContext): string {
     if (!(this._returningColumns && this._returningColumns.length)) return '';
@@ -47,6 +56,13 @@ interface ReturningQueryCtor {
   prototype: ReturningQuery;
 }
 
+/**
+ * Abstract base constructor for queries that support a `RETURNING` clause.
+ * Not meant to be constructed directly - use {@link Insert} or
+ * {@link Update}.
+ *
+ * @throws {TypeError} If instantiated directly rather than through a subclass.
+ */
 export const ReturningQuery = function (this: ReturningQuery) {
   if (!(this instanceof ReturningQuery)) return new ReturningQuery();
   if (this.constructor === ReturningQuery) {

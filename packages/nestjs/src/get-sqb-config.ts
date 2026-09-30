@@ -3,6 +3,18 @@ import { clone } from '@jsopen/objects';
 import { toBoolean, toInt } from 'putil-varhelpers';
 import type { SqbClientConnectionOptions } from './sqb.interface.js';
 
+/**
+ * Fills in any connection option not already set on `moduleOptions` from
+ * the corresponding `<prefix><NAME>` environment variable (e.g.
+ * `SQB_HOST`, `SQB_POOL_MAX`), returning a new, cloned options object -
+ * `moduleOptions` itself is left untouched. Explicitly-given options
+ * always take precedence over the environment.
+ *
+ * @param moduleOptions - the options given to `SqbModule.forRoot()`/
+ *   `forRootAsync()` (or resolved from its `useFactory`)
+ * @param prefix - environment variable prefix, e.g. `'SQB_'` for `SQB_HOST`
+ * @returns a new options object with environment-sourced defaults applied
+ */
 export function getSqbConfig(
   moduleOptions: SqbClientConnectionOptions,
   prefix: string = 'SQB_',

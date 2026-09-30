@@ -1,22 +1,26 @@
 name: Test
 on:
   # Can be called from other workflows
+  # `PERSONAL_ACCESS_TOKEN` is gone: measured, no manifest here carries a private scope and there
+  # is no .npmrc, so the token had nothing to authenticate.
   workflow_call:
-    secrets:
-      PERSONAL_ACCESS_TOKEN:
-        required: true
 
   # Can be run manually
   workflow_dispatch:
 
   # on git push
   push:
-    branches:
-      - dev
+    branches-ignore:
+      - main
     paths:
       - 'packages/*/src/**'
       - 'packages/*/test/**'
-      - 'packages/*/*.{json,js,mjs,cjs}'
+      # **`packages/*/*` rather than `packages/*/*.{json,js,mjs,cjs}`.** Brace expansion is not in
+      # GitHub's documented filter set (`*`, `**`, `?`, `+`, `[]`, `!`, `\`), so that pattern very
+      # likely matched nothing at all - and the two failures are not symmetric: a filter that misses
+      # a file means the tests quietly do not run and nobody finds out, while one that matches too
+      # much costs a minute of CI.
+      - 'packages/*/*'
       - 'support/test/**'
       - '.mocharc.cjs'
       - 'package.json'
@@ -30,17 +34,16 @@ concurrency:
 
 jobs:
   test:
+    # **The "was this a merge from dev" half is gone from here, and that is not a relaxation.** It
+    # was a second copy of release.yml's condition - and in a `workflow_call` `github.event_name` is
+    # the *caller's* event, so the identical guard was evaluated twice on every release, in two files
+    # that had to be kept in step by hand. The decision lives once now, in release.yml, and is
+    # answered by the API rather than by parsing a commit message.
     if: >
       github.event_name == 'workflow_dispatch' ||
       (
         github.event_name == 'push' &&
-        !(
-          contains(github.event.head_commit.message, 'no-test') ||
-          ( 
-            startsWith(github.event.head_commit.message, 'Merge pull request') &&
-            contains(github.event.head_commit.message, '/dev')
-          )
-        )
+        !contains(github.event.head_commit.message, 'no-test')
       )
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -121,17 +124,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # `panates/ghac-setup-node` is this action's old name - it still resolves through GitHub's
+      # rename redirect, which is why nobody noticed. `@v2` also replaces the separate unpinned
+      # `npm install rman -g` with `rman-version`, and `install: 'ci'` installs exactly what the
+      # lockfile pins, where `@v1` deleted package-lock.json first and installed whatever resolved
+      # that morning.
       - name: 'Setup Environment'
-        uses: panates/ghac-setup-node@v1
+        uses: panates/gh-setup-node@v2
         with:
           node-version: '24'
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          rman-version: '2'
+          install: 'ci'
 
-      - name: Install rman
-        run: npm install rman -g
-
+      # **The preset's own commands, not `rman run qc`.** `qc` was a root script wrapping
+      # `rman run lint && rman run check`, and both of those asked rman to fan a *script* out per
+      # package. `check`, `lint` and `format` are commands `@panates/rman-preset` contributes now, so
+      # the flags are pinned in one place - dpdm's `--exit-code circular:1` above all, without which
+      # it reports a cycle and still exits 0.
       - name: Run qc tests
-        run: rman run qc
+        run: |
+          rman check
+          rman lint
 
       - name: Run unit tests
         run: npm run citest

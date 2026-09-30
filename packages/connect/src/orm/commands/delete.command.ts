@@ -9,12 +9,14 @@ export type DestroyCommandArgs = {
   connection: SqbConnection;
 } & Repository.DeleteManyOptions;
 
+/** Static-only implementation of `Repository.delete()`/`deleteMany()`: builds and executes a `DELETE FROM ... WHERE ...` query. */
 export class DeleteCommand {
   // istanbul ignore next
   protected constructor() {
     throw new Error('This class is abstract');
   }
 
+  /** Builds and executes the delete query, returning the number of rows deleted. */
   static async execute(args: DestroyCommandArgs): Promise<number> {
     const { connection, entity, filter, params } = args;
 

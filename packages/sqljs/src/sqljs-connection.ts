@@ -2,6 +2,13 @@ import type { Adapter, QueryRequest } from '@sqb/connect';
 import type { Database, Statement } from 'sql.js';
 import { SqljsCursor } from './sqljs-cursor.js';
 
+/**
+ * `@sqb/connect` {@link Adapter.Connection} wrapping a `sql.js` `Database`:
+ * translates `QueryRequest`s into driver calls (including cursor-mode
+ * iteration and `RETURNING`-on-`INSERT`/`UPDATE` emulation, since this
+ * layer's SQL generation doesn't rely on SQLite's own `RETURNING` support)
+ * and normalizes results/column metadata back into SQB's portable shape.
+ */
 export class SqljsConnection implements Adapter.Connection {
   private intlcon?: Database;
 
@@ -12,10 +19,12 @@ export class SqljsConnection implements Adapter.Connection {
     this.intlcon = db;
   }
 
+  /** SQLite has no server-side session concept - always `0`. */
   get sessionId(): any {
     return 0;
   }
 
+  /** Releases this connection's reference to the underlying `sql.js` database via the closer passed to the constructor (see {@link SqljsAdapter.connect}), closing the file database once no connection references it. */
   async close() {
     if (this.intlcon) {
       this.intlcon = undefined;
@@ -23,10 +32,12 @@ export class SqljsConnection implements Adapter.Connection {
     }
   }
 
+  /** Rolls back any open transaction, readying the connection to be pooled/reused. */
   async reset() {
     return this.rollback();
   }
 
+  /** Begins a transaction (`BEGIN TRANSACTION`), swallowing the driver's error for a transaction already being open rather than throwing. */
   async startTransaction(): Promise<void> {
     assertDefined(this.intlcon);
     try {
@@ -37,6 +48,7 @@ export class SqljsConnection implements Adapter.Connection {
     }
   }
 
+  /** Commits the current transaction, swallowing the driver's error for no transaction being open rather than throwing. */
   async commit(): Promise<void> {
     assertDefined(this.intlcon);
     try {
@@ -47,6 +59,7 @@ export class SqljsConnection implements Adapter.Connection {
     }
   }
 
+  /** Rolls back the current transaction, swallowing the driver's error for no transaction being open rather than throwing. */
   async rollback(): Promise<void> {
     assertDefined(this.intlcon);
     try {
@@ -57,11 +70,24 @@ export class SqljsConnection implements Adapter.Connection {
     }
   }
 
+  /** Validates the connection with a trivial `SELECT 1`. */
   async test(): Promise<void> {
     assertDefined(this.intlcon);
     this.intlcon.exec('select 1');
   }
 
+  /**
+   * Executes one query. For an `INSERT`/`UPDATE` with `returningFields`,
+   * emulates `RETURNING` (`sql.js` has none): an `INSERT` is matched back
+   * via `last_insert_rowid()` and read directly with `exec()`; an `UPDATE`
+   * is emulated by rewriting the request into a synthesized follow-up
+   * `SELECT` reusing the original `WHERE` clause, which then falls through
+   * to the normal query path below - `DELETE` isn't emulated here since
+   * there's nothing left to re-select afterward. Otherwise prepares the
+   * statement and wraps it in a {@link SqljsCursor} (returned directly in
+   * cursor mode, or eagerly drained up to `fetchRows` rows otherwise,
+   * freeing the statement once done).
+   */
   async execute(query: QueryRequest): Promise<Adapter.Response> {
     assertDefined(this.intlcon);
     if (!query.autoCommit) await this.startTransaction();
@@ -131,6 +157,7 @@ export class SqljsConnection implements Adapter.Connection {
     }
   }
 
+  /** Converts `sql.js`'s bare column-name list into SQB's portable {@link Adapter.Field} shape - `sql.js` reports no type information per column, so `dataType`/`jsType` are always `'any'`. */
   private _convertFields(fields: string[]) {
     const result: any[] = [];
     for (let i = 0; i < fields.length; i++) {
@@ -147,6 +174,7 @@ export class SqljsConnection implements Adapter.Connection {
   }
 }
 
+/** Throws if the connection has already been closed. */
 function assertDefined(d: unknown): asserts d {
   if (d == null) throw new Error('Invalid data');
 }

@@ -4,18 +4,37 @@ import { EntityMetadata } from '../model/entity-metadata.js';
 import { LinkChain } from '../model/link-chain.js';
 import type { TypeThunk } from '../orm.type.js';
 
+/** Arguments for one hop of a `@Link().toOne(...)`/`.toMany(...)` chain. */
 type LinkArgs<T> = {
+  /** The source-side key column for this hop; auto-resolved if omitted. */
   sourceKey?: string;
+  /** The target-side key column for this hop; auto-resolved if omitted. */
   targetKey?: keyof T;
+  /** Extra filter condition(s) applied at this hop. */
   where?: object | object[];
 };
 
+/** The property decorator returned by `@Link(...)`, additionally chainable via `.toOne(...)`/`.toMany(...)` to describe multi-hop relations. */
 type LinkPropertyDecorator = PropertyDecorator & {
+  /** Adds a to-one hop to the chain (or sets the initial target, for the first call). */
   toOne<T>(type: TypeThunk<T>, args?: LinkArgs<T>): LinkPropertyDecorator;
 
+  /** Adds a to-many hop to the chain (or sets the initial target, for the first call). */
   toMany<T>(type: TypeThunk<T>, args?: LinkArgs<T>): LinkPropertyDecorator;
 };
 
+/**
+ * Declares an association field: a relation to another `@Entity`-decorated
+ * class, resolved via a `JOIN` (to-one) or a correlated
+ * sub-query/eager-fetch (to-many) when the field is included in a query's
+ * projection. The relation target and shape is set via a chained
+ * `.toOne(Type)`/`.toMany(Type)` call (defaulting to `.toOne(<property's
+ * own TS type>)` when neither is called and the property isn't an array),
+ * and can be extended into a multi-hop relation by chaining further
+ * `.toOne(...)`/`.toMany(...)` calls.
+ *
+ * @throws {TypeError} If applied to a symbol-keyed property, if the target type can't be determined without an explicit `.toOne(...)`/`.toMany(...)` call, or if the property's array-ness doesn't match the relation's to-one/to-many-ness.
+ */
 export function Link(options?: AssociationFieldOptions): LinkPropertyDecorator {
   let root: LinkChain<any>;
   let chain: LinkChain<any>;
@@ -87,9 +106,7 @@ export function Link(options?: AssociationFieldOptions): LinkPropertyDecorator {
   return fn;
 }
 
-/**
- * Crates an Link Chain object
- */
+/** Creates a to-one {@link LinkChain}. */
 function linkToOne<T>(
   type: TypeThunk<T>,
   targetKey?: keyof T,
@@ -98,9 +115,7 @@ function linkToOne<T>(
   return new LinkChain<T>(type, targetKey, sourceKey);
 }
 
-/**
- * Crates an Link Chain object
- */
+/** Creates a to-many {@link LinkChain}. */
 function linkToMany<T>(
   type: TypeThunk<T>,
   targetKey?: keyof T,

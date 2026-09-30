@@ -1,3 +1,6 @@
+/**
+ * The kind of SQL `JOIN` a {@link Join} element serializes to.
+ */
 export enum JoinType {
   INNER = 'inner',
   LEFT = 'left',
@@ -9,6 +12,14 @@ export enum JoinType {
   CROSS = 'cross',
 }
 
+/**
+ * Identifies the kind of SQL fragment being serialized when a
+ * {@link SqlElement} calls {@link SerializeContext.serialize}. Dialect
+ * extensions and per-query `serialize` hooks switch on these values to
+ * intercept and override the default serialization of a specific fragment
+ * (e.g. `SELECT_QUERY_COLUMNS`) without having to replace the whole query
+ * serializer.
+ */
 export enum SerializationType {
   SELECT_QUERY = 'select_query',
   SELECT_QUERY_COLUMNS = 'select_query.columns',
@@ -53,6 +64,11 @@ export enum SerializationType {
   STRINGAGG_STATEMENT = 'String_agg_statement',
 }
 
+/**
+ * Identifies which comparison or logical operator a {@link Operator}
+ * instance represents (e.g. distinguishing an {@link Eq} from a {@link Ne}
+ * once both have been narrowed to their common {@link CompOperator} base).
+ */
 export enum OperatorType {
   and = 'and',
   or = 'or',
@@ -78,6 +94,12 @@ export enum OperatorType {
   match = 'match',
 }
 
+/**
+ * Portable, dialect-agnostic column/parameter data types. A {@link Field} or
+ * {@link Param} carries one of these so a dialect serializer extension can
+ * decide how to bind or cast a value (e.g. array handling, date formatting)
+ * without needing to know the field's real database-specific type.
+ */
 export enum DataType {
   BOOL = 'BOOL',
   CHAR = 'CHAR',

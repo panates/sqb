@@ -8,6 +8,7 @@ import sql, {
 } from 'mssql';
 import { MssqlCursor } from './mssql-cursor.js';
 
+/** Maps the `mssql` driver's column type names to SQB's portable `{ dataType, jsType }` pair. */
 const typeNameMap: Record<string, { dataType: string; jsType: string }> = {
   VarChar: { dataType: 'VARCHAR', jsType: 'string' },
   NVarChar: { dataType: 'NVARCHAR', jsType: 'string' },
@@ -39,8 +40,16 @@ const typeNameMap: Record<string, { dataType: string; jsType: string }> = {
   Image: { dataType: 'IMAGE', jsType: 'Buffer' },
 };
 
+/** Matches a whole tokenized `:name` parameter reference (with any leading whitespace preserved), used by {@link MssqlConnection._normalizeNamedParams}. */
 const NAMED_PARAM_PATTERN = /^( *):([a-zA-Z_]\w*)$/;
 
+/**
+ * `@sqb/connect` {@link Adapter.Connection} wrapping an `mssql`
+ * `ConnectionPool`: translates `QueryRequest`s into driver calls (including
+ * cursor-mode streaming and `RETURNING`-via-`OUTPUT`-clause rewriting,
+ * since T-SQL has no `RETURNING`) and normalizes results/column metadata
+ * back into SQB's portable shape.
+ */
 export class MssqlConnection implements Adapter.Connection {
   private intlcon?: ConnectionPool;
   private _transaction?: Transaction;
@@ -50,10 +59,12 @@ export class MssqlConnection implements Adapter.Connection {
     this.intlcon = pool;
   }
 
+  /** Unsupported by the `mssql` driver at the pool level - always `undefined`. */
   get sessionId(): any {
     return undefined;
   }
 
+  /** Closes any open cursor/transaction first (both would otherwise make the pool hang), then closes the underlying connection pool. */
   async close() {
     if (!this.intlcon) return;
     const pool = this.intlcon;
@@ -74,10 +85,12 @@ export class MssqlConnection implements Adapter.Connection {
     await pool.close();
   }
 
+  /** Rolls back any open transaction, readying the connection to be pooled/reused. */
   async reset() {
     return this.rollback();
   }
 
+  /** Begins a transaction, unless one is already open. */
   async startTransaction(): Promise<void> {
     assertDefined(this.intlcon);
     if (this._transaction) return;
@@ -86,6 +99,7 @@ export class MssqlConnection implements Adapter.Connection {
     this._transaction = transaction;
   }
 
+  /** Commits the current transaction, if any. */
   async commit(): Promise<void> {
     if (!this._transaction) return;
     const transaction = this._transaction;
@@ -93,6 +107,7 @@ export class MssqlConnection implements Adapter.Connection {
     await transaction.commit();
   }
 
+  /** Rolls back the current transaction, if any. */
   async rollback(): Promise<void> {
     if (!this._transaction) return;
     const transaction = this._transaction;
@@ -104,11 +119,13 @@ export class MssqlConnection implements Adapter.Connection {
     return !!this._transaction;
   }
 
+  /** Validates the connection with a trivial `SELECT 1`. */
   async test(): Promise<void> {
     assertDefined(this.intlcon);
     await this.intlcon.request().query('select 1');
   }
 
+  /** Creates a new `mssql` request bound to the current transaction, if one is open, or to the pool directly otherwise. */
   private _newRequest(): Request {
     assertDefined(this.intlcon);
     return this._transaction
@@ -116,6 +133,16 @@ export class MssqlConnection implements Adapter.Connection {
       : this.intlcon.request();
   }
 
+  /**
+   * Executes one query. For an `INSERT`/`UPDATE`/`DELETE` with
+   * `returningFields`, rewrites the SQL to inject T-SQL's `OUTPUT` clause
+   * (referencing the `INSERTED`/`DELETED` pseudo-tables) right before
+   * `VALUES`/`WHERE` - `@sqb/mssql-dialect` deliberately produces no
+   * `RETURNING` clause of its own, since `OUTPUT` can't be appended at the
+   * statement's end the way `RETURNING` can. In cursor mode, streams the
+   * request and wraps it in an {@link MssqlCursor}. Otherwise executes
+   * directly, reading result rows/metadata off `result.recordset`.
+   */
   async execute(query: QueryRequest): Promise<Adapter.Response> {
     assertDefined(this.intlcon);
     if (!query.autoCommit && !this._transaction) await this.startTransaction();
@@ -193,11 +220,13 @@ export class MssqlConnection implements Adapter.Connection {
     return out;
   }
 
+  /** Binds each query parameter as a named `mssql` request input. */
   private _bindParams(request: Request, params?: Record<string, any>) {
     if (!params) return;
     for (const k of Object.keys(params)) request.input(k, params[k]);
   }
 
+  /** Converts the driver's column metadata (unordered by column index) into SQB's portable, index-ordered {@link Adapter.Field} shape via {@link typeNameMap}. */
   private _convertFields(columns: IColumnMetadata) {
     const result: Adapter.Field[] = [];
     const entries = Object.values(columns).sort((a, b) => a.index - b.index);
@@ -216,6 +245,14 @@ export class MssqlConnection implements Adapter.Connection {
     return result;
   }
 
+  /**
+   * Rewrites `:name` parameter placeholders to `mssql`'s native `@name`
+   * syntax in place, via a bracket/quote-aware tokenizer (rather than a
+   * plain regex replace) so a `:name`-shaped substring inside a string
+   * literal or a T-SQL `[bracketed identifier]` isn't mistaken for a
+   * parameter - see the inline comments for why each is handled
+   * differently.
+   */
   _normalizeNamedParams(query: QueryRequest) {
     const tokenizer = tokenize(query.sql, {
       brackets: false,
@@ -255,6 +292,7 @@ export class MssqlConnection implements Adapter.Connection {
   }
 }
 
+/** Throws if the connection has already been closed. */
 function assertDefined(d: unknown): asserts d {
   if (d == null) throw new Error('DB session is closed');
 }

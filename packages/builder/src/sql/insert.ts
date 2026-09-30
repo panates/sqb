@@ -8,6 +8,11 @@ import { Query } from './query.js';
 import { ReturningQuery } from './returning-query.js';
 import { Select } from './select.js';
 
+/**
+ * An `INSERT INTO ... VALUES (...)` query builder, extending
+ * {@link ReturningQuery} for `.returning(...)` support. Construct via the
+ * exported {@link Insert} factory rather than this class directly.
+ */
 class InsertClass extends ReturningQuery {
   _table!: TableName | Raw;
   _input: any;
@@ -17,7 +22,7 @@ class InsertClass extends ReturningQuery {
   }
 
   /**
-   * Performs serialization
+   * Serializes this query into an `insert into ... values (...)` statement.
    */
   _serialize(ctx: SerializeContext): string {
     const o = {
@@ -43,7 +48,8 @@ class InsertClass extends ReturningQuery {
   }
 
   /**
-   *
+   * Serializes the inserted column-name list: the input object's own keys,
+   * or (for an `INSERT ... SELECT`) the source select's column aliases.
    */
   protected __serializeColumns(ctx: SerializeContext): string {
     let arr: string[];
@@ -63,7 +69,9 @@ class InsertClass extends ReturningQuery {
   }
 
   /**
-   *
+   * Serializes the `VALUES` list: the source select/raw's own SQL for an
+   * `INSERT ... SELECT`/`INSERT ... (raw)`, or each input value converted
+   * via `ctx.anyToSQL(...)` for a plain-object input.
    */
   protected __serializeValues(ctx: SerializeContext): string {
     if (isSqlElement(this._input)) return this._input._serialize(ctx);
@@ -89,6 +97,20 @@ interface InsertCtor {
   prototype: Insert;
 }
 
+/**
+ * Creates an `INSERT` query builder. Callable with or without `new`.
+ *
+ * @param tableName - The target table name, or a {@link Raw} expression.
+ * @param input - Either a plain object of column-name/value pairs to insert as a single row, or a {@link Select}/{@link Raw} to insert from (`INSERT ... SELECT`).
+ * @throws {TypeError} If `tableName` isn't a string or `Raw`, or `input` isn't a plain object, `Select`, or `Raw`.
+ *
+ * @example
+ * ```ts
+ * Insert('users', { name: 'John', age: 30 })
+ *   .returning('id')
+ *   .generate({ dialect: 'postgres' });
+ * ```
+ */
 export const Insert = function (
   this: Insert,
   tableName: string | Raw,
@@ -124,8 +146,9 @@ Insert.prototype.constructor = Insert;
 export interface Insert extends InsertClass {}
 
 /**
- * Type guard for Insert
- * @param value
+ * Type guard for {@link Insert}; equivalent to `isInsert` in `type-guards.ts`.
+ *
+ * @param value - The value to test.
  */
 export function isInsertQuery(value: any): value is Insert {
   return isSqlElement(value, SerializationType.INSERT_QUERY);

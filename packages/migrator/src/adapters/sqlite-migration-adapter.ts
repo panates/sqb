@@ -17,22 +17,27 @@ import { MigrationStatus } from '../types.js';
 
 const sqliteAdapter = new SqliteAdapter();
 
-// The shape of @sqb/sqlite's internal NativeDatabase - narrowed to just the
-// synchronous methods this adapter needs. Not imported from @sqb/sqlite
-// directly: that package only exports its public "." entry point (the
-// driver-selection internals aren't part of its public API), and the
-// runtime value behind Adapter.Connection#intlcon is a Node- or Bun-backed
-// wrapper around the real driver, not the driver itself either way.
+/**
+ * The shape of `@sqb/sqlite`'s internal `NativeDatabase` - narrowed to
+ * just the synchronous methods this adapter needs. Not imported from
+ * `@sqb/sqlite` directly: that package only exports its public `.` entry
+ * point (the driver-selection internals aren't part of its public API),
+ * and the runtime value behind `Adapter.Connection`'s `intlcon` is a
+ * Node- or Bun-backed wrapper around the real driver, not the driver
+ * itself either way.
+ */
 interface SqliteNativeStatement {
   run(params?: Record<string, any>): void;
   get(params?: Record<string, any>): Record<string, any> | undefined;
   all(params?: Record<string, any>): Record<string, any>[];
 }
+/** See {@link SqliteNativeStatement}. */
 interface SqliteNativeDatabase {
   exec(sql: string): void;
   prepare(sql: string): SqliteNativeStatement;
 }
 
+/** Quotes a (possibly schema-qualified, e.g. `"main.mytable"`) SQLite identifier so reserved words / mixed case / special characters in a migration task's `tableName` or row keys don't break the generated SQL. */
 function quoteIdent(name: string): string {
   return name
     .split('.')
@@ -40,14 +45,26 @@ function quoteIdent(name: string): string {
     .join('.');
 }
 
-// node:sqlite / better-sqlite3 style named parameters must be bound with
-// their sigil included in the object key (":name", not "name").
+/** `node:sqlite`/`bun:sqlite`-style named parameters must be bound with their sigil included in the object key (`":name"`, not `"name"`). */
 function withColonKeys(params: Record<string, any>): Record<string, any> {
   const out: Record<string, any> = {};
   for (const k of Object.keys(params)) out[':' + k] = params[k];
   return out;
 }
 
+/**
+ * {@link MigrationAdapter} for SQLite (via `@sqb/sqlite`'s `node:sqlite`/
+ * `bun:sqlite` driver), structurally mirroring `PgMigrationAdapter` with
+ * SQLite-specific differences: SQLite has no schema/catalog object to
+ * create, so `infoSchema` is only ever used as a table-name prefix and
+ * `$(schema)` resolves to `'main'`, the one always-present database name;
+ * a script task runs in one call, since SQLite has neither MSSQL's
+ * statement-order restriction nor Oracle's one-statement-per-call limit;
+ * and both {@link lockSchema}/{@link unlockSchema} are no-ops, since
+ * SQLite is an embedded, file-based engine with no server process to
+ * arbitrate an advisory lock between clients - concurrent access is
+ * instead handled at the file-lock level by SQLite itself.
+ */
 export class SqliteMigrationAdapter extends MigrationAdapter {
   declare protected _connection: SqliteNativeDatabase;
   declare protected _adapterConnection: Adapter.Connection;
@@ -91,6 +108,14 @@ export class SqliteMigrationAdapter extends MigrationAdapter {
     return this.infoSchema + '_events';
   }
 
+  /**
+   * Connects via `@sqb/sqlite`, creates the bookkeeping tables if they
+   * don't already exist, seeds the package's summary row if missing, and
+   * returns a ready-to-use adapter with `version`/`status` refreshed from
+   * it.
+   *
+   * @throws {Error} whatever the driver throws for a failed connection or setup statement - the connection is closed first if already open
+   */
   static async create(
     options: StrictOmit<DbMigratorOptions, 'migrationPackage'> & {
       migrationPackage: MigrationPackage;
@@ -162,6 +187,7 @@ CREATE TABLE IF NOT EXISTS ${quoteIdent(adapter.eventTable)}
     await this._adapterConnection.close();
   }
 
+  /** @throws {Error} if the package's summary row is somehow missing (should not happen once `create()` has run) */
   async refresh(): Promise<void> {
     const row = this._connection
       .prepare(
@@ -216,6 +242,16 @@ CREATE TABLE IF NOT EXISTS ${quoteIdent(adapter.eventTable)}
     );
   }
 
+  /**
+   * Runs one task: an SQL-script task's script (resolved from a function
+   * if needed, then `$(name)`-substituted) executes in one call, since
+   * SQLite has no restriction on statement order or count per call; a
+   * custom task's function runs directly against the native database
+   * handle; an insert-data task's rows are each turned into an `INSERT`
+   * via `@sqb/builder`'s `Insert(...).generate({ dialect: 'sqlite' })` and
+   * executed. A script-task error is annotated with the task's file
+   * location before being rethrown.
+   */
   async executeTask(
     migrationPackage: MigrationPackage,
     migration: Migration,

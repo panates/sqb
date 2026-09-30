@@ -8,10 +8,12 @@ import type {
 } from '../orm.type.js';
 import type { FieldMetadata } from './field-metadata.js';
 
+/** Options accepted by the `@Column(...)` decorator. */
 export type ColumnFieldOptions = Partial<
   Omit<ColumnFieldMetadata, 'entity' | 'name' | 'kind'>
 >;
 
+/** Metadata describing one `@Column`-decorated field: a plain scalar data column mapped to a table field. */
 export interface ColumnFieldMetadata extends FieldMetadata {
   readonly kind: 'column';
 

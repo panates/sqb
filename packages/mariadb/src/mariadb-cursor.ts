@@ -1,6 +1,11 @@
 import type { Readable } from 'node:stream';
 import type { Adapter, RowType } from '@sqb/connect';
 
+/**
+ * `@sqb/connect` {@link Adapter.Cursor} wrapping the `mariadb` driver's
+ * `queryStream()` result: consumes it via its async iterator, `fetch(n)`
+ * pulling up to `n` rows at a time.
+ */
 export class MariadbCursor implements Adapter.Cursor {
   private _iterator?: AsyncIterableIterator<any>;
   private readonly _rowType: RowType;
@@ -25,6 +30,7 @@ export class MariadbCursor implements Adapter.Cursor {
     return this._rowType;
   }
 
+  /** Stops consuming the stream - see the inline comment for why this uses the stream's own `close()` rather than just dropping the iterator. */
   async close(): Promise<void> {
     this._iterator = undefined;
     // mariadb's stream exposes a custom close() that stops pulling further
@@ -33,6 +39,7 @@ export class MariadbCursor implements Adapter.Cursor {
     (this._stream as any).close?.();
   }
 
+  /** Pulls up to `nRows` more rows from the stream, or `undefined` once it's exhausted. */
   async fetch(nRows: number): Promise<any[] | undefined> {
     if (!this._iterator) return undefined;
     const rows: any[] = [];

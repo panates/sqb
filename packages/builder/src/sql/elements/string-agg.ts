@@ -5,6 +5,12 @@ import { SerializeContext } from '../../serialize-context.js';
 import { Field } from './field.js';
 import { OrderColumn } from './order-column.js';
 
+/**
+ * A `string_agg(field, 'delimiter' [order by ...])` expression, concatenating
+ * a column's values across grouped rows into one delimited string.
+ * Construct via the exported {@link StringAgg} factory rather than this
+ * class directly.
+ */
 class StringAggClass extends SqlElement {
   _field!: SqlElement;
   _delimiter!: string;
@@ -15,13 +21,18 @@ class StringAggClass extends SqlElement {
     return SerializationType.STRINGAGG_STATEMENT;
   }
 
+  /**
+   * Sets the delimiter placed between concatenated values (default: `,`).
+   */
   delimiter(value: string): this {
     this._delimiter = value;
     return this;
   }
 
   /**
-   * Defines "order by" part of StringAGG.
+   * Adds one or more columns controlling the order values are concatenated in.
+   *
+   * @param field - Column names or {@link SqlElement} expressions.
    */
   orderBy(...field: (string | SqlElement)[]): this {
     this._orderBy = this._orderBy || [];
@@ -33,7 +44,7 @@ class StringAggClass extends SqlElement {
   }
 
   /**
-   * Sets alias to case expression.
+   * Sets an alias for this expression when used as a `SELECT` column.
    */
   as(alias: string): this {
     this._alias = alias;
@@ -41,11 +52,7 @@ class StringAggClass extends SqlElement {
   }
 
   /**
-   * Performs serialization
-   *
-   * @param {Object} ctx
-   * @return {string}
-   * @override
+   * Serializes as `string_agg(field,'delimiter' [order by ...])`.
    */
   _serialize(ctx: SerializeContext): string {
     const q = {
@@ -58,6 +65,7 @@ class StringAggClass extends SqlElement {
     return ctx.serialize(this._type, q, () => this.__defaultSerialize(ctx, q));
   }
 
+  /** Serializes the `ORDER BY` clause, or an empty string if none was set. */
   protected __serializeOrderColumns(ctx: SerializeContext): string {
     const arr: string[] = [];
     if (this._orderBy) {
@@ -93,6 +101,12 @@ interface StringAggCtor {
   prototype: StringAgg;
 }
 
+/**
+ * Creates a `string_agg(...)` expression. Callable with or without `new`.
+ *
+ * @param field - The column to concatenate; a string is parsed as a {@link Field}.
+ * @param delimiter - The delimiter placed between values (default: `,`).
+ */
 export const StringAgg = function (
   this: StringAgg,
   field: string | SqlElement,

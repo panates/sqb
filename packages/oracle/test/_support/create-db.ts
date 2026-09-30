@@ -9,11 +9,11 @@ export const sqls: string[] = [];
 
 export const dbConfig: ClientConfiguration = {
   driver: 'oracledb',
-  host: process.env.ORAHOST,
+  host: process.env.ORAHOST || '127.0.0.1',
   port: parseInt(process.env.ORAPORT || '0', 10) || 1521,
-  database: process.env.ORADATABASE,
-  user: process.env.ORAUSER,
-  password: process.env.ORAPASSWORD,
+  database: process.env.ORADATABASE || 'FREEPDB1',
+  user: process.env.ORAUSER || 'system',
+  password: process.env.ORAPASSWORD || 'Sqb_Test_2024!',
   schema: process.env.ORASCHEMA || 'test',
   defaults: {
     fieldNaming: 'lowercase',
@@ -310,6 +310,29 @@ export async function createTestSchema() {
     clientConfigurationToDriver(dbConfig),
   );
   try {
+    // A real Oracle "schema" is a user, and the DDL below is all
+    // schema-qualified (`${schema}.table`) - that user must already exist
+    // for it to succeed, so provision a fresh one here rather than relying
+    // on it having been created out-of-band on whatever server this
+    // connects to.
+    await connection.execute(
+      `BEGIN
+         EXECUTE IMMEDIATE 'DROP USER ${schema} CASCADE';
+       EXCEPTION
+         WHEN OTHERS THEN IF SQLCODE != -1918 THEN RAISE; END IF;
+       END;`,
+    );
+    await connection.execute(
+      `CREATE USER ${schema} IDENTIFIED BY "${schema}_Test_2024!"`,
+    );
+    await connection.execute(
+      `GRANT CREATE SESSION, CREATE TABLE, CREATE SEQUENCE, CREATE TRIGGER, UNLIMITED TABLESPACE TO ${schema}`,
+    );
+    // @sqb/oracle's own adapter queries v$mystat (via SELECT_CATALOG_ROLE)
+    // to read back the session id on connect.
+    await connection.execute(`GRANT SELECT_CATALOG_ROLE TO ${schema}`);
+    await connection.commit();
+
     for (const s of sqls) {
       try {
         await connection.execute(s);

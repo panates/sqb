@@ -2,6 +2,7 @@ import type { Adapter, QueryRequest, RowType } from '@sqb/connect';
 import type { Connection as MariadbDriverConnection } from 'mariadb';
 import { MariadbCursor } from './mariadb-cursor.js';
 
+/** Maps the `mariadb` driver's column type names to SQB's portable `{ dataType, jsType }` pair. */
 const typeMap: Record<string, { dataType: string; jsType: string }> = {
   DECIMAL: { dataType: 'DECIMAL', jsType: 'number' },
   NEWDECIMAL: { dataType: 'DECIMAL', jsType: 'number' },
@@ -36,6 +37,13 @@ const typeMap: Record<string, { dataType: string; jsType: string }> = {
   NULL: { dataType: 'UNKNOWN', jsType: 'any' },
 };
 
+/**
+ * `@sqb/connect` {@link Adapter.Connection} wrapping a raw `mariadb` driver
+ * connection: translates `QueryRequest`s into driver calls (including
+ * cursor-mode streaming and `RETURNING`-on-`UPDATE` emulation, since
+ * MariaDB doesn't support that natively) and normalizes results/column
+ * metadata back into SQB's portable shape.
+ */
 export class MariadbConnection implements Adapter.Connection {
   private intlcon?: MariadbDriverConnection;
   private _inTransaction = false;
@@ -48,6 +56,7 @@ export class MariadbConnection implements Adapter.Connection {
     return this.intlcon?.threadId;
   }
 
+  /** Forcibly destroys the underlying connection - see the inline comment for why not a graceful `end()`. */
   async close() {
     if (!this.intlcon) return;
     const conn = this.intlcon;
@@ -58,10 +67,12 @@ export class MariadbConnection implements Adapter.Connection {
     conn.destroy();
   }
 
+  /** Rolls back any open transaction, readying the connection to be pooled/reused. */
   async reset() {
     return this.rollback();
   }
 
+  /** Begins a transaction (`BEGIN`). */
   async startTransaction(): Promise<void> {
     assertDefined(this.intlcon);
     // MariaDB implicitly commits any already-active transaction when BEGIN
@@ -70,6 +81,7 @@ export class MariadbConnection implements Adapter.Connection {
     this._inTransaction = true;
   }
 
+  /** Commits the current transaction. */
   async commit(): Promise<void> {
     assertDefined(this.intlcon);
     // COMMIT outside of an active transaction is a no-op in MariaDB.
@@ -77,6 +89,7 @@ export class MariadbConnection implements Adapter.Connection {
     this._inTransaction = false;
   }
 
+  /** Rolls back the current transaction. */
   async rollback(): Promise<void> {
     assertDefined(this.intlcon);
     await this.intlcon.rollback();
@@ -87,11 +100,21 @@ export class MariadbConnection implements Adapter.Connection {
     return this._inTransaction;
   }
 
+  /** Validates the connection with a trivial `SELECT 1`. */
   async test(): Promise<void> {
     assertDefined(this.intlcon);
     await this.intlcon.query('select 1');
   }
 
+  /**
+   * Executes one query: in cursor mode, wraps the driver's row stream in a
+   * {@link MariadbCursor}; for an `UPDATE ... RETURNING`, executes the
+   * update then runs a synthesized follow-up `SELECT` (MariaDB has no
+   * native `RETURNING` on `UPDATE`); otherwise executes directly, reading
+   * result rows/metadata off the driver's response (which carries a result
+   * set for any statement with a `RETURNING` clause or a plain `SELECT`,
+   * and just an affected-row count otherwise).
+   */
   async execute(query: QueryRequest): Promise<Adapter.Response> {
     assertDefined(this.intlcon);
     const intlcon = this.intlcon;
@@ -174,6 +197,7 @@ export class MariadbConnection implements Adapter.Connection {
     return out;
   }
 
+  /** Runs a synthesized `SELECT` and copies its rows/fields onto `out` - used to emulate `RETURNING` on `UPDATE`. */
   private async _fillSelectResult(
     out: Adapter.Response,
     sql: string,
@@ -191,6 +215,7 @@ export class MariadbConnection implements Adapter.Connection {
     out.rows = result;
   }
 
+  /** Converts the driver's column metadata into SQB's portable {@link Adapter.Field} shape via {@link typeMap}. */
   private _convertFields(fields: any[]) {
     const result: Adapter.Field[] = [];
     for (const f of fields) {
@@ -206,6 +231,7 @@ export class MariadbConnection implements Adapter.Connection {
   }
 }
 
+/** Throws if the connection has already been closed. */
 function assertDefined(d: unknown): asserts d {
   if (d == null) throw new Error('DB session is closed');
 }

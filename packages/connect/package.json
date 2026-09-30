@@ -6,26 +6,13 @@
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
   "scripts": {
-    "compile": "tsc --noEmit",
-    "prebuild": "npm run check && npm run lint && npm run clean",
-    "build": "tsc -b tsconfig-build.json",
-    "postbuild": "node ../../support/postbuild.cjs",
-    "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --max-warnings=0 --fix",
-    "format": "prettier . --write --log-level=warn",
-    "check": "dpdm -T --no-warning --no-tree --skip-dynamic-imports circular --exit-code circular:1 ./src/index.ts",
-    "test": "mocha",
-    "clean": "npm run clean:src && npm run clean:test && npm run clean:build && npm run clean:cover",
-    "clean:src": "ts-cleanup -s src --all",
-    "clean:test": "ts-cleanup -s test --all",
-    "clean:build": "rimraf build *.tsbuildinfo",
-    "clean:cover": "rimraf ../../coverage/connect"
+    "test": "mocha"
   },
   "dependencies": {
-    "@jsopen/objects": "^2.3.1",
+    "@jsopen/objects": "^2.3.3",
     "debug": "^4.4.3",
     "doublylinked": "^2.5.6",
-    "fast-tokenizer": "^1.10.0",
+    "fast-tokenizer": "^1.10.1",
     "lightning-pool": "^4.14.0",
     "lodash": "^4.18.1",
     "power-tasks": "^1.14.2",
@@ -42,7 +29,7 @@
     "@types/lodash": "^4.17.25",
     "cross-dirname": "^0.1.0",
     "expect": "^30.5.1",
-    "postgrejs": "^3.1.0"
+    "postgrejs": "^3.3.0"
   },
   "peerDependencies": {
     "@sqb/builder": "^6.0.9",
@@ -63,7 +50,9 @@
   },
   "contributors": [
     "Eray Hanoglu <e.hanoglu@panates.com>",
-    "Ilker Gurelli <i.gurelli@panates.com>"
+    "Ilker Gurelli <i.gurelli@panates.com>",
+    "Onur Tokel <o.tokel@panates.com>",
+    "Bircan Yuruk <b.yuruk@panates.com>"
   ],
   "repository": {
     "type": "git",

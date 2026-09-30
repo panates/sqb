@@ -8,7 +8,9 @@ import {
   type OID,
   type QueryOptions,
 } from 'postgrejs';
+import { PgCursor } from './pg-cursor.js';
 
+/** Maps SQB's portable {@link DataType} enum to the `postgrejs` driver's scalar and array OIDs (`[scalarOID, arrayOID]`), used to bind a parameter as its intended PostgreSQL type rather than relying on the driver's own type inference. */
 const SqbDataTypToOIDMap = {
   [DataType.BOOL]: [DataTypeOIDs.bool, DataTypeOIDs._bool],
   [DataType.CHAR]: [DataTypeOIDs.char, DataTypeOIDs._char],
@@ -28,8 +30,18 @@ const SqbDataTypToOIDMap = {
   [DataType.GUID]: [DataTypeOIDs.uuid, DataTypeOIDs._uuid],
 };
 
+/** Matches a whole tokenized `:name` parameter reference (with any leading whitespace preserved), used by {@link PgConnection._normalizeNamedParams}. */
 const NAMED_PARAM_PATTERN = /^( *):([a-zA-Z_]\w*)$/;
 
+/**
+ * `@sqb/connect` {@link Adapter.Connection} wrapping a `postgrejs`
+ * `Connection`: translates `QueryRequest`s into driver calls (typed
+ * parameter binding via {@link SqbDataTypToOIDMap}, named-to-positional
+ * parameter rewriting, savepoints, schema switching via `search_path`) and
+ * normalizes results/column metadata back into SQB's portable shape. Most
+ * of the actual query execution is already handled by the `postgrejs`
+ * driver itself; this class is a comparatively thin adapter layer.
+ */
 export class PgConnection implements Adapter.Connection {
   private intlcon?: Connection;
 
@@ -41,45 +53,73 @@ export class PgConnection implements Adapter.Connection {
     return this.intlcon && this.intlcon.processID;
   }
 
+  /** Closes the underlying `postgrejs` connection. A no-op if already closed. */
   async close() {
     if (!this.intlcon) return;
     await this.intlcon.close(0);
     this.intlcon = undefined;
   }
 
+  /** Rolls back any open transaction, readying the connection to be pooled/reused. */
   async reset() {
     return this.rollback();
   }
 
+  /**
+   * Begins a transaction.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async startTransaction(): Promise<void> {
     if (!this.intlcon)
       throw new Error('Can not start transaction for a closed db session');
     await this.intlcon.startTransaction();
   }
 
+  /**
+   * Commits the current transaction.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async commit(): Promise<void> {
     if (!this.intlcon)
       throw new Error('Can not commit transaction for a closed db session');
     await this.intlcon.commit();
   }
 
+  /** Rolls back the current transaction. A no-op if the connection is already closed. */
   async rollback(): Promise<void> {
     if (!this.intlcon) return;
     await this.intlcon.rollback();
   }
 
+  /**
+   * Creates a named savepoint within the current transaction.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async setSavepoint(savepoint: string): Promise<void> {
     if (!this.intlcon)
       throw new Error('Can not set savepoint for a closed db session');
     return this.intlcon.savepoint(savepoint);
   }
 
+  /**
+   * Releases a previously-created savepoint, without rolling back to it.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async releaseSavepoint(savepoint: string): Promise<void> {
     if (!this.intlcon)
       throw new Error('Can not release savepoint for a closed db session');
     return this.intlcon.releaseSavepoint(savepoint);
   }
 
+  /**
+   * Rolls the current transaction back to a previously-created savepoint.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async rollbackSavepoint(savepoint: string): Promise<void> {
     if (!this.intlcon)
       throw new Error(
@@ -92,11 +132,21 @@ export class PgConnection implements Adapter.Connection {
     return !!(this.intlcon && this.intlcon.inTransaction);
   }
 
+  /**
+   * Validates the connection with a trivial `SELECT 1`.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async test(): Promise<void> {
     if (!this.intlcon) throw new Error('DB session is closed');
     await this.intlcon.query('select 1');
   }
 
+  /**
+   * Reads the session's current schema search path via `SHOW search_path`.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async getSchema(): Promise<string> {
     if (!this.intlcon) throw new Error('DB session is closed');
     const r = await this.intlcon.query('SHOW search_path');
@@ -104,18 +154,37 @@ export class PgConnection implements Adapter.Connection {
     return '';
   }
 
+  /**
+   * Switches the session's schema search path via `SET search_path TO`.
+   *
+   * @throws {Error} if the connection is already closed
+   */
   async setSchema(schema: string): Promise<void> {
     if (!this.intlcon)
       throw new Error('Can not set schema of a closed db session');
     await this.intlcon.execute('SET search_path TO ' + schema);
   }
 
+  /** Stamps the outgoing `QueryRequest` with this session's `server_version`, so `@sqb/postgres-dialect` can pick version-appropriate SQL if it ever needs to. */
   onGenerateQuery(request: QueryRequest): void {
     if (this.intlcon) {
       request.dialectVersion = this.intlcon.sessionParameters['server_version'];
     }
   }
 
+  /**
+   * Executes one query. Rewrites `:name` placeholders to positional binds
+   * first if `request.normalizeNamedParams` is set, then wraps each
+   * parameter that has a known SQB {@link DataType} in a `postgrejs`
+   * `BindParam` carrying the matching OID (via
+   * {@link SqbDataTypToOIDMap}) so it's bound as the intended PostgreSQL
+   * type rather than left to the driver's own inference; params with no
+   * declared type pass through unchanged. `fetchAsString` is likewise
+   * translated from SQB data types to OIDs before being handed to the
+   * driver. Delegates the actual execution (including cursor-mode
+   * result sets) to `postgrejs`'s `Connection.query()` and copies its
+   * response fields onto SQB's portable `Adapter.Response` shape.
+   */
   async execute(request: QueryRequest): Promise<Adapter.Response> {
     if (!this.intlcon)
       throw new Error('Can not execute query with a closed db session');
@@ -152,12 +221,14 @@ export class PgConnection implements Adapter.Connection {
     const out: Adapter.Response = {};
     if (resp.fields) out.fields = this._convertFields(resp.fields);
     if (resp.rows) out.rows = resp.rows;
-    if (resp.cursor) out.cursor = resp.cursor;
-    if (resp.rowType) out.rowType = resp.rowType;
+    if (resp.cursor) out.cursor = PgCursor.create(resp.cursor);
+    if (resp.rowType)
+      out.rowType = resp.rowType === 'array' ? 'array' : 'object';
     if (resp.rowsAffected) out.rowsAffected = resp.rowsAffected;
     return out;
   }
 
+  /** Converts the `postgrejs` driver's `FieldInfo[]` (already close to SQB's shape) into SQB's portable {@link Adapter.Field} array. */
   _convertFields(fields: FieldInfo[]) {
     const result: any[] = [];
     for (let i = 0; i < fields.length; i++) {
@@ -175,6 +246,20 @@ export class PgConnection implements Adapter.Connection {
     return result;
   }
 
+  /**
+   * Rewrites `:name` parameter placeholders to PostgreSQL's positional
+   * `$1, $2, ...` syntax in place, via a quote-aware tokenizer (rather
+   * than a plain regex replace) so a `:name`-shaped substring inside a
+   * string/quoted-identifier literal isn't mistaken for a parameter, and
+   * so a `::type` cast (which tokenizes as a lone `:` followed by a
+   * `:name`-shaped token) isn't either - see the inline comment on
+   * `prevToken`. Each distinct name is assigned its positional index the
+   * first time it's seen, so repeated references to the same named
+   * parameter reuse one position; `request.params` is rebuilt as a
+   * positional array in that same order.
+   *
+   * @throws {Error} if `request.params` isn't a plain key/value object (required once any named parameter is found)
+   */
   _normalizeNamedParams(request: QueryRequest) {
     const tokenizer = tokenize(request.sql, {
       brackets: false,

@@ -16,9 +16,11 @@ import { MigrationStatus } from '../types.js';
 
 const pgAdapter = new PgAdapter();
 
-// Quotes a (possibly schema-qualified, e.g. "myschema.mytable") Postgres
-// identifier so reserved words / mixed case / special characters in a
-// migration task's tableName or row keys don't break the generated SQL.
+/**
+ * Quotes a (possibly schema-qualified, e.g. `"myschema.mytable"`) Postgres
+ * identifier so reserved words / mixed case / special characters in a
+ * migration task's `tableName` or row keys don't break the generated SQL.
+ */
 function quoteIdent(name: string): string {
   return name
     .split('.')
@@ -26,6 +28,16 @@ function quoteIdent(name: string): string {
     .join('.');
 }
 
+/**
+ * {@link MigrationAdapter} for PostgreSQL - the reference implementation
+ * the other dialect adapters in this package mirror. Bookkeeping tables
+ * (`migration_summary`/`migration_events`) live in a dedicated schema
+ * (`infoSchema`, created via `CREATE SCHEMA IF NOT EXISTS` if missing),
+ * defaulting to `'__migration'`. A migration script may contain several
+ * statements and runs in one `execute()` call, since `postgrejs` (unlike
+ * `oracledb`) supports multi-statement scripts natively - no splitting
+ * needed.
+ */
 export class PgMigrationAdapter extends MigrationAdapter {
   declare protected _connection: Connection;
   protected _infoSchema = 'public';
@@ -64,6 +76,14 @@ export class PgMigrationAdapter extends MigrationAdapter {
     return this.infoSchema + '.' + this.eventTable;
   }
 
+  /**
+   * Connects, creates `infoSchema` and the bookkeeping tables if they
+   * don't already exist, seeds the package's summary row if missing, and
+   * returns a ready-to-use adapter with `version`/`status` refreshed from
+   * it.
+   *
+   * @throws {Error} whatever the driver throws for a failed connection or setup query - the connection is closed first if already open
+   */
   static async create(
     options: StrictOmit<DbMigratorOptions, 'migrationPackage'> & {
       migrationPackage: MigrationPackage;
@@ -150,6 +170,9 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     await this._connection.close();
   }
 
+  /**
+   * @throws {Error} if the package's summary row is somehow missing (should not happen once `create()` has run)
+   */
   async refresh(): Promise<void> {
     const r = await this._connection.query(
       `SELECT * FROM ${this.summaryTableFull} WHERE package_name = $1`,
@@ -209,6 +232,16 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     });
   }
 
+  /**
+   * Runs one task: an SQL-script task's script (resolved from a function
+   * if needed, then `$(name)`-substituted) executes in one call - Postgres
+   * runs a whole multi-statement script per `execute()`, unlike Oracle; a
+   * custom task's function runs directly against the raw `postgrejs`
+   * connection; an insert-data task's rows are each turned into an
+   * `INSERT` via {@link rowToSql} and executed. A script-task error is
+   * annotated with the task's file location and, if the driver reported
+   * one, the offending line/column before being rethrown.
+   */
   async executeTask(
     migrationPackage: MigrationPackage,
     migration: Migration,
@@ -293,6 +326,7 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     );
   }
 
+  /** Builds a single `INSERT` statement for `row` into `tableName`, quoting identifiers via {@link quoteIdent} and values via `postgrejs`'s `stringifyValueForSQL`. */
   protected rowToSql(tableName: string, row: Object): string {
     let sql = '';
     const keys = Object.keys(row);
