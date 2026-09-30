@@ -474,6 +474,7 @@ export function getInsertSQLsForTestData(opts: {
 
 export function stringifyValueForSQL(v: any): string {
   if (v == null) return 'null';
-  if (typeof v === 'string') return "'" + v.replace(/'/g, "\\'") + "'";
+  if (typeof v === 'string')
+    return "'" + v.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
   return '' + v;
 }
