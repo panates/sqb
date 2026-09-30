@@ -1,22 +1,12 @@
-# Quoted because YAML reads a bare leading `@` as a reserved indicator and refuses the file.
 extends: '@panates/rman-preset'
 
-changelog:
-  # How far back a changelog goes - the 4.x line and newer. Unmarked, so it reaches the repository
-  # root as well as the packages.
-  startingAt: v4.0.0
+# All packages release together, under one version and one `v*` tag.
+group: true
 
 version:
-  # Keep the seventeen on the same number even when only some of them changed. Without this, a fix
-  # in a package nothing depends on - `migrator` or `nestjs` - bumps that one alone, and the version
-  # line is split for good.
+  # Bump every package in the group, not only the ones that changed.
   cascade: group
 
-# **`group` is the one key here that cannot be unmarked.** The preset sets `group: false` inside a
-# selector block of its own, and a selector block always beats an unmarked key, wherever either one
-# is written. At the top level this loses silently - measured: seventeen separate version lines,
-# tags derived as `{name}@*` instead of `v*`, and the root switching to a calendar version
-# (6.0.10 -> 2026.9.30-1444), which is permanent once it happens.
-'[*]':
-  # All seventeen release together, under one version and one `v*` tag.
-  group: true
+changelog:
+  # Start the changelog at the 4.x line.
+  startingAt: v4.0.0
