@@ -16,7 +16,7 @@
     "@sqb/builder": "^6.0.10"
   },
   "devDependencies": {
-    "expect": "^30.5.1"
+    "expect": "^30.5.2"
   },
   "type": "module",
   "module": "./index.js",

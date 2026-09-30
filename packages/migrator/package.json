@@ -29,12 +29,12 @@
   "devDependencies": {
     "@types/oracledb": "^7.0.3",
     "@types/sql.js": "^1.4.11",
-    "expect": "^30.5.1",
+    "expect": "^30.5.2",
     "mariadb": "^3.5.4",
     "mssql": "^12.7.2",
-    "mysql2": "^3.24.4",
+    "mysql2": "^3.24.5",
     "oracledb": "^7.0.1",
-    "postgrejs": "^3.3.0",
+    "postgrejs": "^3.12.1",
     "sql.js": "^1.14.2"
   },
   "type": "module",
