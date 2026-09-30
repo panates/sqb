@@ -38,7 +38,6 @@ export class OraAdapter implements Adapter {
    * @throws {Error} whatever the driver throws for a failed connection or schema switch - the connection is closed first if already open
    */
   async connect(config: OraClientConfiguration): Promise<Adapter.Connection> {
-    if (!config.driverOptions?.direct) initOracleClient();
     const cfg = clientConfigurationToDriver(config);
     // Get oracle connection
     const connection = await oracledb.getConnection(cfg);
@@ -94,3 +93,5 @@ function initOracleClient() {
     }
   }
 }
+
+initOracleClient();
