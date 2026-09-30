@@ -8,5 +8,7 @@ version:
   cascade: group
 
 changelog:
+  # One changelog for the whole release, at the repository root.
+  groupBy: group
   # Start the changelog at the 4.x line.
   startingAt: v4.0.0
