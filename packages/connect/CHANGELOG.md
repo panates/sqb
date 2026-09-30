@@ -1,6 +1,14 @@
 # Changelog
 
-<!-- rman:documented-up-to 5d8a11f8379d17ebcaa721c71ba1a143614362c5 -->
+<!-- rman:documented-up-to 2baa288b074166588c54e58204d3f7d86c50c2f8 -->
+
+## v6.0.11 (2026-09-30)
+
+### 🐛 Bug Fixes
+
+- **connect:** escape backslashes before quotes in test stringifyValueForSQL (58c7d5e)
+
+---
 
 ## v6.0.10 (2026-09-30)
 
