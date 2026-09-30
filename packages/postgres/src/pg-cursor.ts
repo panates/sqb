@@ -9,7 +9,7 @@ export class PgCursor extends Cursor implements Adapter.Cursor {
     const out = {
       rowType: cursor.rowType === 'array' ? 'array' : 'object',
     };
-    Object.setPrototypeOf(out, PgCursor.prototype);
+    Object.setPrototypeOf(out, cursor);
     return out as PgCursor;
   }
 }
