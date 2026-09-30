@@ -1,7 +1,7 @@
 {
   "name": "@sqb/sqlite",
   "description": "SQB adapter for Node.js and Bun's native SQLite drivers",
-  "version": "6.0.9",
+  "version": "6.0.10",
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
@@ -15,9 +15,9 @@
     "expect": "^30.5.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.0.9",
-    "@sqb/connect": "^6.0.9",
-    "@sqb/sqlite-dialect": "^6.0.9"
+    "@sqb/builder": "^6.0.10",
+    "@sqb/connect": "^6.0.10",
+    "@sqb/sqlite-dialect": "^6.0.10"
   },
   "type": "module",
   "module": "./index.js",
