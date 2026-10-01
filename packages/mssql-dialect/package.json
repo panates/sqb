@@ -1,7 +1,7 @@
 {
   "name": "@sqb/mssql-dialect",
   "description": "SQB serialization extension for MS-SQL database",
-  "version": "6.0.11",
+  "version": "6.0.12",
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
@@ -12,7 +12,7 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.0.11"
+    "@sqb/builder": "^6.0.12"
   },
   "devDependencies": {
     "expect": "^30.5.2"
