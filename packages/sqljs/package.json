@@ -1,7 +1,7 @@
 {
   "name": "@sqb/sqljs",
   "description": "SQB serialization extension for sql.js driver",
-  "version": "6.0.11",
+  "version": "6.0.12",
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
@@ -18,9 +18,9 @@
     "sql.js": "^1.14.2"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.0.11",
-    "@sqb/connect": "^6.0.11",
-    "@sqb/sqlite-dialect": "^6.0.11",
+    "@sqb/builder": "^6.0.12",
+    "@sqb/connect": "^6.0.12",
+    "@sqb/sqlite-dialect": "^6.0.12",
     "sql.js": "^1.14.2"
   },
   "type": "module",

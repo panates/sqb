@@ -1,6 +1,21 @@
 # Changelog
 
-<!-- rman:documented-up-to 5ad8958a5d221727740afcdfeec9f8ce3d82a0bd -->
+<!-- rman:documented-up-to 591396712ac41d2296d09a3cdc6f4fe99ef229b7 -->
+
+## v6.0.12 (2026-10-01)
+
+### 📚 Documentation
+
+- backfill the repository changelog from 4.0 onward (8e7142b)
+
+### 🧹 Chores
+
+- sync lockfile (c1f9345)
+- one changelog for the whole release, at the repository root (fb95780)
+- add `rman` 2.6.0 to dependencies in package.json (83f4946)
+- update `rman` to 2.6.0 and remove unnecessary `peer` fields in package-lock.json (a8bd1e1)
+
+---
 
 ## v6.0.11 (2026-09-30)
 
