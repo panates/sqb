@@ -43,7 +43,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/panates/sqb.git",
+    "url": "git+https://github.com/panates/sqb.git",
     "directory": "packages/builder"
   },
   "keywords": [
