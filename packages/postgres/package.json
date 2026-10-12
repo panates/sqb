@@ -1,7 +1,7 @@
 {
   "name": "@sqb/postgres",
   "description": "SQB serialization extension for PostgreSQL database",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
@@ -18,9 +18,9 @@
     "postgrejs": "^3.14.0"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.1.0",
-    "@sqb/connect": "^6.1.0",
-    "@sqb/postgres-dialect": "^6.1.0",
+    "@sqb/builder": "^6.1.1",
+    "@sqb/connect": "^6.1.1",
+    "@sqb/postgres-dialect": "^6.1.1",
     "postgrejs": ">=3.8.0 <4"
   },
   "type": "module",

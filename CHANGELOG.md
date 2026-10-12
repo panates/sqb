@@ -1,6 +1,18 @@
 # Changelog
 
-<!-- rman:documented-up-to 41dc391a9a891b761b453e748ca595932cb7fb89 -->
+<!-- rman:documented-up-to 8a03189f8d0857a0ddaef6a635250cb9471eccd6 -->
+
+## v6.1.1 (2026-10-12)
+
+### 🐛 Bug Fixes
+
+- **sqlite:** keep a named in-memory database in memory (890fd10)
+
+### 🧹 Chores
+
+- sync lockfile (71f85f0)
+
+---
 
 ## v6.1.0 (2026-10-12)
 
