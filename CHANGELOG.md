@@ -1,6 +1,15 @@
 # Changelog
 
-<!-- rman:documented-up-to 591396712ac41d2296d09a3cdc6f4fe99ef229b7 -->
+<!-- rman:documented-up-to bd8627619fa7c940f671000fca5a4a1b1e53000a -->
+
+## v6.0.13 (2026-10-12)
+
+### 🧹 Chores
+
+- sync lockfile (9e4ac1b)
+- update dependencies across packages and lockfile (581c4ac)
+
+---
 
 ## v6.0.12 (2026-10-01)
 
