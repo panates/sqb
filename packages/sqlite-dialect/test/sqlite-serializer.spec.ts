@@ -1,5 +1,6 @@
-import { Param, Select, SerializerRegistry } from '@sqb/builder';
+import { Match, Param, Select, SerializerRegistry } from '@sqb/builder';
 import { expect } from 'expect';
+import { toFtsQuery } from '../src/fts.js';
 import { SqliteSerializer } from '../src/sqlite-serializer.js';
 
 describe('sqlite-dialect:SqliteSerializer', () => {
@@ -70,5 +71,59 @@ describe('sqlite-dialect:SqliteSerializer', () => {
     });
     expect(result.sql).toStrictEqual('select * from table1 where ID = :ID');
     expect(result.params).toStrictEqual({ ID: 5 });
+  });
+
+  describe('"match"', () => {
+    it('should search an FTS5 table', () => {
+      const query = Select()
+        .from('logs_fts')
+        .where(Match('message', Param('text')));
+      const result = query.generate({
+        dialect: 'sqlite',
+        params: { text: 'refused' },
+      });
+      expect(result.sql).toStrictEqual(
+        'select * from logs_fts where message MATCH :text',
+      );
+      expect(result.params).toStrictEqual({ text: 'refused' });
+    });
+
+    it('should search a table through its FTS5 index', () => {
+      const query = Select()
+        .from('logs')
+        .where(Match('message', Param('text'), 'logs_fts'));
+      const result = query.generate({
+        dialect: 'sqlite',
+        params: { text: 'refused' },
+      });
+      expect(result.sql).toStrictEqual(
+        'select * from logs where rowid IN (SELECT rowid FROM logs_fts WHERE message MATCH :text)',
+      );
+    });
+
+    it('should compare the FTS5 rowids with the key given', () => {
+      const query = Select()
+        .from('logs l')
+        .where(
+          Match('l.message', Param('text'), { table: 'logs_fts', key: 'l.id' }),
+        );
+      const result = query.generate({
+        dialect: 'sqlite',
+        params: { text: 'refused' },
+      });
+      expect(result.sql).toStrictEqual(
+        'select * from logs l where l.id IN (SELECT rowid FROM logs_fts WHERE message MATCH :text)',
+      );
+    });
+  });
+
+  describe('toFtsQuery', () => {
+    it('should quote each word, so FTS5 syntax is searched for', () => {
+      expect(toFtsQuery('ORU^R01  refused')).toStrictEqual(
+        '"ORU^R01" "refused"',
+      );
+      expect(toFtsQuery('say "hi" -x')).toStrictEqual('"say" """hi""" "-x"');
+      expect(toFtsQuery('  ')).toStrictEqual('');
+    });
   });
 });

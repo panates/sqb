@@ -91,10 +91,11 @@ export class SqliteConnection implements Adapter.Connection {
    * runs the statement then a synthesized follow-up `SELECT` to emulate
    * `RETURNING` (an `INSERT` is matched back by `ROWID`, an `UPDATE` by
    * reusing the original `WHERE` clause) - `DELETE` isn't emulated here
-   * since there's nothing left to re-select afterward. Otherwise prepares
-   * and iterates the statement, wrapping it in a {@link SqliteCursor}
-   * (returned directly in cursor mode, or eagerly drained up to
-   * `fetchRows` rows otherwise).
+   * since there's nothing left to re-select afterward. A statement that
+   * produces no result set (DDL, `PRAGMA`, ...) is simply run. Otherwise
+   * prepares and iterates the statement, wrapping it in a {@link
+   * SqliteCursor} (returned directly in cursor mode, or eagerly drained up
+   * to `fetchRows` rows otherwise).
    */
   async execute(query: QueryRequest): Promise<Adapter.Response> {
     assertDefined(this.intlcon);
@@ -137,11 +138,20 @@ export class SqliteConnection implements Adapter.Connection {
     }
 
     const stmt = intlcon.prepare(query.sql);
+    if (!stmt.columns().length) {
+      // A statement with no result set (DDL, PRAGMA, `INSERT OR REPLACE`,
+      // ...). `iterate()` is lazy - it would not run the statement until
+      // its first `next()` - so run it outright.
+      const info = stmt.run(params);
+      if (/^\s*(insert|replace|update|delete)\b/i.test(query.sql))
+        out.rowsAffected = info.changes;
+      if (query.autoCommit) await this.commit();
+      return out;
+    }
+
     const rowType = query.objectRows ? 'object' : 'array';
     const iterator = stmt.iterate(params);
     const columns = stmt.columns();
-    if (!columns.length) return out;
-
     out.fields = this._convertFields(columns);
     out.rowType = rowType;
     const cursor = new SqliteCursor(iterator, { rowType, columns });
