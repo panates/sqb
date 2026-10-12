@@ -42,7 +42,7 @@ import { SqbClient } from '@sqb/connect';
 
 const client = new SqbClient({
   driver: 'sqlite',
-  database: '/path/to/database.db', // or ':memory:'
+  database: '/path/to/database.db', // or ':memory:' (optionally suffixed, e.g. ':memory:test1')
 });
 ```
 
