@@ -1,6 +1,22 @@
 # Changelog
 
-<!-- rman:documented-up-to bd8627619fa7c940f671000fca5a4a1b1e53000a -->
+<!-- rman:documented-up-to 41dc391a9a891b761b453e748ca595932cb7fb89 -->
+
+## v6.1.0 (2026-10-12)
+
+### ✨ Features
+
+- **sqlite-dialect:** serialize Match as an FTS5 full-text search (d800fc5)
+
+### 🐛 Bug Fixes
+
+- **sqlite:** run statements that produce no result set (1f60622)
+
+### 🧹 Chores
+
+- sync lockfile (d82bc18)
+
+---
 
 ## v6.0.13 (2026-10-12)
 
