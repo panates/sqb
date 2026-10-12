@@ -54,7 +54,12 @@ export class SqliteAdapter implements Adapter {
     if (intlDb) {
       intlDb._refCount++;
     } else {
-      intlDb = (await openDatabase(dbName)) as CachedDatabase;
+      // SQLite only knows the bare `:memory:`; a `:memory:name` passed
+      // through as-is would open a file of that name. Every name gets its
+      // own `:memory:` handle, kept apart by the cache key.
+      intlDb = (await openDatabase(
+        isMemory ? ':memory:' : dbName,
+      )) as CachedDatabase;
       intlDb._refCount = isMemory ? 0 : 1;
       dbCache.set(dbName, intlDb);
     }
