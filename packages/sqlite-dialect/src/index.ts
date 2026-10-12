@@ -13,3 +13,4 @@ import { SqliteSerializer } from './sqlite-serializer.js';
 SerializerRegistry.register(new SqliteSerializer());
 
 export * from './constants.js';
+export * from './fts.js';

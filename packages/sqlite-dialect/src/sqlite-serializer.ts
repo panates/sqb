@@ -1,5 +1,6 @@
 import {
   type DefaultSerializeFunction,
+  OperatorType,
   SerializationType,
   SerializeContext,
   type SerializerExtension,
@@ -103,8 +104,9 @@ const reservedWords = new Set([
 /**
  * `@sqb/builder` {@link SerializerExtension} for SQLite, handling the
  * SQLite-specific quirks the base serializer can't cover: `LIMIT`/`OFFSET`
- * pagination, and suppressing the base serializer's `RETURNING` clause
- * (see {@link _serializeReturning}).
+ * pagination, suppressing the base serializer's `RETURNING` clause
+ * (see {@link _serializeReturning}), and `MATCH` as FTS5 full-text search
+ * (see {@link _serializeMatch}).
  */
 export class SqliteSerializer implements SerializerExtension {
   dialect = 'sqlite';
@@ -127,6 +129,10 @@ export class SqliteSerializer implements SerializerExtension {
         return this._serializeSelect(ctx, o, defFn);
       case SerializationType.RETURNING_BLOCK:
         return this._serializeReturning(ctx, o, defFn);
+      case SerializationType.COMPARISON_EXPRESSION:
+        if (o.operatorType === OperatorType.match)
+          return this._serializeMatch(o);
+        break;
       default:
         break;
     }
@@ -144,6 +150,32 @@ export class SqliteSerializer implements SerializerExtension {
     if (limit) out += '\nLIMIT ' + limit;
     if (offset) out += (!limit ? '\n' : ' ') + 'OFFSET ' + offset;
     return out;
+  }
+
+  /**
+   * `MATCH` as an FTS5 full-text search. The pattern is an FTS5 query (see
+   * `toFtsQuery` to search for the words of user input as they are).
+   *
+   * - `Match('message', value)` - `message MATCH ?`, for a query on the
+   *   FTS5 table itself, `message` being one of its columns.
+   * - `Match('message', value, 'logs_fts')` - the rows of the queried
+   *   table whose `message` the FTS5 table `logs_fts` matches:
+   *   `rowid IN (SELECT rowid FROM logs_fts WHERE message MATCH ?)`. For an
+   *   external-content FTS5 table (`content=`/`content_rowid=`) indexing the
+   *   queried one, whose rowids are the queried table's.
+   * - `Match('message', value, { table: 'logs_fts', key: 'l.id' })` - the
+   *   same, comparing the FTS5 rowids with `key` rather than `rowid` (an
+   *   aliased table in a join, or an `INTEGER PRIMARY KEY` by name).
+   */
+  private _serializeMatch(o: any): string {
+    const args = o.customArgs;
+    const table: string | undefined =
+      typeof args === 'string' ? args : args?.table;
+    if (!table) return `${o.left.expression} MATCH ${o.right.expression}`;
+    const key = (typeof args === 'object' && args.key) || 'rowid';
+    /* A column of the FTS5 table, whatever the queried table is aliased as */
+    const column = String(o.left.expression).split('.').pop();
+    return `${key} IN (SELECT rowid FROM ${table} WHERE ${column} MATCH ${o.right.expression})`;
   }
 
   /**
