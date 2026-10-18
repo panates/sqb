@@ -1,6 +1,25 @@
 # Changelog
 
-<!-- rman:documented-up-to 8a03189f8d0857a0ddaef6a635250cb9471eccd6 -->
+<!-- rman:documented-up-to 1592b6b3d95a4df722d36a6280f26541b614bb89 -->
+
+## v6.2.0 (2026-10-18)
+
+### ✨ Features
+
+- **builder:** bind Insert and Update values as params under strictParams (e663a64)
+
+### 🐛 Bug Fixes
+
+- **builder:** keep line breaks inside string literals intact (431b336)
+- **builder:** write the alias of Count() (fa7e8eb)
+- **sqlite:** pass only the params the "update ... returning" re-select uses (c154b18)
+
+### 🧹 Chores
+
+- sync lockfile (231af61)
+- update dependencies across packages and lockfile (bdb4131)
+
+---
 
 ## v6.1.1 (2026-10-12)
 
