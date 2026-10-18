@@ -1,6 +1,18 @@
 # Changelog
 
-<!-- rman:documented-up-to 1592b6b3d95a4df722d36a6280f26541b614bb89 -->
+<!-- rman:documented-up-to 0f8356bad39502e0467bd9ff454652b9655d1906 -->
+
+## v6.2.1 (2026-10-18)
+
+### 🐛 Bug Fixes
+
+- **postgres:** bind a JSON column's array value as one JSON document (af6a854)
+
+### 🧹 Chores
+
+- sync lockfile (74d2ea6)
+
+---
 
 ## v6.2.0 (2026-10-18)
 
