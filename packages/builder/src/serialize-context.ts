@@ -1,5 +1,6 @@
 import { SerializationType } from './enums.js';
 import { SerializerRegistry } from './extensions.js';
+import { protectLiteral } from './literal-guard.js';
 import { Query } from './sql/index.js';
 import { isLogicalOperator, isQuery, isSqlElement } from './type-guards.js';
 import type {
@@ -201,11 +202,13 @@ export class SerializeContext implements GenerateOptions {
           this.dateToSQL(v),
         );
       }
-      return this.stringToSQL(JSON.stringify(v));
+      return protectLiteral(this.stringToSQL(JSON.stringify(v)));
     }
     if (typeof v === 'string') {
-      return this.serialize(SerializationType.STRING_VALUE, v, () =>
-        this.stringToSQL(v),
+      return protectLiteral(
+        this.serialize(SerializationType.STRING_VALUE, v, () =>
+          this.stringToSQL(v),
+        ),
       );
     }
     if (typeof v === 'boolean') {

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import flattenText from 'putil-flattentext';
 import merge from 'putil-merge';
+import { restoreLiterals } from '../literal-guard.js';
 import { SqlElement } from '../serializable.js';
 import { SerializeContext } from '../serialize-context.js';
 import type { GenerateOptions, GenerateResult } from '../types.js';
@@ -36,7 +37,7 @@ class QueryClass extends SqlElement {
 
     /* generate output */
     let sql = this._serialize(ctx);
-    sql = flattenText(sql, { noWrap: !ctx.prettyPrint });
+    sql = restoreLiterals(flattenText(sql, { noWrap: !ctx.prettyPrint }));
     if (this._comment.length) {
       const comment = this._comment
         .filter(
