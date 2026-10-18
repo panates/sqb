@@ -16,4 +16,10 @@ describe('builder:serialize "Count"', () => {
     const result = query.generate(options);
     expect(result.sql).toStrictEqual('select count(*) from table1');
   });
+
+  it('should serialize with alias', () => {
+    const query = Select(Count().as('n')).from('table1');
+    const result = query.generate(options);
+    expect(result.sql).toStrictEqual('select count(*) n from table1');
+  });
 });

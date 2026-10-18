@@ -22,7 +22,7 @@ class CountClass extends SqlElement {
   }
 
   /**
-   * Serializes as `count(*)`.
+   * Serializes as `count(*)`, followed by the alias if one was set.
    */
   _serialize(ctx: SerializeContext): string {
     return ctx.serialize(this._type, undefined, () =>
@@ -37,7 +37,7 @@ class CountClass extends SqlElement {
     /* eslint-disable-next-line */
     o: any,
   ): string {
-    return 'count(*)';
+    return 'count(*)' + (this._alias ? ' ' + this._alias : '');
   }
 }
 

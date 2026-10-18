@@ -25,6 +25,13 @@ describe('builder:serialize "Select"', () => {
     expect(q._type).toStrictEqual(SerializationType.SELECT_QUERY);
   });
 
+  it('should keep line breaks inside a string literal in a where clause', () => {
+    const query = Select().from('table1').where(Eq('readme', 'a\nb'));
+    expect(query.generate(options).sql).toStrictEqual(
+      "select * from table1 where readme = 'a\nb'",
+    );
+  });
+
   it('should serialize * for when no columns given', () => {
     const query = Select('*').addColumn().from('table1');
     const result = query.generate(options);

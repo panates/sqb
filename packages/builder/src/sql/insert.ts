@@ -1,6 +1,6 @@
 import { SerializationType } from '../enums.js';
 import { printArray } from '../helpers.js';
-import { SerializeContext } from '../serialize-context.js';
+import { isStrictParamValue, SerializeContext } from '../serialize-context.js';
 import { isRaw, isSelect, isSqlElement } from '../type-guards.js';
 import { Raw } from './elements/raw.js';
 import { TableName } from './elements/table-name.js';
@@ -71,7 +71,9 @@ class InsertClass extends ReturningQuery {
   /**
    * Serializes the `VALUES` list: the source select/raw's own SQL for an
    * `INSERT ... SELECT`/`INSERT ... (raw)`, or each input value converted
-   * via `ctx.anyToSQL(...)` for a plain-object input.
+   * via `ctx.anyToSQL(...)` for a plain-object input - bound as a
+   * generated parameter instead under `strictParams` (see
+   * `isStrictParamValue` for which values are).
    */
   protected __serializeValues(ctx: SerializeContext): string {
     if (isSqlElement(this._input)) return this._input._serialize(ctx);
@@ -79,7 +81,9 @@ class InsertClass extends ReturningQuery {
     const arr: string[] = [];
     const allValues = this._input;
     for (const n of Object.keys(allValues)) {
-      const s = ctx.anyToSQL(allValues[n]) || 'null';
+      let v = allValues[n];
+      if (ctx.strictParams && isStrictParamValue(v)) v = ctx.toStrictParam(v);
+      const s = ctx.anyToSQL(v) || 'null';
       arr.push(s);
     }
     return ctx.serialize(SerializationType.INSERT_QUERY_VALUES, arr, () =>

@@ -1,6 +1,6 @@
 import { SerializationType } from '../enums.js';
 import { printArray } from '../helpers.js';
-import { SerializeContext } from '../serialize-context.js';
+import { isStrictParamValue, SerializeContext } from '../serialize-context.js';
 import { isRaw, isSelect, isTableName } from '../type-guards.js';
 import { Raw } from './elements/raw.js';
 import { TableName } from './elements/table-name.js';
@@ -58,13 +58,17 @@ class UpdateClass extends ReturningQuery {
 
   /**
    * Serializes the `SET` clause: each input key/value pair as
-   * `field = value`, with reserved-word field names escaped.
+   * `field = value`, with reserved-word field names escaped. Under
+   * `strictParams` a value is bound as a generated parameter instead of
+   * being written as a literal (see `isStrictParamValue` for which are).
    */
   protected __serializeValues(ctx: SerializeContext): string {
     const arr: { field: string; value: any }[] = [];
     const allValues = this._input;
     for (const n of Object.getOwnPropertyNames(allValues)) {
-      const value = ctx.anyToSQL(allValues[n]);
+      let v = allValues[n];
+      if (ctx.strictParams && isStrictParamValue(v)) v = ctx.toStrictParam(v);
+      const value = ctx.anyToSQL(v);
       arr.push({
         field: n,
         value,

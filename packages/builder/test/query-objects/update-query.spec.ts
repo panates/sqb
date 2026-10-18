@@ -27,6 +27,18 @@ describe('builder:Serialize update query', () => {
     );
   });
 
+  it('should keep line breaks inside a string literal', () => {
+    const query = Update('table1', { readme: '# Doc\n\nWhat it does.' }).where(
+      Eq('id', 1),
+    );
+    expect(query.generate(options).sql).toStrictEqual(
+      "update table1 set readme = '# Doc\n\nWhat it does.' where id = 1",
+    );
+    expect(query.generate({ ...options, prettyPrint: true }).sql).toStrictEqual(
+      "update table1 set \n  readme = '# Doc\n\nWhat it does.'\nwhere id = 1",
+    );
+  });
+
   it('should pass raw as table name', () => {
     const query = Update(Raw('table1'), { id: 2, name: 'aaa' }).where(
       Eq('id', 1),
@@ -128,5 +140,16 @@ describe('builder:Serialize update query', () => {
     expect(result.sql).toStrictEqual(
       "update table1 set id = 1, name = 'aaa' returning id, name as n",
     );
+  });
+
+  it('should bind values as params if strictParams=true', () => {
+    const query = Update('table1', { name: 'a\nb', active: true }).where(
+      Eq('id', 1),
+    );
+    const result = query.generate({ ...options, strictParams: true });
+    expect(result.sql).toStrictEqual(
+      'update table1 set name = :P$_1, active = :P$_2 where id = :P$_3',
+    );
+    expect(result.params).toStrictEqual({ P$_1: 'a\nb', P$_2: true, P$_3: 1 });
   });
 });

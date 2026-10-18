@@ -2,6 +2,7 @@ import '../src/index.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { Eq, Update } from '@sqb/builder';
 import { SqbClient } from '@sqb/connect';
 import { expect } from 'expect';
 
@@ -36,5 +37,13 @@ describe('sqlite:SqliteConnection', () => {
     expect(r.rowsAffected).toStrictEqual(1);
     const r2 = await client.execute('select v from t1 where id = 1');
     expect(r2.rows).toEqual([{ v: 'b' }]);
+  });
+
+  it('should emulate "update ... returning" with the set values bound as params', async () => {
+    const r = await client.execute(
+      Update('t1', { v: 'c' }).where(Eq('id', 1)).returning('id', 'v'),
+    );
+    expect(r.rowsAffected).toStrictEqual(1);
+    expect(r.rows).toEqual([{ id: 1, v: 'c' }]);
   });
 });

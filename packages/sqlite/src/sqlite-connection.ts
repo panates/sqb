@@ -130,7 +130,12 @@ export class SqliteConnection implements Adapter.Connection {
           const m2 = query.sql.match(/where (.+)/i);
           sql += m2 ? ' where ' + m2[1] : '';
           const selStmt = intlcon.prepare(sql);
-          this._fillSelectResult(out, selStmt, selStmt.all(params), query);
+          this._fillSelectResult(
+            out,
+            selStmt,
+            selStmt.all(pickParams(sql, params)),
+            query,
+          );
           return out;
         }
       }
@@ -204,6 +209,22 @@ function assertDefined(d: unknown): asserts d {
 function mapParams(params: Record<string, any>): Record<string, any> {
   const out: Record<string, any> = {};
   for (const k of Object.keys(params)) out[':' + k] = params[k];
+  return out;
+}
+
+/**
+ * Keeps only the (already `:`-prefixed) params that `sql` references:
+ * `node:sqlite` throws on a named parameter the statement doesn't have, and
+ * the `SET` values of an `UPDATE` are not part of its re-`SELECT`.
+ */
+function pickParams(
+  sql: string,
+  params?: Record<string, any>,
+): Record<string, any> | undefined {
+  if (!params) return params;
+  const used = new Set(sql.match(/:[\w$]+/g));
+  const out: Record<string, any> = {};
+  for (const k of Object.keys(params)) if (used.has(k)) out[k] = params[k];
   return out;
 }
 
