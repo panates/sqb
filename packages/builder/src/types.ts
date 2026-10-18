@@ -71,10 +71,13 @@ export interface GenerateOptions {
   /** Optional dialect version string, forwarded to dialect extensions that need to branch on it (e.g. syntax available only from a certain version). */
   dialectVersion?: string;
   /**
-   * When true, every literal value on the right-hand side of a comparison
-   * operator is rewritten into a generated bind parameter (instead of being
-   * inlined as a SQL literal) - see {@link CompOperator}. Useful for
-   * producing parameterized SQL for prepared-statement execution.
+   * When true, plain values are rewritten into generated bind parameters
+   * (`P$_1`, `P$_2`, ...) instead of being inlined as SQL literals: every
+   * value on the right-hand side of a comparison operator (see
+   * `CompOperator`), and the string, number, boolean, bigint and array
+   * values of an `Insert`'s `VALUES` and an `Update`'s `SET` (see
+   * `isStrictParamValue`). Useful for producing parameterized SQL for
+   * prepared-statement execution; `@sqb/connect` always generates with it.
    */
   strictParams?: boolean;
 }

@@ -2,7 +2,6 @@ import { SerializationType } from '../../enums.js';
 import { SqlElement } from '../../serializable.js';
 import { SerializeContext } from '../../serialize-context.js';
 import { isFieldName, isParam, isSqlElement } from '../../type-guards.js';
-import { Param } from '../elements/index.js';
 import { Operator } from './operator.js';
 
 const EXPRESSION_PATTERN = /^([\w\\.$]+)(\[])?/;
@@ -58,16 +57,9 @@ class CompOperatorClass extends Operator {
   ): any {
     const isRight = !!left;
     if (ctx.strictParams && !isSqlElement(x) && isRight) {
-      ctx.strictParamGenId = ctx.strictParamGenId || 0;
-      const name = 'P$_' + ++ctx.strictParamGenId;
-      ctx.params = ctx.params || {};
-      ctx.orgParams = ctx.orgParams || {};
-      ctx.params[name] = x;
-      ctx.orgParams[name] = x;
-      x = Param({
-        name,
+      x = ctx.toStrictParam(x, {
         dataType: left?.dataType,
-        isArray: left?.isArray || Array.isArray(x),
+        isArray: left?.isArray,
       });
     }
 

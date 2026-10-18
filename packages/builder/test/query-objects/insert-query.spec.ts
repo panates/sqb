@@ -146,4 +146,26 @@ describe('builder:Serialize insert query', () => {
         .returning('123'),
     ).toThrow('does not match');
   });
+
+  it('should bind values as params if strictParams=true', () => {
+    const query = Insert('table1', {
+      id: 1,
+      name: 'a\nb',
+      tags: ['x', 'y'],
+      created: new Date(Date.UTC(2024, 0, 1)),
+      data: { a: 1 },
+      note: null,
+      raw: Raw('now()'),
+    });
+    const result = query.generate({ ...options, strictParams: true });
+    expect(result.sql).toStrictEqual(
+      'insert into table1 (id, name, tags, created, data, note, raw) values ' +
+        "(:P$_1, :P$_2, :P$_3, '2024-01-01', '{\"a\":1}', null, now())",
+    );
+    expect(result.params).toStrictEqual({
+      P$_1: 1,
+      P$_2: 'a\nb',
+      P$_3: ['x', 'y'],
+    });
+  });
 });

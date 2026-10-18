@@ -1,6 +1,7 @@
-import { SerializationType } from './enums.js';
+import { type DataType, SerializationType } from './enums.js';
 import { SerializerRegistry } from './extensions.js';
 import { protectLiteral } from './literal-guard.js';
+import { Param } from './sql/elements/param.js';
 import { Query } from './sql/index.js';
 import { isLogicalOperator, isQuery, isSqlElement } from './type-guards.js';
 import type {
@@ -168,6 +169,30 @@ export class SerializeContext implements GenerateOptions {
   }
 
   /**
+   * Turns a plain value into a generated bind parameter (`P$_1`, `P$_2`,
+   * ...), registering the value in `params`/`orgParams`. This is how
+   * `strictParams` keeps literal values out of the SQL text - see
+   * {@link isStrictParamValue} for which values qualify in a value
+   * position, and `CompOperator` for comparison operands.
+   */
+  toStrictParam(
+    value: any,
+    opts?: { dataType?: DataType; isArray?: boolean },
+  ): Param {
+    this.strictParamGenId = this.strictParamGenId || 0;
+    const name = 'P$_' + ++this.strictParamGenId;
+    this.params = this.params || {};
+    this.orgParams = this.orgParams || {};
+    this.params[name] = value;
+    this.orgParams[name] = value;
+    return Param({
+      name,
+      dataType: opts?.dataType,
+      isArray: opts?.isArray || Array.isArray(value),
+    });
+  }
+
+  /**
    * Converts an arbitrary JS value into its SQL literal/expression form:
    * `null` -> `null`; an array -> a parenthesized, comma-joined list of the
    * converted elements (going through `SerializationType.ARRAY`, so a
@@ -307,4 +332,18 @@ export class SerializeContext implements GenerateOptions {
     if (this.isReservedWord(s)) return '"' + s + '"';
     return s;
   }
+}
+
+/**
+ * Whether a value in a value position (an `Insert`'s `VALUES`, an
+ * `Update`'s `SET`) is bound as a parameter under `strictParams`: a
+ * string, number, boolean or bigint, or an array of values. `null`, a
+ * `SqlElement` (`Param`, `Raw`, a sub-query, ...), a `Date`, a `Buffer` and
+ * a plain object (serialized as a JSON string literal) keep their literal
+ * serialization - a driver cannot be relied on to bind those as the
+ * literal would have been written.
+ */
+export function isStrictParamValue(v: any): boolean {
+  if (v == null || isSqlElement(v)) return false;
+  return typeof v !== 'object' || Array.isArray(v);
 }
