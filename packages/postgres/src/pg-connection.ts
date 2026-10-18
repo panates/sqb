@@ -28,6 +28,9 @@ const SqbDataTypToOIDMap = {
   [DataType.BINARY]: [DataTypeOIDs.bytea, DataTypeOIDs._bytea],
   [DataType.TEXT]: [DataTypeOIDs.text, DataTypeOIDs._text],
   [DataType.GUID]: [DataTypeOIDs.uuid, DataTypeOIDs._uuid],
+  // Declared, so that an array value of a (non-array) JSON column is sent
+  // as one JSON document, not left to the driver to infer a `json[]`.
+  [DataType.JSON]: [DataTypeOIDs.json, DataTypeOIDs._json],
 };
 
 /** Matches a whole tokenized `:name` parameter reference (with any leading whitespace preserved), used by {@link PgConnection._normalizeNamedParams}. */
