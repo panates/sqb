@@ -108,6 +108,38 @@ export class SqliteMigrationAdapter extends MigrationAdapter {
     return this.infoSchema + '_events';
   }
 
+  /** SQLite runs DDL inside transactions, so a whole run can be one. */
+  get supportsTransactions(): boolean {
+    return true;
+  }
+
+  async startTransaction(): Promise<void> {
+    this._connection.exec('BEGIN');
+  }
+
+  async commit(): Promise<void> {
+    this._connection.exec('COMMIT');
+  }
+
+  async rollback(): Promise<void> {
+    this._connection.exec('ROLLBACK');
+  }
+
+  /** Flags `VACUUM`, which SQLite refuses inside a transaction, and transaction control that would end the run's own transaction early. */
+  findNonTransactionalStatement(script: string): string | undefined {
+    const bare = script
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/--[^\n]*/g, ' ')
+      .replace(/'(?:[^']|'')*'/g, "''")
+      .replace(/"(?:[^"]|"")*"/g, '""');
+    const m =
+      bare.match(/\bvacuum\b/i) ||
+      bare.match(
+        /(^|;)\s*(begin|commit|rollback|end)(\s+(transaction|deferred|immediate|exclusive))?\s*(;|$)/i,
+      );
+    return m ? m[0].replace(/\s+/g, ' ').trim() : undefined;
+  }
+
   /**
    * Connects via `@sqb/sqlite`, creates the bookkeeping tables if they
    * don't already exist, seeds the package's summary row if missing, and
@@ -306,20 +338,12 @@ CREATE TABLE IF NOT EXISTS ${quoteIdent(adapter.eventTable)}
     }
   }
 
-  backupDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-
   // SQLite is an embedded, file-based engine with no separate server
   // process to arbitrate an advisory lock between clients (no equivalent of
   // Postgres's pg_advisory_lock, MySQL/MariaDB's GET_LOCK, or MSSQL's
   // sp_getapplock) - concurrent access is instead handled at the file-lock
   // level by SQLite itself, so there's nothing meaningful to lock here.
   lockSchema(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-
-  restoreDatabase(): Promise<void> {
     return Promise.resolve(undefined);
   }
 

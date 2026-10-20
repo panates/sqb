@@ -289,10 +289,6 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     }
   }
 
-  backupDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-
   /**
    * Advisory lock via GET_LOCK(), keyed by infoSchema + package name.
    * Session-scoped (unlike a transaction-held row lock), so it isn't
@@ -308,10 +304,6 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     // Another process may have advanced the tracked version while we were
     // waiting for the lock - re-read it now that we hold it.
     await this.refresh();
-  }
-
-  restoreDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
   }
 
   async unlockSchema(): Promise<void> {

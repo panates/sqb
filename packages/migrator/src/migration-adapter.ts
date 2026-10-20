@@ -1,3 +1,4 @@
+import path from 'path';
 import type {
   Migration,
   MigrationPackage,
@@ -54,11 +55,109 @@ export abstract class MigrationAdapter {
   /** Releases the lock acquired by {@link lockSchema}. */
   abstract unlockSchema(): Promise<void>;
 
-  /** Backs up the database before a migration run that includes a migration flagged `backup: true`. A no-op in every current adapter. */
-  abstract backupDatabase(): Promise<void>;
+  /**
+   * Whether this adapter can run migrations inside a transaction (see
+   * `DbMigratorOptions.transaction`): the dialect must support
+   * transactional DDL, and the adapter must implement
+   * {@link startTransaction}/{@link commit}/{@link rollback}. `false` here,
+   * overridden by the adapters that can.
+   */
+  get supportsTransactions(): boolean {
+    return false;
+  }
 
-  /** Restores the database from {@link backupDatabase}'s backup if a migration run fails partway through. A no-op in every current adapter. */
-  abstract restoreDatabase(): Promise<void>;
+  /**
+   * Begins a transaction on the adapter's connection. Only called when
+   * {@link supportsTransactions} is `true`.
+   *
+   * @throws {Error} by default, for an adapter without transaction support.
+   */
+  startTransaction(): Promise<void> {
+    return Promise.reject(this._noTransactionSupport());
+  }
+
+  /** Commits the transaction begun by {@link startTransaction}. */
+  commit(): Promise<void> {
+    return Promise.reject(this._noTransactionSupport());
+  }
+
+  /** Rolls back the transaction begun by {@link startTransaction}. */
+  rollback(): Promise<void> {
+    return Promise.reject(this._noTransactionSupport());
+  }
+
+  /**
+   * Finds, in a SQL script about to run inside a transaction, the first
+   * statement the dialect refuses to run in a transaction block (for
+   * PostgreSQL: `CREATE INDEX CONCURRENTLY`, `VACUUM`, `CREATE DATABASE`,
+   * ...), or a transaction-control statement that would cut the run's own
+   * transaction short. Returns that statement's text, or `undefined` if
+   * the script is fine. Nothing is flagged by default; adapters with
+   * transaction support override this.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  findNonTransactionalStatement(script: string): string | undefined {
+    return undefined;
+  }
+
+  /**
+   * Throws if `script` holds a statement that cannot run inside a
+   * transaction block (see {@link findNonTransactionalStatement}), naming
+   * the task and its file.
+   *
+   * @throws {Error} naming the task, its file and the offending statement
+   */
+  assertTransactionalScript(
+    script: string,
+    task: MigrationTask,
+    migrationPackage: MigrationPackage,
+  ): void {
+    const statement = this.findNonTransactionalStatement(script);
+    if (!statement) return;
+    let msg = `Task "${task.title}"`;
+    if (task.filename)
+      msg +=
+        ' (' + path.relative(migrationPackage.baseDir, task.filename) + ')';
+    throw new Error(
+      msg +
+        ' has a statement that cannot run inside a transaction block: ' +
+        JSON.stringify(statement) +
+        ". Run with transaction: 'none' to apply it.",
+    );
+  }
+
+  /**
+   * Backs up the database before a migration run that includes a migration
+   * flagged `backup: true`. No adapter implements a backup today, so this
+   * rejects rather than let the flag pass as a no-op; a transactional run
+   * (`DbMigratorOptions.transaction`) is the way to make a failed run
+   * leave no trace.
+   *
+   * @throws {Error} always, unless overridden by an adapter that can back up its database.
+   */
+  backupDatabase(): Promise<void> {
+    return Promise.reject(
+      new Error(
+        `Database backup is not supported by ${this.constructor.name}; ` +
+          "run with transaction: 'run' for a run that leaves no trace when it fails",
+      ),
+    );
+  }
+
+  /** Restores the database from {@link backupDatabase}'s backup if a migration run fails partway through. Rejects by default, like {@link backupDatabase}. */
+  restoreDatabase(): Promise<void> {
+    return Promise.reject(
+      new Error(
+        `Database restore is not supported by ${this.constructor.name}`,
+      ),
+    );
+  }
+
+  private _noTransactionSupport(): Error {
+    return new Error(
+      `Transactional migration runs are not supported by ${this.constructor.name}`,
+    );
+  }
 
   /** Substitutes every `$(name)` reference in `text` with `variables[name]`, leaving a reference with no matching variable untouched. */
   protected replaceVariables(

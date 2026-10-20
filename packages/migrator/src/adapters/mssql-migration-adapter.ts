@@ -324,10 +324,6 @@ END`);
     }
   }
 
-  backupDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-
   /**
    * Advisory lock via sp_getapplock, keyed by infoSchema + package name.
    * Unlike MySQL/Oracle, SQL Server DDL does not implicitly commit, so a
@@ -350,10 +346,6 @@ END`);
     // Another process may have advanced the tracked version while we were
     // waiting for the lock - re-read it now that we hold it.
     await this.refresh();
-  }
-
-  restoreDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
   }
 
   /** Commits the lock transaction opened by {@link lockSchema}, releasing the app lock along with it. A no-op if the lock was never acquired. */

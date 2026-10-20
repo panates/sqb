@@ -38,6 +38,21 @@ describe('migrator:DbMigrator (sqlite)', () => {
     return !!row;
   }
 
+  it('should change nothing in a dry run', async () => {
+    const migrator = new DbMigrator();
+    const emitted: string[] = [];
+    for (const ev of ['commit', 'rollback', 'finish'])
+      migrator.on(ev, () => emitted.push(ev));
+    await migrator.execute({
+      ...defaultOptions,
+      migrationPackage: Test1SqliteMigrationPackage,
+      targetVersion: 10,
+      dryRun: true,
+    });
+    assert.strictEqual(tableExists('table1'), false);
+    assert.deepStrictEqual(emitted, ['rollback', 'finish']);
+  });
+
   it('should apply migrations', async () => {
     const migrator = new DbMigrator();
     await migrator.execute({
