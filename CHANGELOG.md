@@ -1,6 +1,24 @@
 # Changelog
 
-<!-- rman:documented-up-to 0f8356bad39502e0467bd9ff454652b9655d1906 -->
+<!-- rman:documented-up-to 37d8e7c752ce4e406f9650e6ea1bb47b50c2b0e0 -->
+
+## v6.3.0 (2026-10-20)
+
+### ✨ Features
+
+- **migrator:** transactional runs and dry runs (189dad9)
+
+### 🐛 Bug Fixes
+
+- **connect:** let an explicit isArray win over the reflected array type (5e889f1)
+- **migrator:** scan scripts for non-transactional statements in linear time (dbe14d9)
+
+### 🧹 Chores
+
+- sync lockfile (fb7e3f9)
+- update dependencies across packages and lockfile (b79778a)
+
+---
 
 ## v6.2.1 (2026-10-18)
 
