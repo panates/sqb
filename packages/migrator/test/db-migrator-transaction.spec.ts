@@ -272,10 +272,34 @@ describe('migrator:DbMigrator (transactions, postgres)', () => {
           ]),
           transaction: 'run',
         }),
-      /Task "index" has a statement that cannot run inside a transaction block: "CREATE INDEX CONCURRENTLY"/,
+      /Task "index" has a statement that cannot run inside a transaction block: "CREATE INDEX CONCURRENTLY ix_t1 ON \$\(schema\)\.t1 \(id\)"/,
     );
     assert.deepStrictEqual(started, []);
     assert.strictEqual(await tableExists('t1'), false);
+  });
+
+  it('should not flag what only looks like a non-transactional statement', async () => {
+    const migrator = new DbMigrator();
+    await migrator.execute({
+      ...defaultOptions,
+      migrationPackage: pkg('TxLookalike', [
+        {
+          version: 1,
+          tasks: [
+            {
+              title: 'lookalikes',
+              script:
+                createTable('t1') +
+                '\nALTER TABLE $(schema).t1 ADD COLUMN vacuum integer;' +
+                '\nCREATE FUNCTION $(schema).f() RETURNS void LANGUAGE plpgsql AS $$' +
+                '\nBEGIN PERFORM 1; COMMIT; END $$;',
+            },
+          ],
+        },
+      ]),
+      transaction: 'run',
+    });
+    assert.strictEqual(await tableExists('t1'), true);
   });
 
   it('should check a script produced by a function when it runs', async () => {
@@ -298,7 +322,7 @@ describe('migrator:DbMigrator (transactions, postgres)', () => {
           ]),
           transaction: 'run',
         }),
-      /Task "vacuum" has a statement that cannot run inside a transaction block: "VACUUM"/,
+      /Task "vacuum" has a statement that cannot run inside a transaction block: "VACUUM migrator_tx_test\.t1"/,
     );
     assert.strictEqual(await tableExists('t1'), false);
     assert.strictEqual(await trackedVersion('TxFn'), 0);

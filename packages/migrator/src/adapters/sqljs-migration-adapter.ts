@@ -16,6 +16,7 @@ import {
   type MigrationTask,
 } from '../migration-package.js';
 import { MigrationStatus } from '../types.js';
+import { splitSqlStatements } from '../utils/split-sql-statements.js';
 
 const sqljsAdapter = new SqljsAdapter();
 
@@ -112,19 +113,20 @@ export class SqljsMigrationAdapter extends MigrationAdapter {
     this._connection.exec('ROLLBACK');
   }
 
-  /** Flags `VACUUM`, which SQLite refuses inside a transaction, and transaction control that would end the run's own transaction early. */
+  /**
+   * Flags `VACUUM`, which SQLite refuses inside a transaction, and
+   * transaction control (`BEGIN`, `COMMIT`, `ROLLBACK`) that would end the
+   * run's own transaction early. `END` is left out: it also closes a
+   * trigger body.
+   */
   findNonTransactionalStatement(script: string): string | undefined {
-    const bare = script
-      .replace(/\/\*[\s\S]*?\*\//g, ' ')
-      .replace(/--[^\n]*/g, ' ')
-      .replace(/'(?:[^']|'')*'/g, "''")
-      .replace(/"(?:[^"]|"")*"/g, '""');
-    const m =
-      bare.match(/\bvacuum\b/i) ||
-      bare.match(
-        /(^|;)\s*(begin|commit|rollback|end)(\s+(transaction|deferred|immediate|exclusive))?\s*(;|$)/i,
-      );
-    return m ? m[0].replace(/\s+/g, ' ').trim() : undefined;
+    return splitSqlStatements(script).find(
+      statement =>
+        /^vacuum\b/i.test(statement) ||
+        /^(begin( (deferred|immediate|exclusive))?|commit|rollback)( transaction)?$/i.test(
+          statement,
+        ),
+    );
   }
 
   /**

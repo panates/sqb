@@ -13,19 +13,25 @@ import {
   type MigrationTask,
 } from '../migration-package.js';
 import { MigrationStatus } from '../types.js';
+import { splitSqlStatements } from '../utils/split-sql-statements.js';
 
 const pgAdapter = new PgAdapter();
 
-/** Statements PostgreSQL cannot run inside a transaction block, plus transaction control - see {@link PgMigrationAdapter.findNonTransactionalStatement}. */
+/**
+ * Statements PostgreSQL cannot run inside a transaction block, plus
+ * transaction control - see
+ * {@link PgMigrationAdapter.findNonTransactionalStatement}. Each is
+ * matched against one whole statement, from its start.
+ */
 const NON_TRANSACTIONAL_PATTERNS: RegExp[] = [
-  /\b(create\s+(unique\s+)?index|drop\s+index)\s+concurrently\b/i,
-  /\breindex\b[^;]*\bconcurrently\b/i,
-  /\bvacuum\b/i,
-  /\b(create|drop)\s+database\b/i,
-  /\b(create|drop)\s+tablespace\b/i,
-  /\balter\s+system\b/i,
-  /\bdiscard\s+all\b/i,
-  /(^|;)\s*(begin|start\s+transaction|commit|rollback)(\s+(work|transaction))?\s*(;|$)/i,
+  /^(create (unique )?index|drop index) concurrently\b/i,
+  /^reindex\b.*\bconcurrently\b/i,
+  /^vacuum\b/i,
+  /^(create|drop) (database|tablespace)\b/i,
+  /^alter system\b/i,
+  /^discard all$/i,
+  // `END` is left out: it also closes a `BEGIN ATOMIC` function body.
+  /^(begin|start transaction|commit|rollback|abort)( (work|transaction))?$/i,
 ];
 
 /**
@@ -204,21 +210,18 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
    * `DROP INDEX CONCURRENTLY`, `REINDEX ... CONCURRENTLY`, `VACUUM`,
    * `CREATE`/`DROP DATABASE`, `CREATE`/`DROP TABLESPACE`, `ALTER SYSTEM`,
    * `DISCARD ALL` - and a transaction-control statement (`BEGIN`, `START
-   * TRANSACTION`, `COMMIT`, `ROLLBACK`) that would end the run's own
-   * transaction early. Comments, string literals, dollar-quoted bodies and
-   * quoted identifiers are ignored, so a function body or a comment that
-   * mentions one of these does not count.
+   * TRANSACTION`, `COMMIT`, `ROLLBACK`, `ABORT`) that would end the run's
+   * own transaction early. Comments, string literals, dollar-quoted bodies
+   * and quoted identifiers are ignored, so a function body or a comment
+   * that mentions one of these does not count.
    */
   findNonTransactionalStatement(script: string): string | undefined {
-    const bare = script
-      .replace(/\$([A-Za-z_][A-Za-z0-9_]*)?\$[\s\S]*?\$\1\$/g, ' ')
-      .replace(/\/\*[\s\S]*?\*\//g, ' ')
-      .replace(/--[^\n]*/g, ' ')
-      .replace(/'(?:[^']|'')*'/g, "''")
-      .replace(/"(?:[^"]|"")*"/g, '""');
-    for (const pattern of NON_TRANSACTIONAL_PATTERNS) {
-      const m = bare.match(pattern);
-      if (m) return m[0].replace(/\s+/g, ' ').trim();
+    for (const statement of splitSqlStatements(script, {
+      dollarQuotes: true,
+      nestedComments: true,
+    })) {
+      if (NON_TRANSACTIONAL_PATTERNS.some(p => p.test(statement)))
+        return statement;
     }
     return undefined;
   }
