@@ -16,6 +16,7 @@ import {
   type MigrationTask,
 } from '../migration-package.js';
 import { MigrationStatus } from '../types.js';
+import { splitSqlStatements } from '../utils/split-sql-statements.js';
 
 const sqljsAdapter = new SqljsAdapter();
 
@@ -93,6 +94,39 @@ export class SqljsMigrationAdapter extends MigrationAdapter {
 
   get eventTable(): string {
     return this.infoSchema + '_events';
+  }
+
+  /** SQLite runs DDL inside transactions, so a whole run can be one. */
+  get supportsTransactions(): boolean {
+    return true;
+  }
+
+  async startTransaction(): Promise<void> {
+    this._connection.exec('BEGIN');
+  }
+
+  async commit(): Promise<void> {
+    this._connection.exec('COMMIT');
+  }
+
+  async rollback(): Promise<void> {
+    this._connection.exec('ROLLBACK');
+  }
+
+  /**
+   * Flags `VACUUM`, which SQLite refuses inside a transaction, and
+   * transaction control (`BEGIN`, `COMMIT`, `ROLLBACK`) that would end the
+   * run's own transaction early. `END` is left out: it also closes a
+   * trigger body.
+   */
+  findNonTransactionalStatement(script: string): string | undefined {
+    return splitSqlStatements(script).find(
+      statement =>
+        /^vacuum\b/i.test(statement) ||
+        /^(begin( (deferred|immediate|exclusive))?|commit|rollback)( transaction)?$/i.test(
+          statement,
+        ),
+    );
   }
 
   /**
@@ -299,17 +333,9 @@ CREATE TABLE IF NOT EXISTS ${quoteIdent(adapter.eventTable)}
     }
   }
 
-  backupDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-
   // Same reasoning as SqliteMigrationAdapter: an embedded, single-process
   // engine with no server to arbitrate an advisory lock between clients.
   lockSchema(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-
-  restoreDatabase(): Promise<void> {
     return Promise.resolve(undefined);
   }
 

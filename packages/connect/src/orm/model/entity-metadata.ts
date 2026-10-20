@@ -389,7 +389,7 @@ export namespace EntityMetadata {
           break;
         case Array:
           options.dataType = DataType.VARCHAR;
-          options.isArray = true;
+          if (options.isArray == null) options.isArray = true;
           break;
         case Buffer:
           options.dataType = DataType.BINARY;

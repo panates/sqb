@@ -31,7 +31,8 @@ Column[DECORATOR_FACTORY] = function (arg0: any): PropertyDecorator {
       );
       if (typ === Array) {
         options.type = String;
-        options.isArray = true;
+        // An explicit `isArray` wins over the reflected type.
+        if (options.isArray == null) options.isArray = true;
       } else options.type = typ;
     }
 

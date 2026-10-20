@@ -13,8 +13,26 @@ import {
   type MigrationTask,
 } from '../migration-package.js';
 import { MigrationStatus } from '../types.js';
+import { splitSqlStatements } from '../utils/split-sql-statements.js';
 
 const pgAdapter = new PgAdapter();
+
+/**
+ * Statements PostgreSQL cannot run inside a transaction block, plus
+ * transaction control - see
+ * {@link PgMigrationAdapter.findNonTransactionalStatement}. Each is
+ * matched against one whole statement, from its start.
+ */
+const NON_TRANSACTIONAL_PATTERNS: RegExp[] = [
+  /^(create (unique )?index|drop index) concurrently\b/i,
+  /^reindex\b.*\bconcurrently\b/i,
+  /^vacuum\b/i,
+  /^(create|drop) (database|tablespace)\b/i,
+  /^alter system\b/i,
+  /^discard all$/i,
+  // `END` is left out: it also closes a `BEGIN ATOMIC` function body.
+  /^(begin|start transaction|commit|rollback|abort)( (work|transaction))?$/i,
+];
 
 /**
  * Quotes a (possibly schema-qualified, e.g. `"myschema.mytable"`) Postgres
@@ -51,6 +69,11 @@ export class PgMigrationAdapter extends MigrationAdapter {
   };
   readonly summaryTable = 'migration_summary';
   readonly eventTable = 'migration_events';
+
+  /** PostgreSQL runs DDL inside transactions, so a whole run can be one. */
+  get supportsTransactions(): boolean {
+    return true;
+  }
 
   get packageName(): string {
     return this._migrationPackage.name;
@@ -170,6 +193,39 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     await this._connection.close();
   }
 
+  async startTransaction(): Promise<void> {
+    await this._connection.startTransaction();
+  }
+
+  async commit(): Promise<void> {
+    await this._connection.commit();
+  }
+
+  async rollback(): Promise<void> {
+    await this._connection.rollback();
+  }
+
+  /**
+   * Flags what PostgreSQL refuses inside a transaction block - `CREATE`/
+   * `DROP INDEX CONCURRENTLY`, `REINDEX ... CONCURRENTLY`, `VACUUM`,
+   * `CREATE`/`DROP DATABASE`, `CREATE`/`DROP TABLESPACE`, `ALTER SYSTEM`,
+   * `DISCARD ALL` - and a transaction-control statement (`BEGIN`, `START
+   * TRANSACTION`, `COMMIT`, `ROLLBACK`, `ABORT`) that would end the run's
+   * own transaction early. Comments, string literals, dollar-quoted bodies
+   * and quoted identifiers are ignored, so a function body or a comment
+   * that mentions one of these does not count.
+   */
+  findNonTransactionalStatement(script: string): string | undefined {
+    for (const statement of splitSqlStatements(script, {
+      dollarQuotes: true,
+      nestedComments: true,
+    })) {
+      if (NON_TRANSACTIONAL_PATTERNS.some(p => p.test(statement)))
+        return statement;
+    }
+    return undefined;
+  }
+
   /**
    * @throws {Error} if the package's summary row is somehow missing (should not happen once `create()` has run)
    */
@@ -265,6 +321,9 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
         } else script = task.script;
         if (typeof script !== 'string') return;
         script = this.replaceVariables(script, variables);
+        // A script from a function could not be checked up front.
+        if (this._connection.inTransaction)
+          this.assertTransactionalScript(script, task, migrationPackage);
         await this._connection.execute(script);
       } catch (e: any) {
         let msg = `Error in task "${task.title}"`;
@@ -296,10 +355,6 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     }
   }
 
-  backupDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-
   /**
    * Serializes concurrent migration runs against the same package using a
    * Postgres session-level advisory lock, so two processes migrating the
@@ -313,10 +368,6 @@ CREATE TABLE IF NOT EXISTS ${adapter.eventTableFull}
     // Another process may have advanced the tracked version while we were
     // waiting for the lock - re-read it now that we hold the lock.
     await this.refresh();
-  }
-
-  restoreDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
   }
 
   async unlockSchema(): Promise<void> {

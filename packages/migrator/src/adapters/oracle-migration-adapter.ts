@@ -318,10 +318,6 @@ END;`);
     }
   }
 
-  backupDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-
   /**
    * Best-effort advisory lock via DBMS_LOCK, keyed by a hash of the info
    * schema + package name. Unlike a transaction-held row lock, this isn't
@@ -355,10 +351,6 @@ END;`);
     // Another process may have advanced the tracked version while we were
     // waiting for the lock - re-read it now that we hold it.
     await this.refresh();
-  }
-
-  restoreDatabase(): Promise<void> {
-    return Promise.resolve(undefined);
   }
 
   /** Releases the lock acquired by {@link lockSchema} via `DBMS_LOCK.RELEASE`, again swallowing an insufficient-privilege error rather than throwing (matching {@link lockSchema}'s degrade-to-no-locking behavior). */

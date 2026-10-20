@@ -80,6 +80,43 @@ few dialect-driven differences worth knowing:
   the result back to the original file when the migration run finishes (skipped for a `:memory:`
   database), otherwise every applied migration would be silently lost the moment the process exits.
 
+### Transactional runs and dry runs
+
+On a dialect that runs DDL inside transactions (PostgreSQL, SQLite), a run can be wrapped in a
+transaction so that a failure leaves the database exactly as it was:
+
+```ts
+await migrator.execute({
+  connection: { dialect: 'postgres', database: 'mydb' },
+  migrationPackage,
+  transaction: 'run', // or 'migration', or 'none' (the default)
+});
+```
+
+- **`transaction: 'run'`** - one transaction for the whole run: every pending migration, its tasks
+  and the version/event bookkeeping, committed at the end and rolled back on any error. The failure
+  is then recorded in `migration_events` after the rollback, so it does not vanish with it.
+- **`transaction: 'migration'`** - one transaction per migration, so the migrations that succeeded
+  stay applied when a later one fails.
+- **`dryRun: true`** - runs everything in one transaction, emits the same events as a real run, and
+  rolls back instead of committing. The run resolves like a real one, or rejects with the error a
+  real run would have failed with, and leaves the database untouched either way - including the
+  event log. For trying a package against a copy of production before the real thing. It implies
+  `transaction: 'run'`.
+
+The adapter's schema lock stays session-level around the transaction. A script holding a statement
+the dialect cannot run inside a transaction block (PostgreSQL: `CREATE`/`DROP INDEX CONCURRENTLY`,
+`REINDEX ... CONCURRENTLY`, `VACUUM`, `CREATE`/`DROP DATABASE`, `CREATE`/`DROP TABLESPACE`, `ALTER
+SYSTEM`, `DISCARD ALL`; SQLite: `VACUUM`), or an explicit `BEGIN`/`COMMIT`/`ROLLBACK` that would
+cut the run's transaction short, fails a transactional run before anything is applied, naming the
+task and file; a script produced by a function is checked when it runs. Apply such a migration with
+`transaction: 'none'`. MySQL, MariaDB and Oracle commit implicitly on DDL, so their adapters refuse
+`'run'` and `'migration'`; SQL Server is not wired up for them yet.
+
+No adapter implements `backupDatabase()`/`restoreDatabase()`; a migration flagged `backup: true`
+is refused rather than run with a backup that never happened. A transactional run is the way to
+make a failed run leave no trace.
+
 ## Main goals
 
 - Single code base for any sql based database

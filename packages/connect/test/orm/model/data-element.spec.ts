@@ -129,6 +129,25 @@ describe('connect:Model / Data Column', () => {
     expect(col!.isArray).toStrictEqual(true);
   });
 
+  it(`should let an explicit isArray win over the reflected array type`, () => {
+    class MyEntity {
+      @Column({ dataType: DataType.JSON })
+      declare docs: { name: string }[];
+
+      @Column({ dataType: DataType.JSON, isArray: false })
+      declare doc: { name: string }[];
+
+      @Column({ isArray: false })
+      declare csv: string[];
+    }
+
+    const meta = Entity.getMetadata(MyEntity);
+    expect(meta).toBeDefined();
+    expect(EntityMetadata.getColumnField(meta!, 'docs')!.isArray).toBe(true);
+    expect(EntityMetadata.getColumnField(meta!, 'doc')!.isArray).toBe(false);
+    expect(EntityMetadata.getColumnField(meta!, 'csv')!.isArray).toBe(false);
+  });
+
   it(`should @AfterInsert() decorator add after-insert hook`, () => {
     class MyEntity {
       @AfterInsert()
