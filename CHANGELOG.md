@@ -1,6 +1,19 @@
 # Changelog
 
-<!-- rman:documented-up-to 37d8e7c752ce4e406f9650e6ea1bb47b50c2b0e0 -->
+<!-- rman:documented-up-to 21959440db04190268fb50626bc27bed0a5309ee -->
+
+## v6.3.1 (2026-10-23)
+
+### 🐛 Bug Fixes
+
+- **oracle-dialect:** Inline array params in every query type, not just SELECT/DELETE (a35bbc6)
+
+### 🧹 Chores
+
+- sync lockfile (0be3e8b)
+- Update dependencies across packages and lockfile (409e6ba)
+
+---
 
 ## v6.3.0 (2026-10-20)
 
