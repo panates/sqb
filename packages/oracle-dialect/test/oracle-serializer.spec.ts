@@ -1,11 +1,15 @@
 import {
   Eq,
+  In,
+  Ne,
+  NotIn,
   Param,
   Select,
   Sequence,
   SerializerRegistry,
   StringAgg,
   TableName,
+  Update,
 } from '@sqb/builder';
 import { expect } from 'expect';
 import { OracleSerializer } from '../src/oracle-serializer.js';
@@ -142,6 +146,94 @@ describe('oracle-dialect:OracleSerializer', () => {
         'select * from table1 where ID in (1,2,3)',
       );
       expect(result.params).not.toBeDefined();
+    });
+
+    it('should inline an array parameter in an UPDATE query', () => {
+      // Oracle rejects an array bound to a non-PL/SQL statement with
+      // ORA-01484, so the list has to be inlined here just as it is in a
+      // SELECT - it regressed to a bound parameter in 5.0.5.
+      const query = Update('table1', { x: 1 }).where(In('ID', Param('ID')));
+      const result = query.generate({
+        dialect: 'oracle',
+        strictParams: true,
+        params: { ID: [1, 2, 3] },
+      });
+      expect(result.sql).toStrictEqual(
+        'update table1 set x = :P$_1 where ID in (1,2,3)',
+      );
+      expect(result.params).toStrictEqual({ P$_1: 1 });
+    });
+
+    it('should rewrite an array-valued "=" to "in" in an UPDATE query', () => {
+      const query = Update('table1', { x: 1 }).where(Eq('ID', Param('ID')));
+      const result = query.generate({
+        dialect: 'oracle',
+        strictParams: true,
+        params: { ID: [1, 2, 3] },
+      });
+      expect(result.sql).toStrictEqual(
+        'update table1 set x = :P$_1 where ID in (1,2,3)',
+      );
+    });
+
+    it('should rewrite an array-valued "!=" to "not in" in an UPDATE query', () => {
+      const query = Update('table1', { x: 1 }).where(Ne('ID', Param('ID')));
+      const result = query.generate({
+        dialect: 'oracle',
+        strictParams: true,
+        params: { ID: [1, 2, 3] },
+      });
+      expect(result.sql).toStrictEqual(
+        'update table1 set x = :P$_1 where ID not in (1,2,3)',
+      );
+    });
+
+    it('should inline an array parameter of a "not in" operator in an UPDATE query', () => {
+      const query = Update('table1', { x: 1 }).where(NotIn('ID', Param('ID')));
+      const result = query.generate({
+        dialect: 'oracle',
+        strictParams: true,
+        params: { ID: [1, 2, 3] },
+      });
+      expect(result.sql).toStrictEqual(
+        'update table1 set x = :P$_1 where ID not in (1,2,3)',
+      );
+    });
+
+    it('should rewrite an array literal turned into a strict param to "in"', () => {
+      // Under strictParams the array never reaches the comparison as a Param,
+      // so the rewrite has to look at the original right-hand operand too.
+      const select = Select()
+        .from('table1')
+        .where(Eq('ID', [1, 2, 3]))
+        .generate({ dialect: 'oracle', strictParams: true });
+      expect(select.sql).toStrictEqual(
+        'select * from table1 where ID in (1,2,3)',
+      );
+
+      const update = Update('table1', { x: 1 })
+        .where(Eq('ID', [1, 2, 3]))
+        .generate({ dialect: 'oracle', strictParams: true });
+      expect(update.sql).toStrictEqual(
+        'update table1 set x = :P$_1 where ID in (1,2,3)',
+      );
+    });
+
+    it('should not remove an inlined array from the given params object', () => {
+      // `ctx.params` is the caller's own object, so deleting the entry made a
+      // second generate() with the same options serialize as "is null".
+      const params = { ID: [1, 2, 3] };
+      const options = { dialect: 'oracle', params };
+      const query = Select()
+        .from('table1')
+        .where(Eq('ID', Param('ID')));
+      expect(query.generate(options).sql).toStrictEqual(
+        'select * from table1 where ID in (1,2,3)',
+      );
+      expect(query.generate(options).sql).toStrictEqual(
+        'select * from table1 where ID in (1,2,3)',
+      );
+      expect(params).toStrictEqual({ ID: [1, 2, 3] });
     });
 
     it('should serialize index hint', () => {

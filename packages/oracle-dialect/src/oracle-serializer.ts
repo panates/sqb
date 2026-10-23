@@ -215,10 +215,11 @@ export class OracleSerializer implements SerializerExtension {
 
   /**
    * Rewrites two comparison shapes Oracle can't express directly:
-   * - `= :param`/`<> :param` where the bound parameter turns out to hold
-   *   an array is rewritten as `IN (...)`/`NOT IN (...)` (Oracle has no
-   *   array binding, so an array-valued equality would otherwise
-   *   serialize as a single, incorrect scalar comparison).
+   * - `=`/`<>` against an array-valued right-hand side - a bound parameter
+   *   holding an array, or an array literal - is rewritten as
+   *   `IN (...)`/`NOT IN (...)` (Oracle has no array binding, so an
+   *   array-valued equality would otherwise serialize as a single,
+   *   incorrect scalar comparison).
    * - `= null`/`<> null` (including an unbound `:param` that resolved to
    *   `null`) is rewritten as `IS NULL`/`IS NOT NULL`, since Oracle's
    *   `= NULL`/`<> NULL` never match rather than raising an error.
@@ -228,24 +229,27 @@ export class OracleSerializer implements SerializerExtension {
     o: any,
     defFn: DefaultSerializeFunction,
   ): string {
-    if (isParam(o.orgRight)) {
-      const n = o.orgRight._name;
-      const v = ctx.orgParams?.[n];
-      if (Array.isArray(v)) {
-        o.right.isParam = false;
-        if (o.operatorType === 'eq')
-          return defFn(ctx, {
-            ...o,
-            operatorType: OperatorType.in,
-            symbol: 'in',
-          });
-        if (o.operatorType === 'ne')
-          return defFn(ctx, {
-            ...o,
-            operatorType: OperatorType.notIn,
-            symbol: 'not in',
-          });
-      }
+    /* An array reaches the right-hand side either as a bound parameter or, under
+       `strictParams`, as a literal the base serializer has already replaced with
+       a generated parameter - in which case `orgRight` is still the original
+       array, so both shapes have to be checked. */
+    const rightValue = isParam(o.orgRight)
+      ? ctx.orgParams?.[o.orgRight._name]
+      : o.orgRight;
+    if (Array.isArray(rightValue)) {
+      o.right.isParam = false;
+      if (o.operatorType === 'eq')
+        return defFn(ctx, {
+          ...o,
+          operatorType: OperatorType.in,
+          symbol: 'in',
+        });
+      if (o.operatorType === 'ne')
+        return defFn(ctx, {
+          ...o,
+          operatorType: OperatorType.notIn,
+          symbol: 'not in',
+        });
     }
 
     if (
@@ -366,18 +370,19 @@ export class OracleSerializer implements SerializerExtension {
   }
 
   /**
-   * Rewrites two parameter shapes Oracle needs special handling for (only
-   * meaningful for a `SELECT`/`DELETE` query, where the bound value is
-   * already known):
+   * Rewrites two parameter shapes Oracle needs special handling for:
+   * - An array-valued parameter is rewritten as an inline SQL list via
+   *   {@link SerializeContext.anyToSQL}, since Oracle has no array
+   *   parameter binding in any statement type. This applies to every query
+   *   type: binding an array raises `ORA-01484`, so an `UPDATE`/`INSERT`
+   *   needs the list inlined just as much as a `SELECT` does.
    * - A `Date`-valued parameter is rebound as a formatted string and
    *   wrapped in `TO_DATE(...)` rather than left for the driver's default
    *   `TO_TIMESTAMP`-based binding, since date-typed columns compared via
    *   `TO_TIMESTAMP` run substantially slower in Oracle - sub-second
    *   precision is deliberately dropped, which is fine for date/timestamp
-   *   equality comparisons at this precision.
-   * - An array-valued parameter is rewritten as an inline SQL list via
-   *   {@link SerializeContext.anyToSQL} and removed from `ctx.params`,
-   *   since Oracle has no array parameter binding.
+   *   equality comparisons at this precision. Unlike the array case this is
+   *   a read-path optimization, so it stays limited to `SELECT`/`DELETE`.
    *
    * Any other parameter falls through to the base serializer's
    * placeholder.
@@ -387,11 +392,18 @@ export class OracleSerializer implements SerializerExtension {
     o: any,
     defFn: DefaultSerializeFunction,
   ): string {
+    const v = ctx.params?.[o.name];
+    /* Oracle rejects an array bound to any statement with ORA-01484, so an array
+       is inlined whatever the query type is - not only for the SELECT/DELETE
+       cases handled below. The value stays in `ctx.params` (the caller's own
+       object) because the parameter is kept out of the result by returning
+       before `defFn`, which is the only thing that records into
+       `ctx.preparedParams`. */
+    if (Array.isArray(v)) return ctx.anyToSQL(v);
     if (
       ctx.rootQuery._type === SerializationType.SELECT_QUERY ||
       ctx.rootQuery._type === SerializationType.DELETE_QUERY
     ) {
-      const v = ctx.params?.[o.name];
       /* Queries involving date data types run very slowly when Oracle's TO_TIMESTAMP is used.
          To overcome this issue, TO_DATE should be used instead. Milliseconds can be disregarded. */
       if (v instanceof Date) {
@@ -401,10 +413,6 @@ export class OracleSerializer implements SerializerExtension {
           ' ',
         );
         return `TO_DATE(:${o.name}, 'yyyy-mm-dd hh24:mi:ss')`;
-      }
-      if (Array.isArray(v)) {
-        delete ctx.params?.[o.name];
-        return ctx.anyToSQL(v);
       }
     }
     return defFn(ctx, o);
