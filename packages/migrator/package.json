@@ -27,11 +27,11 @@
     "@sqb/sqljs": "^6.3.0"
   },
   "devDependencies": {
-    "@types/oracledb": "^7.0.3",
+    "@types/oracledb": "^26.0.0",
     "@types/sql.js": "^1.4.11",
     "expect": "^30.5.2",
     "mariadb": "^3.5.4",
-    "mssql": "^12.7.10",
+    "mssql": "^12.7.11",
     "mysql2": "^3.24.6",
     "oracledb": "^26.0.0",
     "postgrejs": "^3.14.0",
