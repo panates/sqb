@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "expect": "^30.5.2",
-    "postgrejs": "^3.14.0"
+    "postgrejs": "^3.14.1"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^",

@@ -167,13 +167,13 @@ importers:
   .:
     devDependencies:
       '@panates/eslint-config':
-        specifier: ^2.3.3
+        specifier: ^2.3.4
         version: 2.3.4(@eslint/js@10.0.1(eslint@10.13.0(supports-color@8.1.1)))(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@8.1.1)))(eslint-plugin-import-x@4.17.1(@typescript-eslint/utils@8.72.1(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-prettier@5.5.7(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@8.1.1)))(eslint@10.13.0(supports-color@8.1.1))(prettier@3.9.10))(eslint-plugin-security@4.2.0)(eslint-plugin-simple-import-sort@14.0.0(eslint@10.13.0(supports-color@8.1.1)))(eslint@10.13.0(supports-color@8.1.1))(globals@17.13.0)
       '@panates/eslint-config-ts':
-        specifier: ^2.3.3
+        specifier: ^2.3.4
         version: 2.3.4(@eslint/js@10.0.1(eslint@10.13.0(supports-color@8.1.1)))(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@8.1.1)))(eslint-plugin-import-x@4.17.1(@typescript-eslint/utils@8.72.1(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-prettier@5.5.7(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@8.1.1)))(eslint@10.13.0(supports-color@8.1.1))(prettier@3.9.10))(eslint-plugin-security@4.2.0)(eslint-plugin-simple-import-sort@14.0.0(eslint@10.13.0(supports-color@8.1.1)))(eslint@10.13.0(supports-color@8.1.1))(globals@17.13.0)(typescript-eslint@8.72.1(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(typescript@6.0.3)
       '@panates/rman-preset':
-        specifier: ^2.1.1
+        specifier: ^2.2.1
         version: 2.2.1(dpdm@4.3.0)(eslint@10.13.0(supports-color@8.1.1))(prettier@3.9.10)(rman@2.39.0)
       '@panates/tsconfig':
         specifier: ^2.1.8
@@ -191,10 +191,10 @@ importers:
         specifier: ^10.0.10
         version: 10.0.10
       '@types/node':
-        specifier: ^26.6.5
-        version: 26.6.5
+        specifier: ^26.6.6
+        version: 26.6.6
       '@types/sinon':
-        specifier: ^22.0.1
+        specifier: ^22.0.2
         version: 22.0.2
       c8:
         specifier: ^12.0.0
@@ -206,8 +206,8 @@ importers:
         specifier: ^12.0.3
         version: 12.0.3
       postgrejs:
-        specifier: ^3.14.0
-        version: 3.14.0
+        specifier: ^3.14.1
+        version: 3.14.1
       putil-varhelpers:
         specifier: ^1.7.0
         version: 1.7.0
@@ -313,8 +313,8 @@ importers:
         specifier: ^30.5.2
         version: 30.5.2
       postgrejs:
-        specifier: ^3.14.0
-        version: 3.14.0
+        specifier: ^3.14.1
+        version: 3.14.1
 
   packages/mariadb:
     dependencies:
@@ -409,19 +409,19 @@ importers:
         specifier: ^3.5.4
         version: 3.5.4
       mssql:
-        specifier: ^12.7.11
+        specifier: ^12.7.13
         version: 12.7.13(supports-color@8.1.1)
       mysql2:
         specifier: ^3.24.6
-        version: 3.24.6(@types/node@26.6.5)
+        version: 3.24.6(@types/node@26.6.6)
       oracledb:
         specifier: ^26.0.0
         version: 26.0.0
       postgrejs:
-        specifier: ^3.14.0
-        version: 3.14.0
+        specifier: ^3.14.1
+        version: 3.14.1
       sql.js:
-        specifier: ^1.15.1
+        specifier: ^1.15.2
         version: 1.15.2
 
   packages/mssql:
@@ -449,7 +449,7 @@ importers:
         specifier: ^30.5.2
         version: 30.5.2
       mssql:
-        specifier: ^12.7.11
+        specifier: ^12.7.13
         version: 12.7.13(supports-color@8.1.1)
 
   packages/mssql-dialect:
@@ -485,7 +485,7 @@ importers:
         version: 30.5.2
       mysql2:
         specifier: ^3.24.6
-        version: 3.24.6(@types/node@26.6.5)
+        version: 3.24.6(@types/node@26.6.6)
 
   packages/mysql-dialect:
     dependencies:
@@ -525,23 +525,23 @@ importers:
         version: 2.8.1
     devDependencies:
       '@nestjs/common':
-        specifier: ^12.2.0
+        specifier: ^12.3.2
         version: 12.3.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
       '@nestjs/core':
-        specifier: ^12.2.0
+        specifier: ^12.3.2
         version: 12.3.2(@nestjs/common@12.3.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/platform-express@12.3.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/platform-express':
-        specifier: ^12.2.0
+        specifier: ^12.3.2
         version: 12.3.2(@nestjs/common@12.3.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.3.2)(supports-color@8.1.1)
       '@nestjs/testing':
-        specifier: ^12.2.0
+        specifier: ^12.3.2
         version: 12.3.2(@nestjs/common@12.3.2(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.3.2)(@nestjs/platform-express@12.3.2)
       expect:
         specifier: ^30.5.2
         version: 30.5.2
       postgrejs:
-        specifier: ^3.14.0
-        version: 3.14.0
+        specifier: ^3.14.1
+        version: 3.14.1
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -583,8 +583,8 @@ importers:
         specifier: ^2.8.1
         version: 2.8.1
       valgen:
-        specifier: ^7.0.5
-        version: 7.0.5
+        specifier: ^7.0.6
+        version: 7.0.6
     devDependencies:
       expect:
         specifier: ^30.5.2
@@ -615,8 +615,8 @@ importers:
         specifier: ^30.5.2
         version: 30.5.2
       postgrejs:
-        specifier: ^3.14.0
-        version: 3.14.0
+        specifier: ^3.14.1
+        version: 3.14.1
 
   packages/postgres-dialect:
     dependencies:
@@ -688,7 +688,7 @@ importers:
         specifier: ^30.5.2
         version: 30.5.2
       sql.js:
-        specifier: ^1.15.1
+        specifier: ^1.15.2
         version: 1.15.2
 
 packages:
@@ -1424,8 +1424,8 @@ packages:
   '@types/mssql@12.3.0':
     resolution: {integrity: sha512-+jy+AJtfuTDI5+nhh0hDNcir1p8P+pf+qsHXpUpYvg7EikxUUePBe+a+Kr6j/Xs89o4EbHlVzrh0HOxbqWM31Q==}
 
-  '@types/node@26.6.5':
-    resolution: {integrity: sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==}
+  '@types/node@26.6.6':
+    resolution: {integrity: sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==}
 
   '@types/oracledb@26.0.0':
     resolution: {integrity: sha512-+i/QLxN0k2S5AZLohesnRgrp5uHhjjJf+sMbAkstfurPBtKq/i4fJ8lI3lSQYLraS3mV10oknrr1hrOAYotrLg==}
@@ -2710,8 +2710,8 @@ packages:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
 
-  postgrejs@3.14.0:
-    resolution: {integrity: sha512-E45e+Gn02bOIQ1qAkBau9FNJcHGJ2Np0rkcmN3kho0y+oGQ28p5+opMq4uYRMz84G2Asn0o1wqyezzqnmWIyjQ==}
+  postgrejs@3.14.1:
+    resolution: {integrity: sha512-UETatQO7G7Uwo07I4/UlwPGbf/K40s8tozIRJep9EmQC1rfu541HjhyDJIuio0j+b7ZSLAYncgET8pERHE0BHQ==}
     engines: {node: '>=20.0'}
 
   power-tasks@1.14.2:
@@ -3105,9 +3105,9 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
-  valgen@7.0.5:
-    resolution: {integrity: sha512-S6UncKd3gE8yqU00j/512FFgs0T7yAQObaoCSALzBQJNe5aHBwdWbmMHDKiSHp8Nwyhrm8co9mTw/Ovyi42wIA==}
-    engines: {node: '>=20.0'}
+  valgen@7.0.6:
+    resolution: {integrity: sha512-3Qe8g8tE1peemiCMYsQmOKC0raOFalI59CjRbwSqPCXfd3wwOK70BJyZOUdOJar+1pGhmsCJX5++V4rvArDgAg==}
+    engines: {node: '>=22.0'}
 
   validate-npm-package-name@8.0.0:
     resolution: {integrity: sha512-SCv6OOV6Xj2/3cXy3dGmADluJTNcL3o7hZAglNPTe+WYuEuvxgJzxPrSDLZhF+CwyQOubqgecjMmTJGMVLWjYQ==}
@@ -3438,7 +3438,7 @@ snapshots:
 
   '@jest/pattern@30.5.0':
     dependencies:
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       jest-regex-util: 30.5.0
 
   '@jest/schemas@30.5.0':
@@ -3451,7 +3451,7 @@ snapshots:
       '@jest/schemas': 30.5.0
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -3896,23 +3896,23 @@ snapshots:
 
   '@types/mssql@12.3.0(supports-color@8.1.1)':
     dependencies:
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       tarn: 3.1.2
       tedious: 20.3.8(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@types/node@26.6.5':
+  '@types/node@26.6.6':
     dependencies:
       undici-types: 8.9.0
 
   '@types/oracledb@26.0.0':
     dependencies:
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
 
   '@types/readable-stream@4.0.25':
     dependencies:
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
 
   '@types/sinon@22.0.2':
     dependencies:
@@ -3921,7 +3921,7 @@ snapshots:
   '@types/sql.js@1.4.11':
     dependencies:
       '@types/emscripten': 1.41.6
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
 
   '@types/stack-utils@2.0.3': {}
 
@@ -4876,7 +4876,7 @@ snapshots:
     dependencies:
       '@jest/expect-utils': 30.5.2
       '@jest/types': 30.5.1
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       jest-util: 30.5.1
 
   jest-regex-util@30.5.0: {}
@@ -4884,7 +4884,7 @@ snapshots:
   jest-util@30.5.1:
     dependencies:
       '@jest/types': 30.5.1
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       chalk: 4.1.2
       ci-info: 4.4.0
       graceful-fs: 4.2.11
@@ -4989,7 +4989,7 @@ snapshots:
   mariadb@3.5.4:
     dependencies:
       '@types/geojson': 7946.0.16
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       denque: 2.1.0
       iconv-lite: 0.7.3
       lru-cache: 11.5.3
@@ -5074,9 +5074,9 @@ snapshots:
       busboy: 1.6.0
       type-is: 1.6.18
 
-  mysql2@3.24.6(@types/node@26.6.5):
+  mysql2@3.24.6(@types/node@26.6.6):
     dependencies:
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       aws-ssl-profiles: 1.1.2
       generate-function: 2.3.1
       iconv-lite: 0.7.3
@@ -5222,7 +5222,7 @@ snapshots:
 
   pirates@4.0.7: {}
 
-  postgrejs@3.14.0:
+  postgrejs@3.14.1:
     dependencies:
       '@jsopen/objects': 2.3.4
       doublylinked: 2.5.6
@@ -5547,7 +5547,7 @@ snapshots:
       '@azure/identity': 4.14.0(supports-color@8.1.1)
       '@azure/keyvault-keys': 4.10.2(supports-color@8.1.1)
       '@js-joda/core': 6.3.0
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
       bl: 6.1.6
       iconv-lite: 0.7.3
       js-md4: 0.3.2
@@ -5669,7 +5669,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
-  valgen@7.0.5:
+  valgen@7.0.6:
     dependencies:
       '@browsery/validator': 13.15.35
       '@jsopen/objects': 2.3.4
