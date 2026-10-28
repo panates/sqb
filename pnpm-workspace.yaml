@@ -6,7 +6,6 @@ allowBuilds:
   '@swc/core': false
   oracledb: false
   unrs-resolver: false
-minimumReleaseAgeExclude:
-  - '@types/node@26.6.6'
-  - postgrejs@3.14.1
-  - valgen@7.0.6
+# pnpm holds back versions published less than a day ago by default;
+# this repository takes them as soon as they are out.
+minimumReleaseAge: 0
