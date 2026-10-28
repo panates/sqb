@@ -174,7 +174,7 @@ importers:
         version: 2.3.4(@eslint/js@10.0.1(eslint@10.13.0(supports-color@8.1.1)))(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@8.1.1)))(eslint-plugin-import-x@4.17.1(@typescript-eslint/utils@8.72.1(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-prettier@5.5.7(eslint-config-prettier@10.1.8(eslint@10.13.0(supports-color@8.1.1)))(eslint@10.13.0(supports-color@8.1.1))(prettier@3.9.10))(eslint-plugin-security@4.2.0)(eslint-plugin-simple-import-sort@14.0.0(eslint@10.13.0(supports-color@8.1.1)))(eslint@10.13.0(supports-color@8.1.1))(globals@17.13.0)(typescript-eslint@8.72.1(eslint@10.13.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(typescript@6.0.3)
       '@panates/rman-preset':
         specifier: ^2.2.1
-        version: 2.2.1(dpdm@4.3.0)(eslint@10.13.0(supports-color@8.1.1))(prettier@3.9.10)(rman@2.39.0)
+        version: 2.2.1(dpdm@4.3.0)(eslint@10.13.0(supports-color@8.1.1))(prettier@3.9.10)(rman@2.40.1)
       '@panates/tsconfig':
         specifier: ^2.1.8
         version: 2.1.8
@@ -777,8 +777,8 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@borewit/text-codec@0.2.2':
-    resolution: {integrity: sha512-DDaRehssg1aNrH4+2hnj1B7vnUGEjU6OIlyRdkMd0aUdIUvKXrJfXsy8LVtXAy7DRvYVluWbMspsRhz2lcW0mQ==}
+  '@borewit/text-codec@0.2.3':
+    resolution: {integrity: sha512-49CycTz1aAZmvFcwkeFyhud1HUmRIB5Tabf7ALV+VA4Iu85MTfz2cUwzPagMFAdVBvrWdkCxG67I30tUwwpKsw==}
 
   '@browsery/validator@13.15.35':
     resolution: {integrity: sha512-G8MJCQ61UcIQoRqHG0JGgpXOoOtLUdW7M2PH3axNc8QUk+VGAFzprckMJ0qnAyQHxNjYt0oz1bpAT57nBhFbQg==}
@@ -2826,8 +2826,8 @@ packages:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  rman@2.39.0:
-    resolution: {integrity: sha512-nkwf51Am5kWUpoGzbFIJwYEo3b0WHzcc6uXj2dX94XQ05JctPIk/jBZDjNw4vYpUu7BAKEgeJ6X6cVkBx1e2kg==}
+  rman@2.40.1:
+    resolution: {integrity: sha512-HhU5JvQ3h6MbiK7rW0spQBBH8qNHjYPlUqP63uP8wH+7v6OlIO2qKdN45DqnkB3oK32lr1hoBnZG0wQWnwrF4g==}
     engines: {node: '>=20.0'}
     hasBin: true
 
@@ -3324,7 +3324,7 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@borewit/text-codec@0.2.2': {}
+  '@borewit/text-codec@0.2.3': {}
 
   '@browsery/validator@13.15.35': {}
 
@@ -3726,13 +3726,13 @@ snapshots:
       eslint-plugin-simple-import-sort: 14.0.0(eslint@10.13.0(supports-color@8.1.1))
       globals: 17.13.0
 
-  '@panates/rman-preset@2.2.1(dpdm@4.3.0)(eslint@10.13.0(supports-color@8.1.1))(prettier@3.9.10)(rman@2.39.0)':
+  '@panates/rman-preset@2.2.1(dpdm@4.3.0)(eslint@10.13.0(supports-color@8.1.1))(prettier@3.9.10)(rman@2.40.1)':
     dependencies:
       '@npmcli/package-json': 8.0.0
       dpdm: 4.3.0
       eslint: 10.13.0(supports-color@8.1.1)
       prettier: 3.9.10
-      rman: 2.39.0
+      rman: 2.40.1
       tinyglobby: 0.2.17
 
   '@panates/tsconfig@2.1.8': {}
@@ -5324,7 +5324,7 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  rman@2.39.0:
+  rman@2.40.1:
     dependencies:
       '@jsopen/objects': 2.3.4
       '@netlify/parse-npm-script': 0.1.2
@@ -5574,7 +5574,7 @@ snapshots:
 
   token-types@6.1.2:
     dependencies:
-      '@borewit/text-codec': 0.2.2
+      '@borewit/text-codec': 0.2.3
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
