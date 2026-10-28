@@ -18,9 +18,9 @@
     "sql.js": "^1.15.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.3.1",
-    "@sqb/connect": "^6.3.1",
-    "@sqb/sqlite-dialect": "^6.3.1",
+    "@sqb/builder": "workspace:^",
+    "@sqb/connect": "workspace:^",
+    "@sqb/sqlite-dialect": "workspace:^",
     "sql.js": "^1.15.1"
   },
   "type": "module",

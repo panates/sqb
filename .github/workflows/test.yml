@@ -149,7 +149,7 @@ jobs:
           rman lint
 
       - name: Run unit tests
-        run: npm run citest
+        run: pnpm run citest
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
           MYSQL_HOST: 127.0.0.1

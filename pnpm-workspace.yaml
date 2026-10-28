@@ -1,0 +1,8 @@
+# pnpm reads its workspace from here; rman still reads package.json's
+# "workspaces", so the two list the same packages.
+packages:
+  - 'packages/*'
+allowBuilds:
+  '@swc/core': false
+  oracledb: false
+  unrs-resolver: false

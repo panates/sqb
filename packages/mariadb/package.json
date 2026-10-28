@@ -16,9 +16,9 @@
     "mariadb": "^3.5.4"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.3.1",
-    "@sqb/connect": "^6.3.1",
-    "@sqb/mariadb-dialect": "^6.3.1",
+    "@sqb/builder": "workspace:^",
+    "@sqb/connect": "workspace:^",
+    "@sqb/mariadb-dialect": "workspace:^",
     "mariadb": "^3.5.4"
   },
   "type": "module",

@@ -15,9 +15,9 @@
     "expect": "^30.5.2"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.3.1",
-    "@sqb/connect": "^6.3.1",
-    "@sqb/sqlite-dialect": "^6.3.1"
+    "@sqb/builder": "workspace:^",
+    "@sqb/connect": "workspace:^",
+    "@sqb/sqlite-dialect": "workspace:^"
   },
   "type": "module",
   "module": "./index.js",

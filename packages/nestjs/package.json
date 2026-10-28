@@ -27,8 +27,8 @@
   "peerDependencies": {
     "@nestjs/common": ">=7.4.0",
     "@nestjs/core": ">=7.4.0",
-    "@sqb/builder": "^6.3.1",
-    "@sqb/connect": "^6.3.1",
+    "@sqb/builder": "workspace:^",
+    "@sqb/connect": "workspace:^",
     "reflect-metadata": "^0.2.2",
     "rxjs": ">=6.6.0"
   },

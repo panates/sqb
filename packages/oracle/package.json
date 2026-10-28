@@ -12,9 +12,9 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.3.1",
-    "@sqb/connect": "^6.3.1",
-    "@sqb/oracle-dialect": "^6.3.1",
+    "@sqb/builder": "workspace:^",
+    "@sqb/connect": "workspace:^",
+    "@sqb/oracle-dialect": "workspace:^",
     "oracledb": ">=6.4.0"
   },
   "devDependencies": {
