@@ -1,7 +1,7 @@
 {
   "name": "@sqb/oracle",
   "description": "SQB serialization extension for Oracle database",
-  "version": "6.3.1",
+  "version": "6.3.2",
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
