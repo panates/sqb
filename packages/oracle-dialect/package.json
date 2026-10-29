@@ -9,11 +9,11 @@
     "test": "mocha"
   },
   "dependencies": {
-    "valgen": "^7.0.5",
+    "valgen": "^7.0.6",
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.3.1"
+    "@sqb/builder": "workspace:^"
   },
   "devDependencies": {
     "expect": "^30.5.2"

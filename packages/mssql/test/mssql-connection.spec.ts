@@ -17,6 +17,11 @@ describe('mssql:MssqlConnection', () => {
       expect(r.sql).toStrictEqual('select @a as a');
     });
 
+    it('should keep the whole sql when it starts with a line break', () => {
+      const r = normalize('\n  select :a as a', { a: 1 });
+      expect(r.sql).toStrictEqual('\n  select @a as a');
+    });
+
     it('should replace multiple distinct params', () => {
       const r = normalize('select :a, :b', { a: 1, b: 2 });
       expect(r.sql).toStrictEqual('select @a, @b');

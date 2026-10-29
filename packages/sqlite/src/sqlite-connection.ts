@@ -163,7 +163,7 @@ export class SqliteConnection implements Adapter.Connection {
     if (query.cursor) {
       out.cursor = cursor;
     } else {
-      out.rows = await cursor.fetch(query.fetchRows || 100);
+      out.rows = await cursor.fetch(query.fetchRows || Infinity);
     }
     return out;
   }

@@ -16,26 +16,26 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "@sqb/builder": "^6.3.1",
-    "@sqb/connect": "^6.3.1",
-    "@sqb/mariadb": "^6.3.1",
-    "@sqb/mssql": "^6.3.1",
-    "@sqb/mysql": "^6.3.1",
-    "@sqb/oracle": "^6.3.1",
-    "@sqb/postgres": "^6.3.1",
-    "@sqb/sqlite": "^6.3.1",
-    "@sqb/sqljs": "^6.3.1"
+    "@sqb/builder": "workspace:^",
+    "@sqb/connect": "workspace:^",
+    "@sqb/mariadb": "workspace:^",
+    "@sqb/mssql": "workspace:^",
+    "@sqb/mysql": "workspace:^",
+    "@sqb/oracle": "workspace:^",
+    "@sqb/postgres": "workspace:^",
+    "@sqb/sqlite": "workspace:^",
+    "@sqb/sqljs": "workspace:^"
   },
   "devDependencies": {
-    "@types/oracledb": "^26.0.0",
+    "@types/oracledb": "^26.0.1",
     "@types/sql.js": "^1.4.11",
     "expect": "^30.5.2",
     "mariadb": "^3.5.4",
-    "mssql": "^12.7.11",
+    "mssql": "^12.7.13",
     "mysql2": "^3.24.6",
     "oracledb": "^26.0.0",
-    "postgrejs": "^3.14.0",
-    "sql.js": "^1.15.1"
+    "postgrejs": "^3.14.1",
+    "sql.js": "^1.15.2"
   },
   "type": "module",
   "module": "./index.js",

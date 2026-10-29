@@ -149,7 +149,7 @@ export class SqljsConnection implements Adapter.Connection {
         if (query.cursor) {
           out.cursor = cursor;
           stmt = undefined;
-        } else out.rows = await cursor.fetch(query.fetchRows || 100);
+        } else out.rows = await cursor.fetch(query.fetchRows || Infinity);
       }
       return out;
     } finally {

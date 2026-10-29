@@ -496,10 +496,9 @@ export class SqbConnection extends TypedEventEmitterClass<SqbConnectionEvents>(
         coalesce(options.ignoreNulls, defaults.ignoreNulls),
         false,
       ),
-      fetchRows: coerceToInt(
-        coalesce(options.fetchRows, defaults.fetchRows),
-        100,
-      ),
+      // No default here: a plain execute returns every row unless a limit
+      // is set, and a cursor falls back to its own prefetch batch size.
+      fetchRows: coerceToInt(coalesce(options.fetchRows, defaults.fetchRows)),
       fieldNaming: coalesce(
         options.namingStrategy,
         defaults.fieldNaming,

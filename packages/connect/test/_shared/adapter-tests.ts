@@ -155,6 +155,17 @@ export function initAdapterTests(
     expect(result.rows!.length).toStrictEqual(5);
   });
 
+  it('should return every row when fetchRows is not set', async () => {
+    connection = await adapter.connect(clientConfig);
+    // The seeded customers have ids 1-100; the cross join yields 300 rows.
+    const result = await adapterExecute(
+      'select c1.id from customers c1, customers c2 where c1.id <= 100 and c2.id <= 3',
+      { objectRows: false },
+    );
+    expect(result.rows).toBeDefined();
+    expect(result.rows!.length).toStrictEqual(300);
+  });
+
   if (adapter.features?.fetchAsString?.includes(DataType.DATE)) {
     it('should fetch date fields as string (fetchAsString)', async () => {
       connection = await adapter.connect(clientConfig);

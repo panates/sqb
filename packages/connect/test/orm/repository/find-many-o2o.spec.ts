@@ -149,7 +149,7 @@ where (exists (select 1 from countries K
       });
       expect(rows).toBeDefined();
       expect(rows.length).toBeGreaterThan(0);
-      const left = rows.map(x => x.country!.code);
+      const left = rows.map(x => x.country?.code);
       const sorted = [...left];
       sorted.sort();
       expect(left).toStrictEqual(sorted);
@@ -293,7 +293,7 @@ where (exists (select 1 from countries K
       });
       expect(rows).toBeDefined();
       expect(rows.length).toBeGreaterThan(0);
-      const left = rows.map(x => x.country!.code);
+      const left = rows.map(x => x.country?.code);
       const sorted = [...left];
       sorted.sort();
       expect(left).toStrictEqual(sorted);
@@ -322,7 +322,7 @@ where (exists (select 1 from countries K
       });
       expect(rows).toBeDefined();
       expect(rows.length).toBeGreaterThan(0);
-      const left = rows.map(x => x.country!.code);
+      const left = rows.map(x => x.country?.code);
       const sorted = [...left];
       sorted.sort();
       expect(left).toStrictEqual(sorted);

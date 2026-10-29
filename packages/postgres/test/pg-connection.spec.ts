@@ -18,6 +18,19 @@ describe('postgres:PgConnection', () => {
       expect(r.params).toStrictEqual([1]);
     });
 
+    it('should keep the whole sql when it starts with a line break', () => {
+      const r = normalize(
+        '\n  with x as (select 1 as id) select * from x where id = :a',
+        {
+          a: 1,
+        },
+      );
+      expect(r.sql).toStrictEqual(
+        '\n  with x as (select 1 as id) select * from x where id = $1',
+      );
+      expect(r.params).toStrictEqual([1]);
+    });
+
     it('should reuse the same index for a repeated param', () => {
       const r = normalize('select :a, :b, :a', { a: 1, b: 2 });
       expect(r.sql).toStrictEqual('select $1, $2, $1');

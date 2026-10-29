@@ -156,8 +156,10 @@ export class OraConnection implements Adapter.Connection {
         ? oracledb.OUT_FORMAT_OBJECT
         : oracledb.OUT_FORMAT_ARRAY,
     };
-    if (request.cursor) oraOptions.fetchArraySize = request.fetchRows;
-    else oraOptions.maxRows = request.fetchRows;
+    if (request.fetchRows) {
+      if (request.cursor) oraOptions.fetchArraySize = request.fetchRows;
+      else oraOptions.maxRows = request.fetchRows;
+    }
 
     const out: Adapter.Response = {};
     this.intlcon.action = request.action || '';
