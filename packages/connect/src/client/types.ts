@@ -119,8 +119,9 @@ export interface ClientDefaults {
   ignoreNulls?: boolean;
 
   /**
-   * Sets how many row will be fetched at a time
-   * Default = 10
+   * In "cursor" mode; how many rows are prefetched at a time (default = 100).
+   * In regular mode; the maximum number of rows returned. When not set (or 0),
+   * all rows are returned.
    */
   fetchRows?: number;
 
@@ -164,9 +165,9 @@ export interface QueryExecuteOptions {
   /**
    * In "cursor" mode; it provides an initial suggested number of rows to prefetch.
    * Prefetching is a tuning option to maximize data transfer efficiency and
-   * minimize round-trips to the database. In regular mode;
+   * minimize round-trips to the database (default = 100). In regular mode;
    * it provides the maximum number of rows that are fetched from Connection instance.
-   * Default = 10
+   * When not set (or 0), all rows are returned.
    */
   fetchRows?: number;
 

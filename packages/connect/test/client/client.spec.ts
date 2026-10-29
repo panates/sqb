@@ -101,6 +101,12 @@ describe('connect:Client', () => {
     expect(result.rows![0].id).toStrictEqual(1);
   });
 
+  it('should return every row of a plain execute when fetchRows is not set', async () => {
+    const result = await client.execute('select generate_series(1, 250) as n');
+    expect(result.rows).toBeDefined();
+    expect(result.rows!.length).toStrictEqual(250);
+  });
+
   it('should limit returning record with fetchRows property', async () => {
     const result = await client.execute(Select().from('customers'), {
       objectRows: false,
