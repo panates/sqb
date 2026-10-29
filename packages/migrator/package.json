@@ -27,7 +27,7 @@
     "@sqb/sqljs": "workspace:^"
   },
   "devDependencies": {
-    "@types/oracledb": "^26.0.0",
+    "@types/oracledb": "^26.0.1",
     "@types/sql.js": "^1.4.11",
     "expect": "^30.5.2",
     "mariadb": "^3.5.4",
