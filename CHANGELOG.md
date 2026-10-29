@@ -1,6 +1,27 @@
 # Changelog
 
-<!-- rman:documented-up-to 21959440db04190268fb50626bc27bed0a5309ee -->
+<!-- rman:documented-up-to 9733ba73c8ecddc952414201e59158cbd49ea104 -->
+
+## v6.3.2 (2026-10-29)
+
+### 🐛 Bug Fixes
+
+- Return all rows when fetchRows is not set (fb7a6d2)
+- Keep SQL that starts with a line break when converting named params (dea25b4)
+
+### 🧹 Chores
+
+- sync lockfile (9c82dd8)
+- switch the repository from npm to pnpm (9dc051d)
+- update dependencies across packages and lockfile (34f010f)
+- turn off pnpm's minimum release age (90e4513)
+- update @types/oracledb to 26.0.1 (b48b579)
+
+### 💬 General Changes
+
+- add the pre-push checklist to CLAUDE.md (61d9436)
+
+---
 
 ## v6.3.1 (2026-10-23)
 
