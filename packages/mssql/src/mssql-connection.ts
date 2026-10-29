@@ -273,7 +273,7 @@ export class MssqlConnection implements Adapter.Connection {
     // separate tokens ("[col", ":name", "]") - track bracket state
     // explicitly so a ":name" inside one isn't mistaken for a param.
     let inBracket = false;
-    while ((token = tokenizer.next())) {
+    while ((token = tokenizer.next()) != null) {
       const trimmed = token.trim();
       if (inBracket) {
         if (trimmed.includes(']')) inBracket = false;

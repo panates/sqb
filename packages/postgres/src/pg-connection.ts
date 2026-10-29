@@ -288,7 +288,7 @@ export class PgConnection implements Adapter.Connection {
     // preceded by whitespace merged into the same token), so there's
     // nothing else in the token to rule it out with.
     let prevToken = '';
-    while ((token = tokenizer.next())) {
+    while ((token = tokenizer.next()) != null) {
       const m = NAMED_PARAM_PATTERN.exec(token);
       if (m && prevToken !== ':') {
         const [, leading, k] = m;
