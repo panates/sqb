@@ -423,6 +423,7 @@ export class FindCommand {
     if (this._sort) {
       query.orderBy(...this._sort);
     }
+    if (args.limit) query.limit(args.limit);
     if (args.offset) query.offset(args.offset);
 
     // joins must be added last
