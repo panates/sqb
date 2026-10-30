@@ -9,7 +9,7 @@ describe('connect:Client', () => {
   const insertedIds: any[] = [];
 
   before(async () => {
-    client = await initClient();
+    client = await initClient(undefined, { writes: true });
   });
 
   after(async () => {

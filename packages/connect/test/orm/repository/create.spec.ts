@@ -9,7 +9,7 @@ describe('connect:Repository.create()', () => {
   let client: SqbClient;
 
   before(async () => {
-    client = await initClient();
+    client = await initClient(undefined, { writes: true });
   });
 
   after(async () => {
@@ -215,7 +215,7 @@ describe('connect:createOnly()', () => {
   let client: SqbClient;
 
   before(async () => {
-    client = await initClient();
+    client = await initClient(undefined, { writes: true });
   });
 
   after(async () => {
