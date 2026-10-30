@@ -1,6 +1,24 @@
 # Changelog
 
-<!-- rman:documented-up-to 9733ba73c8ecddc952414201e59158cbd49ea104 -->
+<!-- rman:documented-up-to 64b6f81318d368057f05131b3cfb98e9e9bbb00e -->
+
+## v6.3.3 (2026-10-30)
+
+### 🐛 Bug Fixes
+
+- Apply findMany limit in the SQL query (54e406f)
+
+### 🧪 Tests
+
+- run the tests that write rows against a schema of their own (a50f7b9)
+
+### 🧹 Chores
+
+- run the tests when the lockfile, rman/lint config or test data change (1aaf97b)
+- skip the CodeQL scan of pushes that only carry a release (38a7f49)
+- sync lockfile (8e4f0ba)
+
+---
 
 ## v6.3.2 (2026-10-29)
 
