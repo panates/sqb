@@ -9,7 +9,7 @@ let client: SqbClient;
 
 describe('connect:Repository.updateOnly()', () => {
   before(async () => {
-    client = await initClient();
+    client = await initClient(undefined, { writes: true });
   });
 
   after(async () => {
@@ -95,7 +95,7 @@ describe('connect:Repository.updateOnly()', () => {
 
 describe('connect:updateAll()', () => {
   before(async () => {
-    client = await initClient();
+    client = await initClient(undefined, { writes: true });
   });
 
   after(async () => {

@@ -7,7 +7,7 @@ describe('connect:Repository.delete()', () => {
   let client: SqbClient;
 
   before(async () => {
-    client = await initClient();
+    client = await initClient(undefined, { writes: true });
   });
 
   after(async () => {

@@ -21,9 +21,20 @@ on:
       # a file means the tests quietly do not run and nobody finds out, while one that matches too
       # much costs a minute of CI.
       - 'packages/*/*'
-      - 'support/test/**'
+      # The test data lives in `support/test-data` and `support/test-db`; the `support/test/**`
+      # this replaces matched neither.
+      - 'support/**'
       - '.mocharc.cjs'
       - 'package.json'
+      # **The lockfile and the workspace file too.** They decide what gets installed, and release.yml
+      # skips the tests for a pull request merged from dev, so a dependency-only change left out
+      # here reached a release without ever being tested.
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      # What `rman check` and `rman lint` below run with.
+      - '.rmanrc.yml'
+      - 'eslint.config.mjs'
+      - '.prettierrc'
       - 'tsconfig*.json'
       - '.github/workflows/test.yml'
 

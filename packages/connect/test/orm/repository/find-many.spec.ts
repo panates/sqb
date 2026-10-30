@@ -28,6 +28,22 @@ describe('connect:Repository.findMany()', () => {
     expect(rows[0].birthDate).toBeUndefined();
   });
 
+  it('should limit rows in the sql, not only when fetching', async () => {
+    const repo = client.getRepository(Customer);
+    let request: any = {};
+    client.once('execute', req => (request = req));
+    const rows = await repo.findMany({
+      projection: ['id'],
+      sort: ['id'],
+      limit: 5,
+      offset: 10,
+    });
+    expect(request.sql).toStrictEqual(
+      'select T.ID as T_ID from customers T order by T.ID LIMIT 5 OFFSET 10',
+    );
+    expect(rows.map(r => r.id)).toStrictEqual([11, 12, 13, 14, 15]);
+  });
+
   it('should return embedded fields', async () => {
     const repo = client.getRepository(Customer);
     const rows = await repo.findMany({ limit: 1 });

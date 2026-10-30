@@ -1,0 +1,64 @@
+name: CodeQL
+# **Advanced setup, replacing the repository's default setup.** The default setup analyzed every
+# push to main, and a release pushes to main again after the merge it releases - the release
+# commit, and at times a separate lockfile sync - so every release scanned the same code two or
+# three times. The default setup cannot filter paths; this workflow keeps its languages, query
+# suite and weekly schedule and skips the pushes that change nothing but release bookkeeping.
+on:
+  push:
+    branches:
+      - main
+    # **Only what a release commit changes.** A push is skipped when *every* file it touches is
+    # listed here: the version bumps, the changelog, the lockfile, and `src/constants.ts`, which
+    # `rman version` stamps with the version (see `version.stamp` in .rmanrc) and nobody edits.
+    # A merge from dev always carries the code it releases, so it is still analyzed.
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - 'package.json'
+      - 'packages/*/package.json'
+      - 'packages/*/src/constants.ts'
+      - 'pnpm-lock.yaml'
+
+  pull_request:
+    branches:
+      - main
+
+  schedule:
+    - cron: '30 15 * * 4'
+
+  workflow_dispatch:
+
+# A newer push to a pull request supersedes the run before it; on main every push is analyzed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - actions
+          - javascript-typescript
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # `build-mode: none` - neither language needs a build to be analyzed, as with the default setup.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: '/language:${{ matrix.language }}'

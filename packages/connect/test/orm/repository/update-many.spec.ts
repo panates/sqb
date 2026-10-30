@@ -9,7 +9,7 @@ describe('connect:Repository.updateMany()', () => {
   let client: SqbClient;
 
   before(async () => {
-    client = await initClient();
+    client = await initClient(undefined, { writes: true });
   });
 
   after(async () => {
