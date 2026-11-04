@@ -3,7 +3,9 @@
   <img src="https://sqb.panates.com/img/github-hero.webp" width="1280" alt="SQB" />
 </p>
 
-<br>
+# @sqb/migrator
+
+Database migrator for SQB.
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
@@ -126,9 +128,9 @@ make a failed run leave no trace.
 - Support latest JavaScript language standards
 - Lightweight and extensible framework.
 
-You can report bugs and discuss features on the [GitHub issues](https://github.com/sqbjs/sqb/issues) page
+You can report bugs and discuss features on the [GitHub issues](https://github.com/panates/sqb/issues) page
 
-Thanks to all of the great [contributions](https://github.com/sqbjs/sqb/graphs/contributors) to the project.
+Thanks to all of the great [contributions](https://github.com/panates/sqb/graphs/contributors) to the project.
 
 You may want to check detailed [DOCUMENTATION](https://sqbjs.github.io/sqb/)
 
@@ -140,11 +142,11 @@ $ npm install @sqb/migrator --save
 
 ## Node Compatibility
 
-- node >= 20.x
+- Node.js 22 or later.
 
 ### License
 
-SQB is available under [MIT](LICENSE) license.
+SQB is available under the [BSD 3-Clause](https://github.com/panates/sqb/blob/main/LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/migrator.svg
 [npm-url]: https://npmjs.org/package/@sqb/migrator
@@ -153,4 +155,4 @@ SQB is available under [MIT](LICENSE) license.
 [ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
 [ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
 [coveralls-image]: https://coveralls.io/repos/github/panates/sqb/badge.svg?branch=dev
-[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master
+[coveralls-url]: https://coveralls.io/github/panates/sqb?branch=dev
