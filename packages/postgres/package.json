@@ -1,7 +1,7 @@
 {
   "name": "@sqb/postgres",
   "description": "SQB adapter for the postgrejs driver",
-  "version": "6.3.3",
+  "version": "6.3.4",
   "private": true,
   "author": "Panates",
   "license": "BSD-3-Clause",

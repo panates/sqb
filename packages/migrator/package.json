@@ -1,7 +1,7 @@
 {
   "name": "@sqb/migrator",
   "description": "Database migrator for SQB",
-  "version": "6.3.3",
+  "version": "6.3.4",
   "private": true,
   "author": "Panates",
   "license": "BSD-3-Clause",

@@ -1,7 +1,7 @@
 {
   "name": "@sqb/mysql",
   "description": "SQB adapter for the mysql2 driver",
-  "version": "6.3.3",
+  "version": "6.3.4",
   "private": true,
   "author": "Panates",
   "license": "BSD-3-Clause",
