@@ -9,10 +9,13 @@ packages/*/data
 /debug
 *.cache.json
 *.tsbuildinfo
+build/
 junit.xml
 
 # environment variables
 .env
+.env.*
+!.env.example
 env-dev.ts
 
 # Logs
