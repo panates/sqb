@@ -1,9 +1,11 @@
 
-<p style="text-align: center;">
+<p align="center">
   <img src="https://sqb.panates.com/img/github-hero.webp" width="1280" alt="SQB" />
 </p>
 
-<br>
+# @sqb/sqljs
+
+SQB adapter for the sql.js driver.
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
@@ -45,11 +47,11 @@ const client = new SqbClient({
 
 ## Node Compatibility
 
-- node >= 20.x
+- Node.js 22 or later.
 
 ### License
 
-SQB is available under [MIT](LICENSE) license.
+SQB is available under the [BSD 3-Clause](https://github.com/panates/sqb/blob/main/LICENSE) license.
 
 [npm-image]: https://img.shields.io/npm/v/@sqb/sqljs.svg
 [npm-url]: https://npmjs.org/package/@sqb/sqljs
@@ -58,4 +60,4 @@ SQB is available under [MIT](LICENSE) license.
 [ci-test-image]: https://github.com/panates/sqb/actions/workflows/test.yml/badge.svg
 [ci-test-url]: https://github.com/panates/sqb/actions/workflows/test.yml
 [coveralls-image]: https://coveralls.io/repos/github/panates/sqb/badge.svg?branch=dev
-[coveralls-url]: https://coveralls.io/github/sqbjs/sqb?branch=master
+[coveralls-url]: https://coveralls.io/github/panates/sqb?branch=dev

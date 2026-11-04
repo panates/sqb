@@ -1,3 +1,23 @@
+# sqb
+
+SQB is a TypeScript database framework for Node.js, published to npm as `@sqb/*` packages that
+release together under one version (lockstep, `v*` tags).
+
+## Layout
+
+- `packages/builder`: the query builder. `packages/connect`: connection pool, ORM and repositories.
+- `packages/<db>`: the adapters (postgres, mysql, mariadb, mssql, oracle, sqlite, sqljs).
+  `packages/<db>-dialect`: the SQL serializer an adapter loads.
+- `packages/migrator`, `packages/nestjs`.
+- `support/test-data`, `support/test-db`: fixtures the tests load into each database.
+
+## Tests
+
+CI starts PostgreSQL, MySQL 8.4, MariaDB 11, SQL Server 2022 and Oracle Free 23 as services
+(`.github/workflows/test.yml`). Locally, suites for a database that is not running fail with
+connection errors. `@sqb/sqlite` uses `node:sqlite`, so it needs Node.js 22.5 or later; every other
+package declares `engines.node: ">=22"`.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

@@ -9,10 +9,13 @@ packages/*/data
 /debug
 *.cache.json
 *.tsbuildinfo
+build/
 junit.xml
 
 # environment variables
 .env
+.env.*
+!.env.example
 env-dev.ts
 
 # Logs
@@ -34,7 +37,8 @@ lerna-debug.log*
 /.idea
 .project
 .classpath
-/.claude
+.claude/settings.local.json
+.claude/worktrees/
 /graphify-out
 .c9/
 *.launch

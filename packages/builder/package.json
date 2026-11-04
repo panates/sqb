@@ -3,7 +3,7 @@
   "description": "Extensible multi-dialect SQL query builder written with TypeScript",
   "version": "6.3.3",
   "author": "Panates",
-  "private": false,
+  "private": true,
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
   "scripts": {
@@ -16,7 +16,7 @@
     "putil-isplainobject": "^1.1.5",
     "putil-merge": "^3.13.0",
     "putil-varhelpers": "^1.7.0",
-    "tslib": "^2.8.1"
+    "tslib": "^2.9.1"
   },
   "devDependencies": {
     "@types/debug": "^4.1.13",
@@ -33,7 +33,7 @@
     "./package.json": "./package.json"
   },
   "engines": {
-    "node": ">=20.0"
+    "node": ">=22"
   },
   "contributors": [
     "Eray Hanoglu <e.hanoglu@panates.com>",
