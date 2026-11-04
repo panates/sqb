@@ -1,7 +1,7 @@
 {
   "name": "@sqb/nestjs",
   "description": "Nestjs module for data connection using SQB",
-  "version": "6.3.3",
+  "version": "6.3.4",
   "private": true,
   "author": "Panates",
   "license": "BSD-3-Clause",

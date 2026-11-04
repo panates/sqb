@@ -1,6 +1,36 @@
 # Changelog
 
-<!-- rman:documented-up-to 64b6f81318d368057f05131b3cfb98e9e9bbb00e -->
+<!-- rman:documented-up-to 1fd75410b7f2ca84ddae95fe88496e2833f53474 -->
+
+## v6.3.4 (2026-11-04)
+
+### 📚 Documentation
+
+- add the code of conduct, the security policy and issue templates (61d2bff)
+- center README logos with align, not style (59895a1)
+- fix the README top part, Node.js version, license and links (992cd0d)
+- give each package README its name and one sentence (fd149c4)
+- add the project summary, layout and test notes to CLAUDE.md (eb09215)
+- drop the commit message rules copied into CLAUDE.md (4f751f4)
+
+### 🤖 Continuous Integration
+
+- fail a pull request into main that does not come from dev (cffcfd8)
+
+### 🧹 Chores
+
+- remove renovate.json (7488ace)
+- add the lint, check and format root scripts (1632fd5)
+- add the template's ignore entries (38b6d6b)
+- commit .claude/settings.json with the panates plugin (1962d52)
+- declare Node.js >=22 in every manifest (413ffe5)
+- mark published package sources private (ef75983)
+- upgrade dependencies with rman deps -u (be5f795)
+- remove stale test environment variables and an eslint ignore (6f512f4)
+- describe the oracle, postgres and sqljs packages as adapters (78d0143)
+- read the workspace from pnpm-workspace.yaml only (f850f60)
+
+---
 
 ## v6.3.3 (2026-10-30)
 
