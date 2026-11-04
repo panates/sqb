@@ -2,6 +2,7 @@
   "name": "@sqb/oracle-dialect",
   "description": "SQB serialization extension for Oracle database",
   "version": "6.3.3",
+  "private": true,
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
@@ -9,8 +10,8 @@
     "test": "mocha"
   },
   "dependencies": {
-    "valgen": "^7.0.6",
-    "tslib": "^2.8.1"
+    "valgen": "^7.0.7",
+    "tslib": "^2.9.1"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^"
@@ -29,7 +30,7 @@
     "./package.json": "./package.json"
   },
   "engines": {
-    "node": ">=20.0"
+    "node": ">=22"
   },
   "contributors": [
     "Eray Hanoglu <e.hanoglu@panates.com>",

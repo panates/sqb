@@ -1,3 +1,23 @@
+# sqb
+
+SQB is a TypeScript database framework for Node.js, published to npm as `@sqb/*` packages that
+release together under one version (lockstep, `v*` tags).
+
+## Layout
+
+- `packages/builder`: the query builder. `packages/connect`: connection pool, ORM and repositories.
+- `packages/<db>`: the adapters (postgres, mysql, mariadb, mssql, oracle, sqlite, sqljs).
+  `packages/<db>-dialect`: the SQL serializer an adapter loads.
+- `packages/migrator`, `packages/nestjs`.
+- `support/test-data`, `support/test-db`: fixtures the tests load into each database.
+
+## Tests
+
+CI starts PostgreSQL, MySQL 8.4, MariaDB 11, SQL Server 2022 and Oracle Free 23 as services
+(`.github/workflows/test.yml`). Locally, suites for a database that is not running fail with
+connection errors. `@sqb/sqlite` uses `node:sqlite`, so it needs Node.js 22.5 or later; every other
+package declares `engines.node: ">=22"`.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
@@ -22,20 +42,3 @@ steps in order, and push only when all of them pass:
    report those as such rather than as test failures.
 6. Commit any changes these steps made to `package.json` files or `pnpm-lock.yaml` with a `chore:`
    commit, then push.
-
-## Commit messages
-
-Every commit message must start with a type prefix, lowercase, followed by `: ` and a concise, imperative-mood summary (e.g. `fix: Handle array values in Oracle serializer`).
-
-Allowed types:
-- `feat:` — a new feature or capability
-- `fix:` — a bug fix
-- `refactor:` — code change that doesn't add a feature or fix a bug (renames, restructuring, cleanup)
-- `chore:` — maintenance work: dependency bumps, CI/tooling changes, config
-- `dev:` — internal dev-environment/tooling changes not shipped to consumers (e.g. `.gitignore`, editor/repo scripts)
-- `test:` — adding or updating tests only
-- `docs:` — documentation-only changes
-- `style:` — formatting/whitespace/lint-style changes with no code behavior change
-- `perf:` — a performance improvement
-
-Do not invent other types beyond the nine above unless the user explicitly asks for one. Release/version-bump commits (e.g. `5.0.7`) and `Merge pull request #...` commits are exceptions and do not need a type prefix.
