@@ -3,7 +3,7 @@
   "description": "Extensible multi-dialect SQL query builder written with TypeScript",
   "version": "6.3.3",
   "author": "Panates",
-  "private": false,
+  "private": true,
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
   "scripts": {

@@ -2,6 +2,7 @@
   "name": "@sqb/mariadb",
   "description": "SQB adapter for the mariadb driver",
   "version": "6.3.3",
+  "private": true,
   "author": "Panates",
   "license": "BSD-3-Clause",
   "homepage": "https://www.sqbjs.org",
