@@ -1,6 +1,6 @@
 {
   "name": "@sqb/oracle",
-  "description": "SQB serialization extension for Oracle database",
+  "description": "SQB adapter for the oracledb driver",
   "version": "6.3.3",
   "private": true,
   "author": "Panates",
