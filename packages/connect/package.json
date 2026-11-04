@@ -46,7 +46,7 @@
     "./package.json": "./package.json"
   },
   "engines": {
-    "node": ">=20.0"
+    "node": ">=22"
   },
   "contributors": [
     "Eray Hanoglu <e.hanoglu@panates.com>",
