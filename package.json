@@ -23,6 +23,9 @@
     "precover": "rman clean",
     "precitest": "rman clean",
     "citest": "c8 mocha",
+    "lint": "rman lint",
+    "check": "rman check",
+    "format": "rman format",
     "graph": "graphify update ."
   },
   "devDependencies": {
