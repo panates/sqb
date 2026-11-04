@@ -10,8 +10,8 @@
     "test": "mocha"
   },
   "dependencies": {
-    "valgen": "^7.0.6",
-    "tslib": "^2.8.1"
+    "valgen": "^7.0.7",
+    "tslib": "^2.9.1"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^"
