@@ -37,7 +37,8 @@ lerna-debug.log*
 /.idea
 .project
 .classpath
-/.claude
+.claude/settings.local.json
+.claude/worktrees/
 /graphify-out
 .c9/
 *.launch
