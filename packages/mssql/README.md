@@ -1,5 +1,5 @@
 
-<p style="text-align: center;">
+<p align="center">
   <img src="https://sqb.panates.com/img/github-hero.webp" width="1280" alt="SQB" />
 </p>
 
