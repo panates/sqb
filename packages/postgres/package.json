@@ -1,6 +1,6 @@
 {
   "name": "@sqb/postgres",
-  "description": "SQB serialization extension for PostgreSQL database",
+  "description": "SQB adapter for the postgrejs driver",
   "version": "6.3.3",
   "private": true,
   "author": "Panates",

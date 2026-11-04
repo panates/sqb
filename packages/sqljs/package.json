@@ -1,6 +1,6 @@
 {
   "name": "@sqb/sqljs",
-  "description": "SQB serialization extension for sql.js driver",
+  "description": "SQB adapter for the sql.js driver",
   "version": "6.3.3",
   "private": true,
   "author": "Panates",
