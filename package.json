@@ -14,9 +14,6 @@
     "type": "git",
     "url": "https://github.com/panates/sqb.git"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "build": "rman build",
     "test": "mocha",

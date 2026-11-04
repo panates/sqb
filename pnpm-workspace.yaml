@@ -1,5 +1,4 @@
-# pnpm reads its workspace from here; rman still reads package.json's
-# "workspaces", so the two list the same packages.
+# pnpm and rman (since 2.39.0) read the workspace packages from here.
 packages:
   - 'packages/*'
 allowBuilds:
