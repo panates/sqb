@@ -14,13 +14,13 @@
   },
   "devDependencies": {
     "expect": "^30.5.2",
-    "mariadb": "^3.5.4"
+    "mariadb": "^3.5.5"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^",
     "@sqb/connect": "workspace:^",
     "@sqb/mariadb-dialect": "workspace:^",
-    "mariadb": "^3.5.4"
+    "mariadb": "^3.5.5"
   },
   "type": "module",
   "module": "./index.js",
