@@ -31,7 +31,7 @@
     "@panates/rman-preset": "^2.2.2",
     "@panates/tsconfig": "^2.1.8",
     "@swc-node/register": "^1.12.1",
-    "@swc/core": "^1.16.21",
+    "@swc/core": "^1.16.22",
     "@swc/helpers": "^0.5.24",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.6.6",
@@ -39,7 +39,7 @@
     "c8": "^12.0.0",
     "globals": "^17.14.0",
     "mocha": "^12.0.3",
-    "postgrejs": "^3.14.1",
+    "postgrejs": "^3.15.1",
     "putil-varhelpers": "^1.7.0",
     "tslib": "^2.9.1",
     "typescript": "^6.0.3"

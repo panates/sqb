@@ -14,7 +14,7 @@
     "debug": "^4.4.3",
     "doublylinked": "^2.5.6",
     "fast-tokenizer": "^1.10.1",
-    "lightning-pool": "^4.14.0",
+    "lightning-pool": "^4.14.2",
     "lodash": "^4.18.1",
     "power-tasks": "^1.14.2",
     "putil-isplainobject": "^1.1.5",
@@ -30,7 +30,7 @@
     "@types/lodash": "^4.17.27",
     "cross-dirname": "^0.1.0",
     "expect": "^30.5.2",
-    "postgrejs": "^3.14.1"
+    "postgrejs": "^3.15.1"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^",
