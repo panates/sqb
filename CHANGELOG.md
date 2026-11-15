@@ -1,6 +1,18 @@
 # Changelog
 
-<!-- rman:documented-up-to 1fd75410b7f2ca84ddae95fe88496e2833f53474 -->
+<!-- rman:documented-up-to 2e06a2251695f3cb2a10e7c540975297a925d697 -->
+
+## v6.3.5 (2026-11-15)
+
+### 🤖 Continuous Integration
+
+- fix the stale comment on the Oracle service (f9b8cc0)
+
+### 🧹 Chores
+
+- **deps:** upgrade dependencies (5d3cbe3)
+
+---
 
 ## v6.3.4 (2026-11-04)
 
