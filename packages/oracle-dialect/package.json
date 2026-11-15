@@ -10,7 +10,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "valgen": "^7.0.7",
+    "valgen": "^7.0.8",
     "tslib": "^2.9.1"
   },
   "peerDependencies": {

@@ -16,14 +16,14 @@
     "tslib": "^2.9.1"
   },
   "devDependencies": {
-    "@nestjs/common": "^12.3.3",
-    "@nestjs/core": "^12.3.3",
-    "@nestjs/platform-express": "^12.3.3",
-    "@nestjs/testing": "^12.3.3",
+    "@nestjs/common": "^12.4.2",
+    "@nestjs/core": "^12.4.2",
+    "@nestjs/platform-express": "^12.4.2",
+    "@nestjs/testing": "^12.4.2",
     "expect": "^30.5.2",
-    "postgrejs": "^3.14.1",
+    "postgrejs": "^3.15.1",
     "rxjs": "^7.8.2",
-    "supertest": "^7.3.1"
+    "supertest": "^7.3.2"
   },
   "peerDependencies": {
     "@nestjs/common": ">=7.4.0",

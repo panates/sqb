@@ -117,9 +117,8 @@ jobs:
           --health-timeout=5s
           --health-retries=10
 
-      # Oracle test coverage is currently disabled (describe.skip in
-      # packages/oracle/test/oracledb-adapter.spec.ts) - this service is
-      # wired up and ready for when that test file gets finished.
+      # The Oracle specs in packages/oracle/test run against this service;
+      # without it they fail with ECONNREFUSED.
       oracle:
         image: gvenzl/oracle-free:23-slim
         env:
