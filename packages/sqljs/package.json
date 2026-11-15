@@ -16,13 +16,13 @@
   "devDependencies": {
     "@types/sql.js": "^1.4.11",
     "expect": "^30.5.2",
-    "sql.js": "^1.15.2"
+    "sql.js": "^1.16.0"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^",
     "@sqb/connect": "workspace:^",
     "@sqb/sqlite-dialect": "workspace:^",
-    "sql.js": "^1.15.2"
+    "sql.js": "^1.16.0"
   },
   "type": "module",
   "module": "./index.js",
