@@ -1,6 +1,18 @@
 # Changelog
 
-<!-- rman:documented-up-to 2e06a2251695f3cb2a10e7c540975297a925d697 -->
+<!-- rman:documented-up-to 36b305bda81bd90e29a49069ab0cbf8db3503523 -->
+
+## v6.3.6 (2026-11-20)
+
+### 📚 Documentation
+
+- add the missing H1 to the root README (849b6a6)
+
+### 🧹 Chores
+
+- **deps:** upgrade dependencies (66cc08a)
+
+---
 
 ## v6.3.5 (2026-11-15)
 
