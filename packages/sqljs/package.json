@@ -14,15 +14,15 @@
     "tslib": "^2.9.1"
   },
   "devDependencies": {
-    "@types/sql.js": "^1.4.11",
+    "@types/sql.js": "^1.16.0",
     "expect": "^30.5.2",
-    "sql.js": "^1.15.2"
+    "sql.js": "^1.17.0"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^",
     "@sqb/connect": "workspace:^",
     "@sqb/sqlite-dialect": "workspace:^",
-    "sql.js": "^1.15.2"
+    "sql.js": "^1.17.0"
   },
   "type": "module",
   "module": "./index.js",

@@ -3,6 +3,8 @@
   <img src="https://sqb.panates.com/img/github-hero.webp" width="1280" alt="SQB" />
 </p>
 
+# SQB
+
 SQB is a TypeScript database framework for Node.js: a query builder, connection pooling, an ORM and migrations for PostgreSQL, MySQL, MariaDB, SQL Server, Oracle and SQLite.
 
 [![NPM Version][npm-image]][npm-url]
