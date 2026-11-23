@@ -1,6 +1,22 @@
 # Changelog
 
-<!-- rman:documented-up-to 743a754fe2e9422057762f7f342ee37b46955f06 -->
+<!-- rman:documented-up-to 155e50a5f38a914e4d39621c69a2ca2f2eb6a8db -->
+
+## v6.4.0 (2026-11-23)
+
+### ✨ Features
+
+- Export prepareEntityFilter to build entity filters on a caller's table alias (87a438d)
+
+### 🐛 Bug Fixes
+
+- Keep a link's where conditions in its EXISTS sub-query and every hop's join (256f1f5)
+
+### 🧹 Chores
+
+- refresh pnpm-lock.yaml after a clean reinstall (aec5bb7)
+
+---
 
 ## v6.3.8 (2026-11-23)
 
