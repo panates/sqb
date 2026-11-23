@@ -127,9 +127,8 @@ export class PostgresSerializer implements SerializerExtension {
    * for:
    * - `= null`/`<> null` (including an unbound `$n` positional placeholder
    *   that resolved to `null`) is rewritten as `IS NULL`/`IS NOT NULL`;
-   *   the now-unused positional parameter is spliced out of
-   *   `ctx.preparedParams`/`ctx.paramOptions` (tracked in
-   *   `ctx.removedParams` so the same index isn't spliced out twice).
+   *   the now-unused positional parameter, the last one pushed, is removed
+   *   from `ctx.preparedParams`/`ctx.paramOptions`.
    * - A scalar value bound to a param flagged `isArray` (an array-typed
    *   column compared against a single value) is wrapped in a one-element
    *   array first, since PostgreSQL array columns need an actual array
@@ -157,17 +156,18 @@ export class PostgresSerializer implements SerializerExtension {
           (!o.right.expression || o.right.expression.startsWith('$')))
       ) {
         if (o.right.expression?.startsWith('$')) {
+          // The right operand was serialized just before this comparison, so
+          // its parameter is the last one pushed. Removing it frees its index
+          // for the next parameter, which is why an index is never "already
+          // removed": tracking removed indexes kept the second of two null
+          // tests from dropping its own, now reused, index.
           const i = parseInt(o.right.expression.substring(1), 10);
-          if (i > 0) {
-            const _ctx = ctx as any;
-            _ctx.removedParams = _ctx.removedParams || [];
-            if (!_ctx.removedParams.includes(i)) {
-              _ctx.removedParams.push(i);
-              if (Array.isArray(ctx.preparedParams))
-                ctx.preparedParams.splice(i - 1, 1);
-              if (Array.isArray(ctx.paramOptions))
-                ctx.paramOptions.splice(i - 1, 1);
-            }
+          if (
+            Array.isArray(ctx.preparedParams) &&
+            i === ctx.preparedParams.length
+          ) {
+            ctx.preparedParams.pop();
+            if (Array.isArray(ctx.paramOptions)) ctx.paramOptions.splice(i - 1);
           }
 
           o.right.expression = 'null';

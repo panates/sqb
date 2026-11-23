@@ -44,6 +44,44 @@ describe('postgres-dialect:PostgresSerializer', () => {
     );
   });
 
+  it('should drop the parameter of every null test, with strictParams', () => {
+    const query = sql
+      .Select('x')
+      .from('t')
+      .where(
+        sql.Or(sql.IsNot('a', null), sql.Is('c', null)),
+        sql.Gt('b', sql.Param('p0')),
+      );
+    const result = query.generate({
+      dialect: 'postgres',
+      params: { p0: 1 },
+      strictParams: true,
+    });
+    expect(result.sql).toStrictEqual(
+      'select x from t where (a is not null or c is null) and b > $1',
+    );
+    expect(result.params).toStrictEqual([1]);
+  });
+
+  it('should drop the parameter of every param bound to null', () => {
+    const query = sql
+      .Select('x')
+      .from('t')
+      .where(
+        sql.Eq('a', sql.Param('a')),
+        sql.Eq('c', sql.Param('c')),
+        sql.Gt('b', sql.Param('b')),
+      );
+    const result = query.generate({
+      dialect: 'postgres',
+      params: { a: null, c: null, b: 1 },
+    });
+    expect(result.sql).toStrictEqual(
+      'select x from t where a is null and c is null and b > $1',
+    );
+    expect(result.params).toStrictEqual([1]);
+  });
+
   it('should serialize reserved word', () => {
     const query = sql.Select('comment').from('table1');
     const result = query.generate({ dialect: 'postgres' });
