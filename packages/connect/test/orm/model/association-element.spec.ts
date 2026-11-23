@@ -85,4 +85,45 @@ describe('connect:Model / Link field', () => {
       }
     }).toThrow('Link returns array of instances');
   });
+
+  describe('without decorator metadata', () => {
+    // Applying the decorator by hand emits no design:type metadata, as a
+    // build with emitDecoratorMetadata off does.
+    it(`should accept .toMany() on a property with no reflected type`, () => {
+      class Customer extends BaseCustomer {
+        declare countries: Country[];
+      }
+      Link().toMany(() => Country, {
+        sourceKey: 'countryCode',
+        targetKey: 'code',
+      })(Customer.prototype, 'countries');
+      const col = EntityMetadata.getAssociationField(
+        Entity.getMetadata(Customer)!,
+        'countries',
+      );
+      expect(isAssociationField(col)).toBeTruthy();
+      expect(col!.association.returnsMany()).toStrictEqual(true);
+    });
+
+    it(`should accept .toOne() on a property with no reflected type`, () => {
+      class Customer extends BaseCustomer {
+        declare country: Country;
+      }
+      Link().toOne(() => Country)(Customer.prototype, 'country');
+      const col = EntityMetadata.getAssociationField(
+        Entity.getMetadata(Customer)!,
+        'country',
+      );
+      expect(col!.association.returnsMany()).toStrictEqual(false);
+    });
+
+    it(`should throw if neither .toOne() nor .toMany() is called`, () => {
+      class Customer extends BaseCustomer {
+        declare country: Country;
+      }
+      expect(() => Link()(Customer.prototype, 'country')).toThrow(
+        `Can't get type information of "country"`,
+      );
+    });
+  });
 });

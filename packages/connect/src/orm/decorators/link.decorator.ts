@@ -33,7 +33,11 @@ type LinkPropertyDecorator = PropertyDecorator & {
  * and can be extended into a multi-hop relation by chaining further
  * `.toOne(...)`/`.toMany(...)` calls.
  *
- * @throws {TypeError} If applied to a symbol-keyed property, if the target type can't be determined without an explicit `.toOne(...)`/`.toMany(...)` call, or if the property's array-ness doesn't match the relation's to-one/to-many-ness.
+ * The property's array-ness is checked against the relation's to-one/to-many
+ * shape only when TypeScript emits decorator metadata (`emitDecoratorMetadata`);
+ * without it an explicit `.toOne(...)`/`.toMany(...)` call is required.
+ *
+ * @throws {TypeError} If applied to a symbol-keyed property, if the target type can't be determined without an explicit `.toOne(...)`/`.toMany(...)` call, or if the reflected property type's array-ness doesn't match the relation's to-one/to-many-ness.
  */
 export function Link(options?: AssociationFieldOptions): LinkPropertyDecorator {
   let root: LinkChain<any>;
@@ -47,6 +51,11 @@ export function Link(options?: AssociationFieldOptions): LinkPropertyDecorator {
       throw new TypeError('Symbol properties are not allowed');
     const reflectType = Reflect.getMetadata('design:type', target, propertyKey);
     if (!root) {
+      if (!reflectType) {
+        throw new TypeError(
+          `Can't get type information of "${propertyKey}". Please define entity type with .toOne() or .toMany()`,
+        );
+      }
       if (reflectType === Array) {
         throw new TypeError(
           `Can't get type information while it is an array. Please define entity type`,
@@ -58,7 +67,9 @@ export function Link(options?: AssociationFieldOptions): LinkPropertyDecorator {
         );
       fn.toOne(reflectType);
     }
-    if (reflectType !== Array && root.first.returnsMany()) {
+    // Without emitDecoratorMetadata there is no reflected type, and the
+    // explicit .toOne()/.toMany() call alone states the shape.
+    if (reflectType && reflectType !== Array && root.first.returnsMany()) {
       throw new TypeError(
         `Link returns single instance however property type is an array`,
       );
