@@ -1,6 +1,14 @@
 # Changelog
 
-<!-- rman:documented-up-to 3acefc3f8f62fee7e4e4ab06bf19eaa4c1d1e8fa -->
+<!-- rman:documented-up-to 743a754fe2e9422057762f7f342ee37b46955f06 -->
+
+## v6.3.8 (2026-11-23)
+
+### 🐛 Bug Fixes
+
+- Let @Link().toOne()/toMany() work without decorator metadata (53b868d)
+
+---
 
 ## v6.3.7 (2026-11-23)
 
