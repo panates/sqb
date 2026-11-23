@@ -1,7 +1,7 @@
 {
   "name": "@sqb/builder",
   "description": "Extensible multi-dialect SQL query builder written with TypeScript",
-  "version": "6.3.7",
+  "version": "6.3.8",
   "author": "Panates",
   "private": true,
   "license": "BSD-3-Clause",
