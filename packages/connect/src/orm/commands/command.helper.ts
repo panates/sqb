@@ -14,6 +14,7 @@ import {
   Raw,
   Select,
 } from '@sqb/builder';
+import type { Type } from 'ts-gems';
 import { AssociationNode } from '../model/association-node.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import {
@@ -279,19 +280,21 @@ export async function prepareFilter(
                   ),
                 ),
               );
+              // The link's own conditions name columns of K, so they belong
+              // inside the sub-query, never in the outer operator.
+              if (col.association.conditions) {
+                await prepareFilter(
+                  _curEntity,
+                  col.association.conditions,
+                  subSelect._where as LogicalOperator,
+                  'K',
+                );
+              }
               currentOp.add(Exists(subSelect));
               if (currentOp._operatorType !== OperatorType.and) {
                 currentOp = Or();
                 subSelect.where(currentOp);
               } else currentOp = subSelect._where as LogicalOperator;
-              if (col.association.conditions) {
-                await prepareFilter(
-                  _curEntity,
-                  col.association.conditions,
-                  trgOp,
-                  'K',
-                );
-              }
               node = col.association.next;
               _curAlias = 'K';
             } else node = col.association;
@@ -301,22 +304,31 @@ export async function prepareFilter(
               const sourceColumn = await node.resolveSourceProperty();
               const targetColumn = await node.resolveTargetProperty();
               const joinAlias = 'J' + ((subSelect?._joins?.length || 0) + 1);
-              subSelect.join(
-                InnerJoin(targetEntity.tableName + ' ' + joinAlias).on(
-                  Eq(
-                    Field(
-                      joinAlias + '.' + targetColumn.fieldName,
-                      targetColumn.dataType,
-                      targetColumn.isArray,
-                    ),
-                    Field(
-                      _curAlias + '.' + sourceColumn.fieldName,
-                      sourceColumn.dataType,
-                      sourceColumn.isArray,
-                    ),
+              const join = InnerJoin(
+                targetEntity.tableName + ' ' + joinAlias,
+              ).on(
+                Eq(
+                  Field(
+                    joinAlias + '.' + targetColumn.fieldName,
+                    targetColumn.dataType,
+                    targetColumn.isArray,
+                  ),
+                  Field(
+                    _curAlias + '.' + sourceColumn.fieldName,
+                    sourceColumn.dataType,
+                    sourceColumn.isArray,
                   ),
                 ),
               );
+              // Each hop's own conditions, as the read path's joins add them.
+              if (node.conditions)
+                await prepareFilter(
+                  targetEntity,
+                  node.conditions,
+                  join._conditions,
+                  joinAlias,
+                );
+              subSelect.join(join);
               _curEntity = targetEntity;
               _curAlias = joinAlias;
               node = node.next;
@@ -337,4 +349,40 @@ export async function prepareFilter(
     }
     trgOp.add(item);
   }
+}
+
+/**
+ * Translates an entity-level `filter` into a `@sqb/builder` condition whose
+ * fields are column names qualified by `tableAlias`, for a query the caller
+ * builds itself on that alias. Property names become column names, embedded
+ * prefixes/suffixes are applied, and a path through a to-many link becomes a
+ * correlated `EXISTS` sub-query (its own table aliased `K`).
+ *
+ * @example
+ * ```ts
+ * const op = await prepareEntityFilter(Telecom, Eq('kind', 'phone'), 't_k0');
+ * Select().from('telecoms t_k0').where(op); // ... where (t_k0.tc_kind = 'phone')
+ * ```
+ *
+ * @param entity - The entity class, or its metadata, that `filter`'s property paths are resolved against.
+ * @param filter - A plain-object condition, a `@sqb/builder` operator, or an array of either.
+ * @param tableAlias - The alias of the entity's table in the caller's query. Defaults to `T`.
+ * @returns An `And` operator holding the translated conditions.
+ * @throws {TypeError} If `entity` is a class with no `@Entity` metadata.
+ * @throws {Error} If a filter key doesn't name a real field, or names one of the wrong kind for its position in the path.
+ */
+export async function prepareEntityFilter(
+  entity: EntityMetadata | Type,
+  filter: any,
+  tableAlias = 'T',
+): Promise<LogicalOperator> {
+  const entityDef =
+    typeof entity === 'function' ? EntityMetadata.get(entity) : entity;
+  if (!entityDef)
+    throw new TypeError(
+      `No entity metadata found for type "${(entity as Type).name}"`,
+    );
+  const op = And();
+  await prepareFilter(entityDef, filter, op, tableAlias);
+  return op;
 }

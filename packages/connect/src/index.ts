@@ -20,6 +20,7 @@ export * from './client/sqb-error.js';
 export * from './client/types.js';
 export * from './constants.js';
 export * from './orm/base-entity.js';
+export { prepareEntityFilter } from './orm/commands/command.helper.js';
 export * from './orm/decorators/column.decorator.js';
 export * from './orm/decorators/embedded.decorator.js';
 export * from './orm/decorators/entity.decorator.js';
