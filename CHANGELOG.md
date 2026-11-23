@@ -1,6 +1,18 @@
 # Changelog
 
-<!-- rman:documented-up-to 36b305bda81bd90e29a49069ab0cbf8db3503523 -->
+<!-- rman:documented-up-to 3acefc3f8f62fee7e4e4ab06bf19eaa4c1d1e8fa -->
+
+## v6.3.7 (2026-11-23)
+
+### 🐛 Bug Fixes
+
+- Keep every null test from leaving a parameter behind in postgres (e222186)
+
+### 🧹 Chores
+
+- update mssql and @nestjs/* dependencies (beba9e3)
+
+---
 
 ## v6.3.6 (2026-11-20)
 
