@@ -14,6 +14,7 @@ import {
   Raw,
   Select,
 } from '@sqb/builder';
+import type { Type } from 'ts-gems';
 import { AssociationNode } from '../model/association-node.js';
 import { EntityMetadata } from '../model/entity-metadata.js';
 import {
@@ -348,4 +349,40 @@ export async function prepareFilter(
     }
     trgOp.add(item);
   }
+}
+
+/**
+ * Translates an entity-level `filter` into a `@sqb/builder` condition whose
+ * fields are column names qualified by `tableAlias`, for a query the caller
+ * builds itself on that alias. Property names become column names, embedded
+ * prefixes/suffixes are applied, and a path through a to-many link becomes a
+ * correlated `EXISTS` sub-query (its own table aliased `K`).
+ *
+ * @example
+ * ```ts
+ * const op = await prepareEntityFilter(Telecom, Eq('kind', 'phone'), 't_k0');
+ * Select().from('telecoms t_k0').where(op); // ... where (t_k0.tc_kind = 'phone')
+ * ```
+ *
+ * @param entity - The entity class, or its metadata, that `filter`'s property paths are resolved against.
+ * @param filter - A plain-object condition, a `@sqb/builder` operator, or an array of either.
+ * @param tableAlias - The alias of the entity's table in the caller's query. Defaults to `T`.
+ * @returns An `And` operator holding the translated conditions.
+ * @throws {TypeError} If `entity` is a class with no `@Entity` metadata.
+ * @throws {Error} If a filter key doesn't name a real field, or names one of the wrong kind for its position in the path.
+ */
+export async function prepareEntityFilter(
+  entity: EntityMetadata | Type,
+  filter: any,
+  tableAlias = 'T',
+): Promise<LogicalOperator> {
+  const entityDef =
+    typeof entity === 'function' ? EntityMetadata.get(entity) : entity;
+  if (!entityDef)
+    throw new TypeError(
+      `No entity metadata found for type "${(entity as Type).name}"`,
+    );
+  const op = And();
+  await prepareFilter(entityDef, filter, op, tableAlias);
+  return op;
 }
