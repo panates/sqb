@@ -16,10 +16,10 @@
     "tslib": "^2.9.1"
   },
   "devDependencies": {
-    "@nestjs/common": "^12.5.1",
-    "@nestjs/core": "^12.5.1",
-    "@nestjs/platform-express": "^12.5.1",
-    "@nestjs/testing": "^12.5.1",
+    "@nestjs/common": "^12.6.0",
+    "@nestjs/core": "^12.6.0",
+    "@nestjs/platform-express": "^12.6.0",
+    "@nestjs/testing": "^12.6.0",
     "expect": "^30.5.2",
     "postgrejs": "^3.15.2",
     "rxjs": "^7.8.2",
