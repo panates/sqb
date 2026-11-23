@@ -279,19 +279,21 @@ export async function prepareFilter(
                   ),
                 ),
               );
+              // The link's own conditions name columns of K, so they belong
+              // inside the sub-query, never in the outer operator.
+              if (col.association.conditions) {
+                await prepareFilter(
+                  _curEntity,
+                  col.association.conditions,
+                  subSelect._where as LogicalOperator,
+                  'K',
+                );
+              }
               currentOp.add(Exists(subSelect));
               if (currentOp._operatorType !== OperatorType.and) {
                 currentOp = Or();
                 subSelect.where(currentOp);
               } else currentOp = subSelect._where as LogicalOperator;
-              if (col.association.conditions) {
-                await prepareFilter(
-                  _curEntity,
-                  col.association.conditions,
-                  trgOp,
-                  'K',
-                );
-              }
               node = col.association.next;
               _curAlias = 'K';
             } else node = col.association;
@@ -301,22 +303,31 @@ export async function prepareFilter(
               const sourceColumn = await node.resolveSourceProperty();
               const targetColumn = await node.resolveTargetProperty();
               const joinAlias = 'J' + ((subSelect?._joins?.length || 0) + 1);
-              subSelect.join(
-                InnerJoin(targetEntity.tableName + ' ' + joinAlias).on(
-                  Eq(
-                    Field(
-                      joinAlias + '.' + targetColumn.fieldName,
-                      targetColumn.dataType,
-                      targetColumn.isArray,
-                    ),
-                    Field(
-                      _curAlias + '.' + sourceColumn.fieldName,
-                      sourceColumn.dataType,
-                      sourceColumn.isArray,
-                    ),
+              const join = InnerJoin(
+                targetEntity.tableName + ' ' + joinAlias,
+              ).on(
+                Eq(
+                  Field(
+                    joinAlias + '.' + targetColumn.fieldName,
+                    targetColumn.dataType,
+                    targetColumn.isArray,
+                  ),
+                  Field(
+                    _curAlias + '.' + sourceColumn.fieldName,
+                    sourceColumn.dataType,
+                    sourceColumn.isArray,
                   ),
                 ),
               );
+              // Each hop's own conditions, as the read path's joins add them.
+              if (node.conditions)
+                await prepareFilter(
+                  targetEntity,
+                  node.conditions,
+                  join._conditions,
+                  joinAlias,
+                );
+              subSelect.join(join);
               _curEntity = targetEntity;
               _curAlias = joinAlias;
               node = node.next;
