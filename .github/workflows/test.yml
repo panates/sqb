@@ -179,7 +179,9 @@ jobs:
           ORAUSER: system
           ORAPASSWORD: Sqb_Test_2024!
 
-      - name: Send coverage to Coveralls
-        uses: coverallsapp/github-action@v2
+      # release.yml sends this report to Coveralls under the release commit on main
+      - name: Keep the coverage report for the release
+        uses: actions/upload-artifact@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: coverage
+          path: coverage/lcov.info
