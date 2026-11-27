@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@sqb/adapter-tests": "workspace:^",
-    "@types/mssql": "^12.3.0",
+    "@types/mssql": "^12.3.1",
     "expect": "^30.5.2",
     "mssql": "^12.8.1"
   },
