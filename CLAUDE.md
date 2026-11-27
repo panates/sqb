@@ -12,6 +12,13 @@ release together under one version (lockstep, `v*` tags).
 - `packages/adapter-tests` (`@sqb/adapter-tests`): the conformance suite every adapter runs, and in
   `src/data` the test data the tests load into each database. `support/test-db`: schema fixtures.
 
+## Session handoff
+
+`.claude/local/` is gitignored and holds local files that are never committed. At the start of every
+session, read `.claude/local/handoff.md` if it exists: it records the state and open work the
+previous session left. Update it when you hand work over to another session. A worktree session
+does not have this folder, because worktrees hold only committed files.
+
 ## Tests
 
 CI starts PostgreSQL, MySQL 8.4, MariaDB 11, SQL Server 2022 and Oracle Free 23 as services
