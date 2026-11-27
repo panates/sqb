@@ -9,7 +9,8 @@ release together under one version (lockstep, `v*` tags).
 - `packages/<db>`: the adapters (postgres, mysql, mariadb, mssql, oracle, sqlite, sqljs).
   `packages/<db>-dialect`: the SQL serializer an adapter loads.
 - `packages/migrator`, `packages/nestjs`.
-- `support/test-data`, `support/test-db`: fixtures the tests load into each database.
+- `packages/adapter-tests` (`@sqb/adapter-tests`): the conformance suite every adapter runs, and in
+  `src/data` the test data the tests load into each database. `support/test-db`: schema fixtures.
 
 ## Tests
 

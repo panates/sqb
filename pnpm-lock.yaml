@@ -218,6 +218,28 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  packages/adapter-tests:
+    dependencies:
+      '@sqb/builder':
+        specifier: workspace:^
+        version: link:../builder
+      '@sqb/connect':
+        specifier: workspace:^
+        version: link:../connect
+      expect:
+        specifier: ^30.5.2
+        version: 30.5.2
+      mocha:
+        specifier: '>=10'
+        version: 12.0.3
+      tslib:
+        specifier: ^2.9.1
+        version: 2.9.1
+    devDependencies:
+      '@sqb/postgres-dialect':
+        specifier: workspace:^
+        version: link:../postgres-dialect
+
   packages/builder:
     dependencies:
       debug:
@@ -306,9 +328,6 @@ importers:
       '@types/lodash':
         specifier: ^4.17.27
         version: 4.17.27
-      cross-dirname:
-        specifier: ^0.1.0
-        version: 0.1.0
       expect:
         specifier: ^30.5.2
         version: 30.5.2
@@ -331,6 +350,9 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
     devDependencies:
+      '@sqb/adapter-tests':
+        specifier: workspace:^
+        version: link:../adapter-tests
       expect:
         specifier: ^30.5.2
         version: 30.5.2
@@ -442,6 +464,9 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
     devDependencies:
+      '@sqb/adapter-tests':
+        specifier: workspace:^
+        version: link:../adapter-tests
       '@types/mssql':
         specifier: ^12.3.0
         version: 12.3.0(supports-color@8.1.1)
@@ -480,6 +505,9 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
     devDependencies:
+      '@sqb/adapter-tests':
+        specifier: workspace:^
+        version: link:../adapter-tests
       expect:
         specifier: ^30.5.2
         version: 30.5.2
@@ -564,6 +592,9 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
     devDependencies:
+      '@sqb/adapter-tests':
+        specifier: workspace:^
+        version: link:../adapter-tests
       '@types/oracledb':
         specifier: ^26.0.1
         version: 26.0.1
@@ -611,6 +642,9 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
     devDependencies:
+      '@sqb/adapter-tests':
+        specifier: workspace:^
+        version: link:../adapter-tests
       expect:
         specifier: ^30.5.2
         version: 30.5.2
@@ -646,6 +680,9 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
     devDependencies:
+      '@sqb/adapter-tests':
+        specifier: workspace:^
+        version: link:../adapter-tests
       expect:
         specifier: ^30.5.2
         version: 30.5.2
@@ -681,6 +718,9 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
     devDependencies:
+      '@sqb/adapter-tests':
+        specifier: workspace:^
+        version: link:../adapter-tests
       '@types/sql.js':
         specifier: ^1.16.0
         version: 1.16.0

@@ -21,8 +21,8 @@ on:
       # a file means the tests quietly do not run and nobody finds out, while one that matches too
       # much costs a minute of CI.
       - 'packages/*/*'
-      # The test data lives in `support/test-data` and `support/test-db`; the `support/test/**`
-      # this replaces matched neither.
+      # Fixtures under `support/` (the adapter test data itself is in
+      # `packages/adapter-tests/src/data`, covered above).
       - 'support/**'
       - '.mocharc.cjs'
       - 'package.json'

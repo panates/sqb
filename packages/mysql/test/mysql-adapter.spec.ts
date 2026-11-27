@@ -1,4 +1,4 @@
-import { initAdapterTests } from '../../connect/test/_shared/adapter-tests.js';
+import { initAdapterTests } from '@sqb/adapter-tests';
 import { MysqlAdapter } from '../src/mysql-adapter.js';
 import { createTestSchema } from './_support/create-db.js';
 

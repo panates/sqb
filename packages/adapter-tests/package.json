@@ -1,0 +1,58 @@
+{
+  "name": "@sqb/adapter-tests",
+  "description": "Conformance test suite and test data for SQB database adapters",
+  "version": "6.4.0",
+  "private": true,
+  "author": "Panates",
+  "license": "BSD-3-Clause",
+  "homepage": "https://www.sqbjs.org",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "expect": "^30.5.2",
+    "tslib": "^2.9.1"
+  },
+  "devDependencies": {
+    "@sqb/postgres-dialect": "workspace:^"
+  },
+  "peerDependencies": {
+    "@sqb/builder": "workspace:^",
+    "@sqb/connect": "workspace:^",
+    "mocha": ">=10"
+  },
+  "type": "module",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "contributors": [
+    "Eray Hanoglu <e.hanoglu@panates.com>",
+    "Ilker Gurelli <i.gurelli@panates.com>",
+    "Onur Tokel <o.tokel@panates.com>",
+    "Bircan Yuruk <b.yuruk@panates.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/panates/sqb.git",
+    "directory": "packages/adapter-tests"
+  },
+  "keywords": [
+    "sqb",
+    "adapter",
+    "test",
+    "conformance",
+    "database"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

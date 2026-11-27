@@ -28,7 +28,6 @@
   "devDependencies": {
     "@types/debug": "^4.1.13",
     "@types/lodash": "^4.17.27",
-    "cross-dirname": "^0.1.0",
     "expect": "^30.5.2",
     "postgrejs": "^3.15.2"
   },
