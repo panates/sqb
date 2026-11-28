@@ -1,6 +1,6 @@
+import { getInsertSQLsForTestData } from '@sqb/adapter-tests';
 import type { ClientConfiguration } from '@sqb/connect';
 import oracledb from 'oracledb';
-import { getInsertSQLsForTestData } from '../../../connect/test/_shared/adapter-tests.js';
 import { clientConfigurationToDriver } from '../../src/helpers.js';
 
 const schema = process.env.ORASCHEMA || 'test';

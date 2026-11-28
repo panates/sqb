@@ -203,6 +203,7 @@ SQB is a monorepo of small, focused packages. Most projects only need `@sqb/buil
 | [`@sqb/connect`](packages/connect)         | The connection layer: pooling, transactions, cursors/streaming, and a full-featured ORM (`Repository`, `@Entity`/`@Column`/`@Link` decorators) built on top of `@sqb/builder`. |
 | [`@sqb/migrator`](packages/migrator)       | A versioned schema and data migration runner, with SQL-script, data-insert and custom-function migration tasks.                     |
 | [`@sqb/nestjs`](packages/nestjs)           | A NestJS module that registers an `@sqb/connect` client as an injectable, application-scoped provider (`SqbModule.forRoot()`/`forRootAsync()`). |
+| [`@sqb/adapter-tests`](packages/adapter-tests) | The conformance test suite every SQB adapter runs, with its test data, for checking an adapter of your own. |
 
 ### Database adapters
 

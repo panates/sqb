@@ -1,7 +1,4 @@
-import {
-  getInsertSQLsForTestData,
-  initAdapterTests,
-} from '../../connect/test/_shared/adapter-tests.js';
+import { getInsertSQLsForTestData, initAdapterTests } from '@sqb/adapter-tests';
 import { SqliteAdapter } from '../src/sqlite-adapter.js';
 
 describe('sqlite:SqliteAdapter', () => {

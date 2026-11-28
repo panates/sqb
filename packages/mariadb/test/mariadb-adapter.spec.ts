@@ -1,4 +1,4 @@
-import { initAdapterTests } from '../../connect/test/_shared/adapter-tests.js';
+import { initAdapterTests } from '@sqb/adapter-tests';
 import { MariadbAdapter } from '../src/mariadb-adapter.js';
 import { createTestSchema } from './_support/create-db.js';
 

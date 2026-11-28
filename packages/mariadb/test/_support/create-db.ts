@@ -1,5 +1,5 @@
+import { getInsertSQLsForTestData } from '@sqb/adapter-tests';
 import { createConnection } from 'mariadb';
-import { getInsertSQLsForTestData } from '../../../connect/test/_shared/adapter-tests.js';
 
 const schemaCreated: Record<string, boolean> = {};
 

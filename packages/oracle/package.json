@@ -19,6 +19,7 @@
     "oracledb": ">=6.4.0"
   },
   "devDependencies": {
+    "@sqb/adapter-tests": "workspace:^",
     "@types/oracledb": "^26.0.1",
     "expect": "^30.5.2",
     "oracledb": "^26.0.0"

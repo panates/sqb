@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { DataType, Insert, Param, Query, Select, Update } from '@sqb/builder';
 import {
   type Adapter,
@@ -5,11 +7,45 @@ import {
   type ClientConfiguration,
   type QueryRequest,
 } from '@sqb/connect';
-import { getDirname } from 'cross-dirname';
 import { expect } from 'expect';
-import fs from 'fs';
-import path from 'path';
 
+/**
+ * The test data tables, in the order they must be inserted so that every
+ * foreign key finds its parent row.
+ */
+export const testDataTables = [
+  'continents',
+  'countries',
+  'customers',
+  'customer_details',
+  'customer_vip_details',
+  'tags',
+  'customer_tags',
+  'parents',
+  'children',
+  'grandchildren',
+] as const;
+
+/** One of the {@link testDataTables}. */
+export type TestDataTable = (typeof testDataTables)[number];
+
+/**
+ * Registers the shared SQB adapter test suite with mocha: connecting,
+ * schemas, selects, cursors, `fetchRows`, `fetchAsString`, inserts and
+ * updates with `returning`, named parameters and transactions. Call it inside
+ * a `describe()` block; tests that need an optional adapter feature run only
+ * when `adapter.features` declares it.
+ *
+ * The database must already hold the test schema with the test data loaded
+ * (see the package README and {@link getInsertSQLsForTestData}). Some tests
+ * insert and update rows in `customers`, so give the suite its own schema or
+ * database.
+ *
+ * @param adapter - The adapter under test. It is registered before the suite
+ *   and unregistered after it.
+ * @param config - The client configuration the suite connects with (host,
+ *   database, credentials, `schema`); `driver` and `pool` are set by the suite.
+ */
 export function initAdapterTests(
   adapter: Adapter,
   config?: Partial<ClientConfiguration>,
@@ -440,49 +476,56 @@ export function initAdapterTests(
   });
 }
 
+/**
+ * Builds the `INSERT` statements that load the test data, one entry per table
+ * in {@link testDataTables} order, generated with `@sqb/builder` for the
+ * given dialect. The dialect's serializer extension must be registered (an
+ * SQB adapter registers its own when imported).
+ *
+ * @param opts.dialect - The `@sqb/builder` dialect to generate SQL for.
+ * @param opts.schema - A schema to qualify table names with.
+ * @param opts.tables - The tables to include, defaults to all of them.
+ */
 export function getInsertSQLsForTestData(opts: {
   dialect: string;
   schema?: string;
-  stringifyValueForSQL?: (v: any) => string;
-}) {
-  const result: { table: string; scripts: string[] }[] = [];
-  const repositoryRoot = path.resolve(getDirname(), '../../../..');
-
-  const dataFiles: any[] = [
-    'continents',
-    'countries',
-    'customers',
-    'customer_details',
-    'customer_vip_details',
-    'tags',
-    'customer_tags',
-    'parents',
-    'children',
-    'grandchildren',
-  ].map(f =>
-    JSON.parse(
-      fs.readFileSync(
-        path.join(repositoryRoot, 'support/test-data', f + '.json'),
-        'utf8',
+  tables?: readonly TestDataTable[];
+}): { table: TestData; scripts: string[] }[] {
+  const tables = opts.tables
+    ? testDataTables.filter(t => opts.tables!.includes(t))
+    : testDataTables;
+  return tables.map(name => {
+    const table = getTestData(name);
+    return {
+      table,
+      scripts: table.rows.map(
+        row =>
+          Insert(
+            (opts.schema ? opts.schema + '.' : '') + table.name,
+            row,
+          ).generate({ dialect: opts.dialect }).sql,
       ),
-    ),
-  );
-
-  for (const table of dataFiles) {
-    const file = { table, scripts: [] as string[] };
-    for (const row of table.rows) {
-      const x = Insert(
-        (opts.schema ? opts.schema + '.' : '') + table.name,
-        row,
-      ).generate({ dialect: opts.dialect });
-      file.scripts.push(x.sql);
-    }
-    result.push(file);
-  }
-
-  return result;
+    };
+  });
 }
 
+/** A test data table: its name, field descriptions and rows. */
+export interface TestData {
+  name: string;
+  fields: { fieldName: string; dataType: string; jsType: string }[];
+  rows: Record<string, any>[];
+}
+
+/** Reads one table of the test data shipped with this package. */
+export function getTestData(table: TestDataTable): TestData {
+  const file = fileURLToPath(new URL(`./data/${table}.json`, import.meta.url));
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+/**
+ * Renders a value as an SQL literal, for test scripts that inline values:
+ * `null`, a quoted and backslash-escaped string, or the value as text.
+ */
 export function stringifyValueForSQL(v: any): string {
   if (v == null) return 'null';
   if (typeof v === 'string')

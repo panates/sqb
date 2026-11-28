@@ -14,7 +14,8 @@
     "tslib": "^2.9.1"
   },
   "devDependencies": {
-    "@types/sql.js": "^1.16.0",
+    "@sqb/adapter-tests": "workspace:^",
+    "@types/sql.js": "^1.16.1",
     "expect": "^30.5.2",
     "sql.js": "^1.17.0"
   },

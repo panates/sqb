@@ -10,13 +10,14 @@
     "test": "mocha"
   },
   "dependencies": {
-    "fast-tokenizer": "^1.10.2",
+    "fast-tokenizer": "^1.10.3",
     "putil-promisify": "^1.10.1",
     "tslib": "^2.9.1"
   },
   "devDependencies": {
+    "@sqb/adapter-tests": "workspace:^",
     "expect": "^30.5.2",
-    "postgrejs": "^3.15.2"
+    "postgrejs": "^3.15.3"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^",

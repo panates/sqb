@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig-base.json",
+  "include": ["src"],
+  "exclude": ["build"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "./build",
+    "types": ["node", "mocha"],
+    "paths": {
+      "@sqb/builder": ["../builder/src/index.js"],
+      "@sqb/connect": ["../connect/src/index.js"]
+    }
+  },
+  "references": [{ "path": "../builder" }, { "path": "../connect" }]
+}
