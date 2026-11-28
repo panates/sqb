@@ -1,6 +1,23 @@
 # Changelog
 
-<!-- rman:documented-up-to 155e50a5f38a914e4d39621c69a2ca2f2eb6a8db -->
+<!-- rman:documented-up-to 86043c361e0849f18d1d96df7ad157295212e262 -->
+
+## v6.5.0 (2026-11-28)
+
+### ✨ Features
+
+- Publish the adapter conformance suite as @sqb/adapter-tests (62206b2)
+
+### 🤖 Continuous Integration
+
+- Send coverage to Coveralls from the release instead of every test run (b93e3f9)
+
+### 🧹 Chores
+
+- Add a gitignored .claude/local folder for session handoff notes (70858f7)
+- Update dependencies (e3cd6ca)
+
+---
 
 ## v6.4.0 (2026-11-23)
 

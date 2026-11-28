@@ -1,7 +1,7 @@
 {
   "name": "@sqb/adapter-tests",
   "description": "Conformance test suite and test data for SQB database adapters",
-  "version": "6.4.0",
+  "version": "6.5.0",
   "private": true,
   "author": "Panates",
   "license": "BSD-3-Clause",
