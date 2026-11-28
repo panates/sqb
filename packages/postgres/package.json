@@ -10,7 +10,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "fast-tokenizer": "^1.10.2",
+    "fast-tokenizer": "^1.10.3",
     "putil-promisify": "^1.10.1",
     "tslib": "^2.9.1"
   },

@@ -10,14 +10,14 @@
     "test": "mocha"
   },
   "dependencies": {
-    "fast-tokenizer": "^1.10.2",
+    "fast-tokenizer": "^1.10.3",
     "tslib": "^2.9.1"
   },
   "devDependencies": {
     "@sqb/adapter-tests": "workspace:^",
-    "@types/mssql": "^12.3.1",
+    "@types/mssql": "^12.3.2",
     "expect": "^30.5.2",
-    "mssql": "^12.8.1"
+    "mssql": "^12.8.3"
   },
   "peerDependencies": {
     "@sqb/builder": "workspace:^",
